@@ -23,7 +23,7 @@ class Toolbar extends React.Component {
 }
 
 
-ReactDOM.render(<div className="hbox fill debug">
+ReactDOM.render(<div className="hbox fill">
     <Toolbar/>
     <DrawingSurface/>
     <LayersPanel/>
