@@ -23,9 +23,23 @@ class Toolbar extends React.Component {
 }
 
 
+var pencil_tool = {
+    mouseDown: function(surf) {
+    },
+    mouseDrag: function(surf,pt) {
+        surf.setData(pt,1);
+        surf.drawCanvas();
+        console.log('was dragged');
+    },
+    mouseUp:function(surf){
+    }
+};
+
+
+
 ReactDOM.render(<div className="hbox fill">
     <Toolbar/>
-    <DrawingSurface/>
+    <DrawingSurface tool={pencil_tool}/>
     <LayersPanel/>
 </div>,
     document.getElementsByTagName("body")[0]);

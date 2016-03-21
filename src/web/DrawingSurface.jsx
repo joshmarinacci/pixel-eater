@@ -5,7 +5,12 @@ class Point {
     static makePoint(x,y) {
         return {
             x:x,
-            y:y
+            y:y,
+            equals: function(pt) {
+                if(!pt) return false;
+                if(pt.x == this.x && pt.y == this.y) return true;
+                return false;
+            }
         }
     }
 }
@@ -21,12 +26,11 @@ export default class DrawingSurface extends React.Component {
             data:[],
             pw:16,
             ph:16
-        }
+        };
 
         this.fillData(this.state.data,this.state.pw*this.state.ph,0);
         this.state.data[2] = 1;
         this.state.data[122] = 1;
-
     }
     fillData(array, len, val) {
         for(let i=0; i<len; i++) {
@@ -88,15 +92,18 @@ export default class DrawingSurface extends React.Component {
     }
 
     mouseDown() {
-        this.setState({down:true})
+        this.setState({down:true});
+        this.props.tool.mouseDown(this);
     }
 
     mouseMove(e) {
         if(this.state.down) {
             var rect = this.refs.canvas.getBoundingClientRect();
             var modelPoint = this.mouseToModel(Point.makePoint(e.clientX-rect.left, e.clientY-rect.top));
-            this.setData(modelPoint,1);
-            this.drawCanvas();
+            if(!modelPoint.equals(this.state.prevPoint)) {
+                this.props.tool.mouseDrag(this,modelPoint);
+                this.setState({prevPoint:modelPoint});
+            }
         }
     }
 
@@ -107,7 +114,8 @@ export default class DrawingSurface extends React.Component {
     }
 
     mouseUp() {
-        this.setState({down:false})
+        this.setState({down:false});
+        this.props.tool.mouseUp(this);
     }
 
     render() {
