@@ -1,5 +1,6 @@
 
 import React from "react";
+import BitmapModel from "./BitmapModel";
 
 class Point {
     static makePoint(x,y) {
@@ -14,6 +15,7 @@ class Point {
         }
     }
 }
+
 export default class DrawingSurface extends React.Component {
     constructor(props) {
         super(props)
@@ -21,26 +23,14 @@ export default class DrawingSurface extends React.Component {
             down:false,
             xoff:5,
             yoff:5,
-
-            scale:25,
-            data:[],
-            pw:16,
-            ph:16
+            scale:25
         };
 
-        this.fillData(this.state.data,this.state.pw*this.state.ph,0);
-        this.state.data[2] = 1;
-        this.state.data[122] = 1;
-    }
-    fillData(array, len, val) {
-        for(let i=0; i<len; i++) {
-            array[i] = val;
-        }
-    }
+        var self = this;
+        this.props.model.changed(function() {
+            self.drawCanvas();
+        });
 
-    setData(point, val) {
-        var n = point.x + point.y*16;
-        this.state.data[n] = val;
     }
 
     lookupColor(val) {
@@ -49,10 +39,9 @@ export default class DrawingSurface extends React.Component {
     }
 
     drawCanvas() {
-
-
-        var width = this.state.pw*this.state.scale;
-        var height = this.state.ph*this.state.scale;
+        var sc = this.state.scale;
+        var width = this.props.model.getWidth() * sc;
+        var height = this.props.model.getHeight() * sc;
         var canvas = this.refs.canvas;
         var c = canvas.getContext('2d');
         c.fillStyle = 'red';
@@ -64,20 +53,20 @@ export default class DrawingSurface extends React.Component {
 
         for(let y=0; y<16; y++) {
             for (let x = 0; x < 16; x++) {
-                var val = this.state.data[x+y*16];
+                var val = this.props.model.getPixel(x,y);
                 c.fillStyle = this.lookupColor(val);
-                c.fillRect(x * this.state.scale, y * this.state.scale, this.state.scale, this.state.scale);
+                c.fillRect(x * sc, y * sc, sc, sc);
             }
         }
 
         c.beginPath();
-        for(let i=0; i<=this.state.ph; i++) {
-            c.moveTo(0,     i*this.state.scale);
-            c.lineTo(width, i*this.state.scale);
+        for(let i=0; i<=this.props.model.getWidth(); i++) {
+            c.moveTo(0,     i*sc);
+            c.lineTo(width, i*sc);
         }
-        for(let i=0; i<=this.state.pw; i++) {
-            c.moveTo(i*this.state.scale, 0);
-            c.lineTo(i*this.state.scale, height);
+        for(let i=0; i<=this.props.model.getWidth(); i++) {
+            c.moveTo(i*sc, 0);
+            c.lineTo(i*sc, height);
         }
         c.stroke();
         c.restore();

@@ -22,14 +22,13 @@ class Toolbar extends React.Component {
     }
 }
 
+var model = new BitmapModel(16,16);
 
 var pencil_tool = {
     mouseDown: function(surf) {
     },
     mouseDrag: function(surf,pt) {
-        surf.setData(pt,1);
-        surf.drawCanvas();
-        console.log('was dragged');
+        model.setData(pt,1);
     },
     mouseUp:function(surf){
     }
@@ -37,9 +36,10 @@ var pencil_tool = {
 
 
 
+
 ReactDOM.render(<div className="hbox fill">
     <Toolbar/>
-    <DrawingSurface tool={pencil_tool}/>
+    <DrawingSurface tool={pencil_tool} model={model}/>
     <LayersPanel/>
 </div>,
     document.getElementsByTagName("body")[0]);
