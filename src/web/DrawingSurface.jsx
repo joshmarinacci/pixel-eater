@@ -16,6 +16,7 @@ export default class DrawingSurface extends React.Component {
             down:false,
             xoff:5,
             yoff:5,
+
             scale:25,
             data:[],
             pw:16,
