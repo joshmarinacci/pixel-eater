@@ -13,7 +13,7 @@ module.exports = {
         //hash:true // ??
     },
     plugins: [new HtmlWebpackPlugin({
-        title:'List-O-Rama',
+        title:'Pixel Eater',
         //template: 'src/web/index.html', //set this to use a template html file
     })],
     module: {

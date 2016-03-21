@@ -2,6 +2,12 @@
 import React from "react";
 
 export default class DrawingSurface extends React.Component {
+    constructor(props) {
+        super(props)
+        this.state = {
+            down:false
+        }
+    }
     fillData(array, len, val) {
         for(let i=0; i<len; i++) {
             array[i] = val;
@@ -13,7 +19,7 @@ export default class DrawingSurface extends React.Component {
         return 'blue';
     }
 
-    componentDidMount() {
+    drawCanvas() {
         var pw = 16;
         var ph = 16;
         var xoff = 5;
@@ -56,11 +62,36 @@ export default class DrawingSurface extends React.Component {
         }
         c.stroke();
         c.restore();
-
     }
+
+    componentDidMount() {
+        this.drawCanvas();
+    }
+
+    shouldComponentUpdate() {
+        return false;
+    }
+
+    mouseDown() {
+        this.setState({down:true})
+    }
+
+    mouseMove() {
+        if(this.state.down) {
+            console.log("moved");
+        }
+    }
+
+    mouseUp() {
+        this.setState({down:false})
+    }
+
     render() {
         return <div className="grow">
-            <canvas ref="canvas" width="800" height="800"></canvas>
+            <canvas ref="canvas" width="800" height="800"
+                    onMouseUp={this.mouseUp.bind(this)}
+                    onMouseDown={this.mouseDown.bind(this)}
+                    onMouseMove={this.mouseMove.bind(this)}></canvas>
         </div>
     }
 }
