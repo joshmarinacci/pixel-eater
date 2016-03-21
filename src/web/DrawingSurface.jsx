@@ -1,17 +1,41 @@
 
 import React from "react";
 
+class Point {
+    static makePoint(x,y) {
+        return {
+            x:x,
+            y:y
+        }
+    }
+}
 export default class DrawingSurface extends React.Component {
     constructor(props) {
         super(props)
         this.state = {
-            down:false
+            down:false,
+            xoff:5,
+            yoff:5,
+            scale:25,
+            data:[],
+            pw:16,
+            ph:16
         }
+
+        this.fillData(this.state.data,this.state.pw*this.state.ph,0);
+        this.state.data[2] = 1;
+        this.state.data[122] = 1;
+
     }
     fillData(array, len, val) {
         for(let i=0; i<len; i++) {
             array[i] = val;
         }
+    }
+
+    setData(point, val) {
+        var n = point.x + point.y*16;
+        this.state.data[n] = val;
     }
 
     lookupColor(val) {
@@ -20,45 +44,35 @@ export default class DrawingSurface extends React.Component {
     }
 
     drawCanvas() {
-        var pw = 16;
-        var ph = 16;
-        var xoff = 5;
-        var yoff = 5;
-        var scale = 25;
 
 
-        var data = [];
-        this.fillData(data,pw*ph,0);
-        data[2] = 1;
-        data[122] = 1;
-
-        var width = pw*scale;
-        var height = ph*scale;
+        var width = this.state.pw*this.state.scale;
+        var height = this.state.ph*this.state.scale;
         var canvas = this.refs.canvas;
         var c = canvas.getContext('2d');
         c.fillStyle = 'red';
-        c.fillRect(0 + xoff,0 + xoff,width,height);
+        c.fillRect(0 + this.state.xoff,0 + this.state.yoff,width,height);
 
         c.strokeStyle = 'black';
         c.save();
-        c.translate(0.5+xoff,0.5+yoff);
+        c.translate(0.5+this.state.xoff,0.5+this.state.yoff);
 
         for(let y=0; y<16; y++) {
             for (let x = 0; x < 16; x++) {
-                var val = data[x+y*16];
+                var val = this.state.data[x+y*16];
                 c.fillStyle = this.lookupColor(val);
-                c.fillRect(x * scale, y * scale, scale, scale);
+                c.fillRect(x * this.state.scale, y * this.state.scale, this.state.scale, this.state.scale);
             }
         }
 
         c.beginPath();
-        for(let i=0; i<=ph; i++) {
-            c.moveTo(0,     i*scale);
-            c.lineTo(width, i*scale);
+        for(let i=0; i<=this.state.ph; i++) {
+            c.moveTo(0,     i*this.state.scale);
+            c.lineTo(width, i*this.state.scale);
         }
-        for(let i=0; i<=pw; i++) {
-            c.moveTo(i*scale, 0);
-            c.lineTo(i*scale, height);
+        for(let i=0; i<=this.state.pw; i++) {
+            c.moveTo(i*this.state.scale, 0);
+            c.lineTo(i*this.state.scale, height);
         }
         c.stroke();
         c.restore();
@@ -76,10 +90,19 @@ export default class DrawingSurface extends React.Component {
         this.setState({down:true})
     }
 
-    mouseMove() {
+    mouseMove(e) {
         if(this.state.down) {
-            console.log("moved");
+            var rect = this.refs.canvas.getBoundingClientRect();
+            var modelPoint = this.mouseToModel(Point.makePoint(e.clientX-rect.left, e.clientY-rect.top));
+            this.setData(modelPoint,1);
+            this.drawCanvas();
         }
+    }
+
+    mouseToModel(mousePoint) {
+        return Point.makePoint(
+            Math.floor((mousePoint.x-this.state.xoff)/this.state.scale),
+            Math.floor((mousePoint.y-this.state.yoff)/this.state.scale));
     }
 
     mouseUp() {
