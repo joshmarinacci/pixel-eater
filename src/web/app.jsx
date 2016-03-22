@@ -5,11 +5,16 @@ import ReactDOM from "react-dom";
 import DrawingSurface from "./DrawingSurface.jsx"
 import LayersPanel from "./LayersPanel.jsx";
 import BitmapModel from "./BitmapModel.js";
+import ExportPNG from "./ExportPng";
 
-
+var model = new BitmapModel(16,16);
 
 
 class Toolbar extends React.Component {
+    exportPNG() {
+        console.log('exporting');
+        ExportPNG(model);
+    }
     render() {
         return <div className="vbox">
             <button>color</button>
@@ -17,12 +22,11 @@ class Toolbar extends React.Component {
             <button>eraser</button>
             <button>undo</button>
             <button>redo</button>
-            <button>export</button>
+            <button onClick={this.exportPNG.bind(this)}>export</button>
         </div>
     }
 }
 
-var model = new BitmapModel(16,16);
 
 var pencil_tool = {
     mouseDown: function(surf) {

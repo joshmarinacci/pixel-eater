@@ -44,4 +44,10 @@ export default class BitmapModel {
     getPixel(x,y) {
         return this.data[x+y*16];
     }
+
+    lookupCanvasColor(val) {
+        if(val == 1) return 'green';
+        return 'blue';
+    }
+
 }
