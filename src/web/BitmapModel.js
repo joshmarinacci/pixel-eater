@@ -11,6 +11,7 @@ export default class BitmapModel {
         this.data[2] = 1;
         this.data[122] = 1;
         this.cbs = [];
+        this.palette = ['blue','red','green']
     }
     fillData(array, len, val) {
         for(let i=0; i<len; i++) {
@@ -46,8 +47,11 @@ export default class BitmapModel {
     }
 
     lookupCanvasColor(val) {
-        if(val == 1) return 'green';
-        return 'blue';
+        return this.palette[val];
+    }
+
+    getPalette() {
+        return this.palette;
     }
 
 }

@@ -33,11 +33,6 @@ export default class DrawingSurface extends React.Component {
 
     }
 
-    lookupColor(val) {
-        if(val == 1) return 'green';
-        return 'blue';
-    }
-
     drawCanvas() {
         var sc = this.state.scale;
         var width = this.props.model.getWidth() * sc;
@@ -54,7 +49,7 @@ export default class DrawingSurface extends React.Component {
         for(let y=0; y<16; y++) {
             for (let x = 0; x < 16; x++) {
                 var val = this.props.model.getPixel(x,y);
-                c.fillStyle = this.lookupColor(val);
+                c.fillStyle = this.props.model.lookupCanvasColor(val);
                 c.fillRect(x * sc, y * sc, sc, sc);
             }
         }
@@ -80,9 +75,11 @@ export default class DrawingSurface extends React.Component {
         return false;
     }
 
-    mouseDown() {
-        this.setState({down:true});
-        this.props.tool.mouseDown(this);
+    mouseDown(e) {
+        var rect = this.refs.canvas.getBoundingClientRect();
+        var modelPoint = this.mouseToModel(Point.makePoint(e.clientX-rect.left, e.clientY-rect.top));
+        this.setState({down:true, prevPoint:modelPoint});
+        this.props.tool.mouseDown(this,modelPoint);
     }
 
     mouseMove(e) {
