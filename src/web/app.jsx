@@ -33,7 +33,7 @@ class ColorPicker extends React.Component {
         selectedColor = i;
     }
     renderColorWell(c,i) {
-        return <div key={c}
+        return <div key={i}
                     style={{border:'0px solid black', backgroundColor:c, width:32,height:32, display:'inline-block', margin:0, padding:0}}
                     onClick={this.selectColor.bind(this,c,i)}
         ></div>
@@ -47,7 +47,7 @@ class ColorPicker extends React.Component {
                     display:'flex',
                     flexDirection:'row',
                     flexWrap:'wrap',
-                    width:32*3
+                    width:32*16
             }}
         >{wells}</div>
     }
