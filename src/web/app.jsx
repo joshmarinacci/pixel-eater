@@ -108,25 +108,6 @@ class ColorWellButton extends React.Component {
     }
 }
 
-class Toolbar extends React.Component {
-    exportPNG() {
-        ExportPNG(model);
-    }
-    render() {
-        return <div className="vbox">
-            <PopupButton caption="Color"><ColorPicker onSelectColor={this.props.onSelectColor}/></PopupButton>
-            <ColorWellButton selectedColor={this.props.selectedColor}/>
-            <button>pencil</button>
-            <button>eraser</button>
-            <button>undo</button>
-            <button>redo</button>
-            <ToggleButton onToggle={this.props.onToggleGrid} selected={this.props.drawGrid}>Grid</ToggleButton>
-            <button onClick={this.exportPNG.bind(this)}>export</button>
-        </div>
-    }
-}
-
-
 class App extends React.Component {
     constructor(props) {
         super(props)
@@ -135,7 +116,7 @@ class App extends React.Component {
             selectedColor:1
         };
         var self = this;
-        var pencil_tool = {
+        this.state.pencil_tool = {
             mouseDown: function(surf, pt) {
                 model.setData(pt,self.state.selectedColor);
             },
@@ -145,7 +126,22 @@ class App extends React.Component {
             mouseUp:function(surf){
             }
         };
-        this.state.pencil_tool = pencil_tool;
+        this.state.eyedropper_tool = {
+            mouseDown: function(surf,pt) {
+                self.setState({
+                    selectedColor:model.getData(pt)
+                })
+            },
+            mouseDrag: function(surf,pt) {
+                self.setState({
+                    selectedColor:model.getData(pt)
+                })
+            },
+            mouseUp: function() {
+
+            }
+        };
+        this.state.selected_tool = this.state.pencil_tool;
     }
 
     toggleGrid() {
@@ -156,15 +152,33 @@ class App extends React.Component {
     selectColor(color) {
         this.setState({selectedColor:color});
     }
+
+    selectPencil() {
+        this.setState({ selected_tool: this.state.pencil_tool});
+    }
+
+    selectEyedropper() {
+        this.setState({ selected_tool: this.state.eyedropper_tool});
+    }
+
+    exportPNG() {
+        ExportPNG(model);
+    }
+
     render() {
         return <div className="hbox fill">
-            <Toolbar
-                onToggleGrid={this.toggleGrid.bind(this)}
-                drawGrid={this.state.drawGrid}
-                selectedColor={this.state.selectedColor}
-                onSelectColor={this.selectColor.bind(this)}
-            />
-            <DrawingSurface tool={this.state.pencil_tool} model={model} drawGrid={this.state.drawGrid}/>
+            <div className="vbox">
+                <PopupButton caption="Color"><ColorPicker onSelectColor={this.selectColor.bind(this)}/></PopupButton>
+                <ColorWellButton selectedColor={this.state.selectedColor}/>
+                <ToggleButton onToggle={this.selectPencil.bind(this)} selected={this.state.selected_tool === this.state.pencil_tool}>pencil</ToggleButton>
+                <ToggleButton onToggle={this.selectEyedropper.bind(this)} selected={this.state.selected_tool === this.state.eyedropper_tool}>eyedropper</ToggleButton>
+                <button>eraser</button>
+                <button>undo</button>
+                <button>redo</button>
+                <ToggleButton onToggle={this.toggleGrid.bind(this)} selected={this.state.drawGrid}>Grid</ToggleButton>
+                <button onClick={this.exportPNG.bind(this)}>export</button>
+            </div>
+            <DrawingSurface tool={this.state.selected_tool} model={model} drawGrid={this.state.drawGrid}/>
             <LayersPanel/>
         </div>
     }

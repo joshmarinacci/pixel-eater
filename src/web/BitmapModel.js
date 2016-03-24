@@ -90,6 +90,9 @@ export default class BitmapModel {
         this.data[n] = val;
         this.fireUpdate();
     }
+    getData(point) {
+        return this.data[point.x+point.y*16];
+    }
 
     fireUpdate() {
         this.cbs.forEach(function(cb) {
