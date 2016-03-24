@@ -10,7 +10,6 @@ import ExportPNG from "./ExportPng";
 
 var model = new BitmapModel(16,16);
 
-var selectedColor = 1;
 
 var PopupState = {
     cbs:[],
@@ -31,7 +30,7 @@ class ColorPicker extends React.Component {
     selectColor(c,i,e) {
         e.stopPropagation();
         PopupState.done();
-        selectedColor = i;
+        this.props.onSelectColor(i);
     }
     renderColorWell(c,i) {
         return <div key={i}
@@ -101,13 +100,22 @@ class ToggleButton extends React.Component {
     }
 }
 
+class ColorWellButton extends React.Component {
+    render() {
+        return <button className="color-well" style={{
+            backgroundColor:model.lookupCanvasColor(this.props.selectedColor)
+        }}></button>
+    }
+}
+
 class Toolbar extends React.Component {
     exportPNG() {
         ExportPNG(model);
     }
     render() {
         return <div className="vbox">
-            <PopupButton caption="Color"><ColorPicker/></PopupButton>
+            <PopupButton caption="Color"><ColorPicker onSelectColor={this.props.onSelectColor}/></PopupButton>
+            <ColorWellButton selectedColor={this.props.selectedColor}/>
             <button>pencil</button>
             <button>eraser</button>
             <button>undo</button>
@@ -123,33 +131,45 @@ class App extends React.Component {
     constructor(props) {
         super(props)
         this.state = {
-            drawGrid:true
-        }
+            drawGrid:true,
+            selectedColor:1
+        };
+        var self = this;
+        var pencil_tool = {
+            mouseDown: function(surf, pt) {
+                model.setData(pt,self.state.selectedColor);
+            },
+            mouseDrag: function(surf,pt) {
+                model.setData(pt,self.state.selectedColor);
+            },
+            mouseUp:function(surf){
+            }
+        };
+        this.state.pencil_tool = pencil_tool;
     }
+
     toggleGrid() {
         this.setState({
             drawGrid: !this.state.drawGrid
         })
     }
+    selectColor(color) {
+        this.setState({selectedColor:color});
+    }
     render() {
         return <div className="hbox fill">
-            <Toolbar onToggleGrid={this.toggleGrid.bind(this)} drawGrid={this.state.drawGrid}/>
-            <DrawingSurface tool={pencil_tool} model={model} drawGrid={this.state.drawGrid}/>
+            <Toolbar
+                onToggleGrid={this.toggleGrid.bind(this)}
+                drawGrid={this.state.drawGrid}
+                selectedColor={this.state.selectedColor}
+                onSelectColor={this.selectColor.bind(this)}
+            />
+            <DrawingSurface tool={this.state.pencil_tool} model={model} drawGrid={this.state.drawGrid}/>
             <LayersPanel/>
         </div>
     }
 }
 
-var pencil_tool = {
-    mouseDown: function(surf, pt) {
-        model.setData(pt,selectedColor);
-    },
-    mouseDrag: function(surf,pt) {
-        model.setData(pt,selectedColor);
-    },
-    mouseUp:function(surf){
-    }
-};
 
 
 ReactDOM.render(<App/>, document.getElementsByTagName("body")[0]);

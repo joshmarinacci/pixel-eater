@@ -89,13 +89,13 @@ export default class DrawingSurface extends React.Component {
     }
 
     mouseMove(e) {
-        if(this.state.down) {
-            var rect = this.refs.canvas.getBoundingClientRect();
-            var modelPoint = this.mouseToModel(Point.makePoint(e.clientX-rect.left, e.clientY-rect.top));
-            if(!modelPoint.equals(this.state.prevPoint)) {
-                this.props.tool.mouseDrag(this,modelPoint);
-                this.setState({prevPoint:modelPoint});
-            }
+        e.stopPropagation();
+        if(!this.state.down) return;
+        var rect = this.refs.canvas.getBoundingClientRect();
+        var modelPoint = this.mouseToModel(Point.makePoint(e.clientX-rect.left, e.clientY-rect.top));
+        if(!modelPoint.equals(this.state.prevPoint)) {
+            this.props.tool.mouseDrag(this,modelPoint);
+            this.setState({prevPoint:modelPoint});
         }
     }
 
