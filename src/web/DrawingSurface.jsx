@@ -21,8 +21,8 @@ export default class DrawingSurface extends React.Component {
         super(props)
         this.state = {
             down:false,
-            xoff:5,
-            yoff:5,
+            xoff:0,
+            yoff:0,
             scale:25
         };
 
@@ -44,7 +44,6 @@ export default class DrawingSurface extends React.Component {
 
         c.strokeStyle = 'black';
         c.save();
-        c.translate(0.5+this.state.xoff,0.5+this.state.yoff);
 
         for(let y=0; y<16; y++) {
             for (let x = 0; x < 16; x++) {
@@ -54,21 +53,28 @@ export default class DrawingSurface extends React.Component {
             }
         }
 
-        c.beginPath();
-        for(let i=0; i<=this.props.model.getWidth(); i++) {
-            c.moveTo(0,     i*sc);
-            c.lineTo(width, i*sc);
+        if(this.props.drawGrid === true) {
+            c.translate(0.5+this.state.xoff,0.5+this.state.yoff);
+            c.beginPath();
+            for (let i = 0; i <= this.props.model.getWidth(); i++) {
+                c.moveTo(0, i * sc);
+                c.lineTo(width, i * sc);
+            }
+            for (let i = 0; i <= this.props.model.getWidth(); i++) {
+                c.moveTo(i * sc, 0);
+                c.lineTo(i * sc, height);
+            }
+            c.stroke();
         }
-        for(let i=0; i<=this.props.model.getWidth(); i++) {
-            c.moveTo(i*sc, 0);
-            c.lineTo(i*sc, height);
-        }
-        c.stroke();
         c.restore();
     }
 
     componentDidMount() {
         this.drawCanvas();
+    }
+
+    componentWillReceiveProps(props) {
+        setTimeout(this.drawCanvas.bind(this),0);
     }
 
     shouldComponentUpdate() {

@@ -1,4 +1,5 @@
 require('./flexbox.css');
+require('./components.css');
 
 import React from "react";
 import ReactDOM from "react-dom";
@@ -92,6 +93,14 @@ class PopupButton extends React.Component {
     }
 }
 
+class ToggleButton extends React.Component {
+    render() {
+        var cls = 'button';
+        if(this.props.selected === true)  cls += " selected";
+        return <button className={cls} onClick={this.props.onToggle}>{this.props.children}</button>
+    }
+}
+
 class Toolbar extends React.Component {
     exportPNG() {
         ExportPNG(model);
@@ -103,12 +112,33 @@ class Toolbar extends React.Component {
             <button>eraser</button>
             <button>undo</button>
             <button>redo</button>
-            <button>toggle grid</button>
+            <ToggleButton onToggle={this.props.onToggleGrid} selected={this.props.drawGrid}>Grid</ToggleButton>
             <button onClick={this.exportPNG.bind(this)}>export</button>
         </div>
     }
 }
 
+
+class App extends React.Component {
+    constructor(props) {
+        super(props)
+        this.state = {
+            drawGrid:true
+        }
+    }
+    toggleGrid() {
+        this.setState({
+            drawGrid: !this.state.drawGrid
+        })
+    }
+    render() {
+        return <div className="hbox fill">
+            <Toolbar onToggleGrid={this.toggleGrid.bind(this)} drawGrid={this.state.drawGrid}/>
+            <DrawingSurface tool={pencil_tool} model={model} drawGrid={this.state.drawGrid}/>
+            <LayersPanel/>
+        </div>
+    }
+}
 
 var pencil_tool = {
     mouseDown: function(surf, pt) {
@@ -122,9 +152,4 @@ var pencil_tool = {
 };
 
 
-ReactDOM.render(<div className="hbox fill">
-    <Toolbar/>
-    <DrawingSurface tool={pencil_tool} model={model}/>
-    <LayersPanel/>
-</div>,
-    document.getElementsByTagName("body")[0]);
+ReactDOM.render(<App/>, document.getElementsByTagName("body")[0]);

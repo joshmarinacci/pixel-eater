@@ -1,0 +1,31 @@
+html, body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 100%;
+}
+button {
+    border: 1px solid #666;
+    background-color: #ddd;
+    border-radius: 0.25em;
+    font-size: 100%;
+    font-family: inherit;
+    font-weight: bold;
+    padding: 0.25em;
+}
+button:hover {
+    background-color: #fff;
+}
+button:active {
+    background-color: #4444ff;
+}
+
+button.selected {
+    background-color: #2288ff;
+    color: #eee;
+}
+
+button.selected:active {
+    background-color: #4444ff;
+}
+button.selected:hover {
+    background-color: #66aaff;
+}
