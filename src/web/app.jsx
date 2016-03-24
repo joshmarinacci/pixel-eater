@@ -110,7 +110,7 @@ class ColorWellButton extends React.Component {
 
 class App extends React.Component {
     constructor(props) {
-        super(props)
+        super(props);
         this.state = {
             drawGrid:true,
             selectedColor:1
@@ -118,10 +118,10 @@ class App extends React.Component {
         var self = this;
         this.state.pencil_tool = {
             mouseDown: function(surf, pt) {
-                model.setData(pt,self.state.selectedColor);
+                self.setPixel(pt,self.state.selectedColor);
             },
             mouseDrag: function(surf,pt) {
-                model.setData(pt,self.state.selectedColor);
+                self.setPixel(pt,self.state.selectedColor);
             },
             mouseUp:function(surf){
             }
@@ -142,6 +142,9 @@ class App extends React.Component {
             }
         };
         this.state.selected_tool = this.state.pencil_tool;
+
+        this.state.command_buffer = [];
+        this.state.command_index = 0;
     }
 
     toggleGrid() {
@@ -165,6 +168,44 @@ class App extends React.Component {
         ExportPNG(model);
     }
 
+    setPixel(pt,new_color) {
+        var old_color = model.getData(pt);
+        model.setData(pt,new_color);
+        this.appendCommand(function() {
+            model.setData(pt,old_color);
+        }, function() {
+            model.setData(pt,new_color);
+        });
+    }
+    appendCommand(undo,redo) {
+        var newbuff = this.state.command_buffer.slice(0,this.state.command_index);
+        newbuff.push({undo:undo,redo:redo});
+        this.setState({
+            command_buffer:newbuff,
+            command_index: this.state.command_index+1
+        })
+    }
+    execUndo() {
+        var cmd = this.state.command_buffer[this.state.command_index-1];
+        cmd.undo();
+        this.setState({
+            command_index:this.state.command_index-1
+        });
+    }
+    execRedo() {
+        var cmd = this.state.command_buffer[this.state.command_index];
+        cmd.redo();
+        this.setState({
+            command_index:this.state.command_index+1
+        })
+    }
+    isUndoAvailable() {
+        return this.state.command_index > 0;
+    }
+    isRedoAvailable() {
+        return this.state.command_index < this.state.command_buffer.length;
+    }
+
     render() {
         return <div className="hbox fill">
             <div className="vbox">
@@ -173,8 +214,9 @@ class App extends React.Component {
                 <ToggleButton onToggle={this.selectPencil.bind(this)} selected={this.state.selected_tool === this.state.pencil_tool}>pencil</ToggleButton>
                 <ToggleButton onToggle={this.selectEyedropper.bind(this)} selected={this.state.selected_tool === this.state.eyedropper_tool}>eyedropper</ToggleButton>
                 <button>eraser</button>
-                <button>undo</button>
-                <button>redo</button>
+                <button onClick={this.execUndo.bind(this)} disabled={!this.isUndoAvailable()}>undo</button>
+                <button onClick={this.execRedo.bind(this)} disabled={!this.isRedoAvailable()}>redo</button>
+                <label>{this.state.command_index}</label>
                 <ToggleButton onToggle={this.toggleGrid.bind(this)} selected={this.state.drawGrid}>Grid</ToggleButton>
                 <button onClick={this.exportPNG.bind(this)}>export</button>
             </div>

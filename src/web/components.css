@@ -38,3 +38,16 @@ button.color-well {
     min-width: 1em;
     min-height: 1em;
 }
+
+button:disabled {
+    color: gray;
+}
+button:disabled:hover {
+    background-color: #ddd;
+}
+
+label {
+    padding: 0.25em;
+    margin: 0.25em 0.5em;
+    text-align: center;
+}
