@@ -10,6 +10,7 @@ button {
     font-family: inherit;
     font-weight: bold;
     padding: 0.25em;
+    margin: 0.25em 0.5em;
 }
 button:hover {
     background-color: #fff;
