@@ -20,10 +20,37 @@ app.use(cors({origin:true, credentials:true}));
 //assume all bodies will be JSON and parse them automatically
 app.use(bodyParser.json());
 
-//create database if necessary
+//database connection
+var conn = null;
 function startDatabase(cb) {
-    RethinkDB.connect({host:'localhost', db:'pixel-eater'}, function(err,c) {
-
+    RethinkDB.connect({host: 'localhost'}).then(function (c) {
+        console.log("here");
+        conn = c;
+        conn.use('pixel_eater');
+        RethinkDB.dbList().run(conn).then(function (arr) {
+                //create DB if necessary
+                if (arr.indexOf("pixel_eater") < 0) {
+                    return RethinkDB.dbCreate("pixel_eater").run(conn);
+                }
+            })
+            // select the docs table
+            .then(function () {
+                conn.use('pixel_eater');
+                return RethinkDB.table('docs').run(conn);
+            })
+            //create the docs table if necessary
+            .catch(function () {
+                return RethinkDB.tableCreate("docs").run(conn);
+            })
+            .then(function () {
+                return RethinkDB.table("docs").run(conn);
+            })
+            .then(function (data) {
+                if (cb)cb();
+            });
+    }).catch(function (err) {
+        console.log(err);
+        console.log("couldn't connect to the database");
     });
 }
 
@@ -35,9 +62,9 @@ function startWebserver(cb) {
     });
 }
 
-
-startWebserver(function(){
-    console.log("we are rolling");
+startDatabase(function() {
+    startWebserver(function() {
+        console.log('ready to go');
+    });
 });
-
 
