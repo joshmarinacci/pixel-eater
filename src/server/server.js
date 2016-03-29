@@ -8,6 +8,9 @@ var express = require('express');
 var cors = require('cors');
 var bodyParser = require('body-parser');
 
+
+var stormpath = require('express-stormpath');
+
 //create an app
 var app = express();
 
@@ -19,6 +22,15 @@ app.use(cors({origin:true, credentials:true}));
 
 //assume all bodies will be JSON and parse them automatically
 app.use(bodyParser.json());
+
+
+app.use(stormpath.init(app, {
+    // Optional configuration options.
+    web: {
+        produces: ['application/json'],
+    }
+}));
+
 
 //database connection
 var conn = null;
@@ -54,6 +66,8 @@ function startDatabase(cb) {
     });
 }
 
+
+
 //start webserver
 function startWebserver(cb) {
     app.listen(PORT, function() {
@@ -62,9 +76,37 @@ function startWebserver(cb) {
     });
 }
 
-startDatabase(function() {
-    startWebserver(function() {
-        console.log('ready to go');
+function summarizeList(cursor, list, cb) {
+    cursor.next().then(function(val) {
+        RethinkDB.table('items').filter(RethinkDB.row('list').eq(val.id)).count().run(conn, function(err, count) {
+            val.count = count;
+            list.push(val);
+            summarizeList(cursor,list,cb);
+        });
+    }).catch(function(){
+        cb(list);
+    })
+}
+
+app.get('/docs',stormpath.loginRequired,function(req,res) {
+    RethinkDB.table('docs').run(conn).then(function(cursor) {
+        summarizeList(cursor, [], function(list){
+            res.json(list);
+        });
+    });
+});
+app.get('/whoami',stormpath.loginRequired,function(req,res) {
+    console.log("whoami = ", req.user);
+    res.json({status:'success',user:req.user});
+});
+
+app.on('stormpath.ready', function () {
+    console.log('Stormpath Ready!');
+    startDatabase(function() {
+        console.log("database is ready");
+        startWebserver(function() {
+            console.log('webserver is ready');
+        });
     });
 });
 

@@ -7,6 +7,8 @@ import DrawingSurface from "./DrawingSurface.jsx"
 import LayersPanel from "./LayersPanel.jsx";
 import BitmapModel from "./BitmapModel.js";
 import ExportPNG from "./ExportPng";
+import US from "./UserStore";
+var UserStore = US.init();
 
 var model = new BitmapModel(16,16);
 
@@ -145,6 +147,7 @@ class App extends React.Component {
 
         this.state.command_buffer = [];
         this.state.command_index = 0;
+        this.state.user = null;
     }
 
     toggleGrid() {
@@ -167,7 +170,9 @@ class App extends React.Component {
     exportPNG() {
         ExportPNG(model);
     }
-
+    saveDoc() {
+        console.log("not really saving the doc yet");
+    }
     setPixel(pt,new_color) {
         var old_color = model.getData(pt);
         model.setData(pt,new_color);
@@ -206,9 +211,36 @@ class App extends React.Component {
         return this.state.command_index < this.state.command_buffer.length;
     }
 
+    tryLogin(e) {
+        e.stopPropagation();
+        var self = this;
+        var data = {
+            username: this.refs.username.value,
+            password: this.refs.password.value
+        };
+        UserStore.login(data, function(user){
+            console.log("fully logged in now, i hope",user);
+            self.setState({user:UserStore.getUser()});
+        });
+    }
+    renderLogin() {
+        if(!this.state.user) {
+            return <div className="fill" style={{ background:"blue"}}>
+                <form>
+                    <label>username</label><input type="text" ref="username" value="foo@bar.com"/><br/>
+                    <label>password</label><input type="text" ref="password" value="Foobar76"/><br/>
+                    <input type="button" onClick={this.tryLogin.bind(this)} value="login"/>
+                </form>
+            </div>
+        } else {
+            return "";
+        }
+
+    }
     render() {
-        return <div className="hbox fill">
+        return (<div className="hbox fill">
             <div className="vbox">
+                <label>user = {this.state.user?this.state.user.username:'not logged in'}</label>
                 <PopupButton caption="Color"><ColorPicker onSelectColor={this.selectColor.bind(this)}/></PopupButton>
                 <ColorWellButton selectedColor={this.state.selectedColor}/>
                 <ToggleButton onToggle={this.selectPencil.bind(this)} selected={this.state.selected_tool === this.state.pencil_tool}>pencil</ToggleButton>
@@ -219,10 +251,12 @@ class App extends React.Component {
                 <label>{this.state.command_index}</label>
                 <ToggleButton onToggle={this.toggleGrid.bind(this)} selected={this.state.drawGrid}>Grid</ToggleButton>
                 <button onClick={this.exportPNG.bind(this)}>export</button>
+                <button onClick={this.saveDoc.bind(this)}>save</button>
             </div>
             <DrawingSurface tool={this.state.selected_tool} model={model} drawGrid={this.state.drawGrid}/>
+            {this.renderLogin()}
             <LayersPanel/>
-        </div>
+        </div>)
     }
 }
 
