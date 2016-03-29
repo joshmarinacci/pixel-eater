@@ -14,18 +14,13 @@ class UserStore {
 
     login(data, cb) {
         var self = this;
-        console.log("doing a proper submit",data);
-        POST_JSON("http://localhost:30065/login",data,function(err,val){
-            console.log("got back",err,val);
-            if(err.account) {
+        POST_JSON("http://localhost:30065/login",data,function(val){
+            console.log("got back",val);
+            if(val.account) {
                 console.log("logged in okay!");
-                GET_JSON("http://localhost:30065/docs",function(err,val) {
-                    console.log("docs = ", err,val);
-                });
-                GET_JSON("http://localhost:30065/whoami", function(err,val) {
-                    console.log("I am",err.user.username);
-                    self.user = err.user;
-                    if(cb)cb(err.user);
+                GET_JSON("http://localhost:30065/whoami", function(data) {
+                    self.user = data.user;
+                    if(cb)cb(data.user);
                 })
             }
         })

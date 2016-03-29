@@ -110,6 +110,28 @@ class ColorWellButton extends React.Component {
     }
 }
 
+class LoginPanel extends React.Component {
+    tryLogin(e) {
+        e.stopPropagation();
+        var self = this;
+        var data = {
+            username: this.refs.username.value,
+            password: this.refs.password.value
+        };
+        UserStore.login(data, function(user){
+            self.props.onCompleted(user);
+        });
+    }
+    render() {
+        return <div className="fill" style={{ background:"white"}}>
+            <form>
+                <label>username</label><input type="text" ref="username"/><br/>
+                <label>password</label><input type="text" ref="password"/><br/>
+                <input type="button" onClick={this.tryLogin.bind(this)} value="login"/>
+            </form>
+        </div>
+    }
+}
 class App extends React.Component {
     constructor(props) {
         super(props);
@@ -211,31 +233,15 @@ class App extends React.Component {
         return this.state.command_index < this.state.command_buffer.length;
     }
 
-    tryLogin(e) {
-        e.stopPropagation();
-        var self = this;
-        var data = {
-            username: this.refs.username.value,
-            password: this.refs.password.value
-        };
-        UserStore.login(data, function(user){
-            console.log("fully logged in now, i hope",user);
-            self.setState({user:UserStore.getUser()});
-        });
-    }
     renderLogin() {
-        if(!this.state.user) {
-            return <div className="fill" style={{ background:"blue"}}>
-                <form>
-                    <label>username</label><input type="text" ref="username" value="foo@bar.com"/><br/>
-                    <label>password</label><input type="text" ref="password" value="Foobar76"/><br/>
-                    <input type="button" onClick={this.tryLogin.bind(this)} value="login"/>
-                </form>
-            </div>
+        if(UserStore.getUser()) {
+            return ""
         } else {
-            return "";
+            return <LoginPanel onCompleted={this.onLoginCompleted.bind(this)}/>
         }
-
+    }
+    onLoginCompleted(user) {
+        this.setState({user:user});
     }
     render() {
         return (<div className="hbox fill">
@@ -255,10 +261,10 @@ class App extends React.Component {
             </div>
             <DrawingSurface tool={this.state.selected_tool} model={model} drawGrid={this.state.drawGrid}/>
             {this.renderLogin()}
-            <LayersPanel/>
         </div>)
     }
 }
+//disable layers until we are ready for it           <LayersPanel/>
 
 
 
