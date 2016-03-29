@@ -1,10 +1,18 @@
 require('./flexbox.css');
 require('./components.css');
 
+/*
+
+get list of files
+save current file
+create a new file
+
+ */
 import React from "react";
 import ReactDOM from "react-dom";
 import DrawingSurface from "./DrawingSurface.jsx"
 import LayersPanel from "./LayersPanel.jsx";
+import DocStore from "./DocStore.js";
 import BitmapModel from "./BitmapModel.js";
 import ExportPNG from "./ExportPng";
 import US from "./UserStore";
@@ -132,6 +140,26 @@ class LoginPanel extends React.Component {
         </div>
     }
 }
+
+class OpenDocPanel extends React.Component {
+    loadDoc(id) {
+        this.props.onSelectDoc(id);
+    }
+    renderDocs(docs) {
+        var self = this;
+        return docs.map((doc)=> {
+            return <li key={doc.id}><button onClick={self.loadDoc.bind(self,doc.id)}>{doc.title}</button></li>
+        });
+    }
+    render() {
+        return <div className="fill" style={{ background:"white"}}>
+            <ul>
+                {this.renderDocs(this.props.docs)}
+            </ul>
+            <button onClick={this.props.onCancel}>Cancel</button>
+        </div>
+    }
+}
 class App extends React.Component {
     constructor(props) {
         super(props);
@@ -170,6 +198,11 @@ class App extends React.Component {
         this.state.command_buffer = [];
         this.state.command_index = 0;
         this.state.user = null;
+        this.state.model = model;
+        this.state.doc_title = "Untitled Artwork";
+        this.state.doc_id = null;
+
+        UserStore.checkLoggedIn((user) => this.setState({user:user}));
     }
 
     toggleGrid() {
@@ -193,7 +226,12 @@ class App extends React.Component {
         ExportPNG(model);
     }
     saveDoc() {
-        console.log("not really saving the doc yet");
+        var doc = {
+            model: this.state.model,
+            id: this.state.doc_id,
+            title: this.state.doc_title
+        };
+        DocStore.save(doc, (res) => this.setState({doc_id:res.id}));
     }
     setPixel(pt,new_color) {
         var old_color = model.getData(pt);
@@ -233,6 +271,44 @@ class App extends React.Component {
         return this.state.command_index < this.state.command_buffer.length;
     }
 
+    openDoc() {
+        DocStore.loadDocList((docs)=>this.setState({doclist:docs}));
+    }
+
+    renderOpenDoc() {
+        if(this.state.doclist) {
+            return <OpenDocPanel
+                docs={this.state.doclist}
+                onCancel={this.openDocCanceled.bind(this)}
+                onSelectDoc={this.openDocPerform.bind(this)}
+            />
+        }
+        return "";
+    }
+    openDocCanceled() {
+        this.setState({doclist:null})
+    }
+    openDocPerform(id) {
+        this.setState({doclist:null})
+        var self = this;
+        DocStore.loadDoc(id,function(obj) {
+            var m2 = BitmapModel.fromJSON(obj.doc.model);
+            model = m2;
+            self.setState({
+                model:m2,
+                doc_id:obj.doc.id,
+                doc_title:obj.doc.title
+            })
+        });
+    }
+    newDoc() {
+        model = new BitmapModel(16,16);
+        this.setState({
+            model:model,
+            doc_title:"Untitled Artwork",
+            doc_id:null
+        })
+    }
     renderLogin() {
         if(UserStore.getUser()) {
             return ""
@@ -243,24 +319,35 @@ class App extends React.Component {
     onLoginCompleted(user) {
         this.setState({user:user});
     }
+    titleEdited() {
+        this.setState({doc_title:this.refs.doc_title.value});
+    }
     render() {
         return (<div className="hbox fill">
             <div className="vbox">
                 <label>user = {this.state.user?this.state.user.username:'not logged in'}</label>
+                <label></label>
                 <PopupButton caption="Color"><ColorPicker onSelectColor={this.selectColor.bind(this)}/></PopupButton>
                 <ColorWellButton selectedColor={this.state.selectedColor}/>
                 <ToggleButton onToggle={this.selectPencil.bind(this)} selected={this.state.selected_tool === this.state.pencil_tool}>pencil</ToggleButton>
                 <ToggleButton onToggle={this.selectEyedropper.bind(this)} selected={this.state.selected_tool === this.state.eyedropper_tool}>eyedropper</ToggleButton>
                 <button>eraser</button>
+                <label></label>
                 <button onClick={this.execUndo.bind(this)} disabled={!this.isUndoAvailable()}>undo</button>
                 <button onClick={this.execRedo.bind(this)} disabled={!this.isRedoAvailable()}>redo</button>
-                <label>{this.state.command_index}</label>
                 <ToggleButton onToggle={this.toggleGrid.bind(this)} selected={this.state.drawGrid}>Grid</ToggleButton>
+                <label></label>
                 <button onClick={this.exportPNG.bind(this)}>export</button>
+                <button onClick={this.newDoc.bind(this)}>new</button>
                 <button onClick={this.saveDoc.bind(this)}>save</button>
+                <button onClick={this.openDoc.bind(this)}>open</button>
             </div>
-            <DrawingSurface tool={this.state.selected_tool} model={model} drawGrid={this.state.drawGrid}/>
+            <div className="vbox">
+                <input type="text" ref="doc_title" value={this.state.doc_title} onChange={this.titleEdited.bind(this)}/>
+                <DrawingSurface tool={this.state.selected_tool} model={model} drawGrid={this.state.drawGrid}/>
+            </div>
             {this.renderLogin()}
+            {this.renderOpenDoc()}
         </div>)
     }
 }

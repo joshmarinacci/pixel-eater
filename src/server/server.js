@@ -26,6 +26,9 @@ app.use(bodyParser.json());
 
 app.use(stormpath.init(app, {
     // Optional configuration options.
+    application: {
+        href: 'https://api.stormpath.com/v1/applications/YsU8xiLUaoZBupUPBld1x'
+    },
     web: {
         produces: ['application/json'],
     }
@@ -76,28 +79,49 @@ function startWebserver(cb) {
     });
 }
 
-function summarizeList(cursor, list, cb) {
-    cursor.next().then(function(val) {
-        RethinkDB.table('items').filter(RethinkDB.row('list').eq(val.id)).count().run(conn, function(err, count) {
-            val.count = count;
-            list.push(val);
-            summarizeList(cursor,list,cb);
-        });
-    }).catch(function(){
-        cb(list);
-    })
-}
-
-app.get('/docs',stormpath.loginRequired,function(req,res) {
-    RethinkDB.table('docs').run(conn).then(function(cursor) {
-        summarizeList(cursor, [], function(list){
+app.get('/listfull',stormpath.loginRequired,function(req,res) {
+    RethinkDB.table('docs').filter(RethinkDB.row("username").eq(req.user.username)).run(conn)
+        .then(function(cursor) {
+            return cursor.toArray()
+        })
+        .then(function(list) {
             res.json(list);
         });
-    });
 });
 app.get('/whoami',stormpath.loginRequired,function(req,res) {
     console.log("whoami = ", req.user);
     res.json({status:'success',user:req.user});
+});
+
+app.post("/save", stormpath.loginRequired, function(req,res) {
+    if(req.body.id) {
+        RethinkDB.table('docs').get(req.body.id).update(req.body).run(conn)
+            .then(function (ans) {
+                res.json({status:'success',id:req.body.id})
+            })
+            .catch(function (err) {
+                console.log("failed to save", err);
+            });
+    } else {
+        delete req.body.id;
+        req.body.username = req.user.username;
+        RethinkDB.table('docs').insert([req.body]).run(conn)
+            .then(function (ans) {
+                var listid = ans.generated_keys[0];
+                res.json({status: 'success', id: listid});
+            })
+            .catch((err) => console.log("error",err));
+    }
+});
+
+app.post("/load", stormpath.loginRequired, function(req,res) {
+    RethinkDB.table('docs').get(req.body.id).run(conn)
+        .then(function(doc) {
+            res.json({status:'success',doc:doc});
+        })
+        .catch(function(err){
+            console.log("there was an error while loading doc",req.body.id,err);
+        })
 });
 
 app.on('stormpath.ready', function () {

@@ -3,6 +3,7 @@
  */
 
 export default class BitmapModel {
+
     constructor(pw, ph) {
         this.pw = pw;
         this.ph = ph;
@@ -80,6 +81,22 @@ export default class BitmapModel {
             "#000000"
           ]
     }
+
+    toJSON() {
+        return {
+            width:this.pw,
+            height:this.ph,
+            data:this.data,
+            palette:this.palette
+        }
+    }
+
+    static fromJSON(json) {
+        var model = new BitmapModel(json.width,json.height);
+        model.data = json.data;
+        return model;
+    }
+
     fillData(array, len, val) {
         for(let i=0; i<len; i++) {
             array[i] = val;

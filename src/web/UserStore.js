@@ -26,6 +26,15 @@ class UserStore {
         })
     }
 
+    checkLoggedIn(cb) {
+        var self = this;
+        GET_JSON("http://localhost:30065/whoami", function(data) {
+            console.log("got the data",data);
+            self.user = data.user;
+            if(cb)cb(data.user);
+        });
+    }
+
     getUser() {
         return this.user;
     }
