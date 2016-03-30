@@ -13,7 +13,6 @@ import ReactDOM from "react-dom";
 import DrawingSurface from "./DrawingSurface.jsx"
 import LayersPanel from "./LayersPanel.jsx";
 import DocStore from "./DocStore.js";
-import BitmapModel from "./BitmapModel.js";
 import ExportPNG from "./ExportPng";
 import US from "./UserStore";
 var UserStore = US.init();
@@ -21,7 +20,6 @@ var UserStore = US.init();
 
 var REQUIRE_AUTH = true;
 
-var model = new BitmapModel(16,16);
 
 
 var PopupState = {
@@ -52,7 +50,7 @@ class ColorPicker extends React.Component {
         ></div>
     }
     render() {
-        var wells = model.getPalette().map((c,i) => this.renderColorWell(c,i));
+        var wells = DocStore.getModel().getPalette().map((c,i) => this.renderColorWell(c,i));
         return <div
             style={{
                     margin:0,
@@ -116,7 +114,7 @@ class ToggleButton extends React.Component {
 class ColorWellButton extends React.Component {
     render() {
         return <button className="color-well" style={{
-            backgroundColor:model.lookupCanvasColor(this.props.selectedColor)
+            backgroundColor:DocStore.getModel().lookupCanvasColor(this.props.selectedColor)
         }}></button>
     }
 }
@@ -203,12 +201,12 @@ class App extends React.Component {
         this.state.eyedropper_tool = {
             mouseDown: function(surf,pt) {
                 self.setState({
-                    selectedColor:model.getData(pt)
+                    selectedColor:DocStore.getModel().getData(pt)
                 })
             },
             mouseDrag: function(surf,pt) {
                 self.setState({
-                    selectedColor:model.getData(pt)
+                    selectedColor:DocStore.getModel().getData(pt)
                 })
             },
             mouseUp: function() {
@@ -220,9 +218,7 @@ class App extends React.Component {
         this.state.command_buffer = [];
         this.state.command_index = 0;
         this.state.user = null;
-        this.state.model = model;
-        this.state.doc_title = "Untitled Artwork";
-        this.state.doc_id = null;
+        this.state.doc = DocStore.getDoc();
         this.state.doclist = [];
         this.state.loginVisible = false;
         this.state.openVisible = false;
@@ -246,17 +242,13 @@ class App extends React.Component {
     }
 
     exportPNG() {
-        ExportPNG(model);
+        ExportPNG(DocStore.getModel());
     }
     saveDoc() {
-        var doc = {
-            model: this.state.model,
-            id: this.state.doc_id,
-            title: this.state.doc_title
-        };
-        DocStore.save(doc, (res) => this.setState({doc_id:res.id}));
+        DocStore.save(DocStore.getDoc(), (res) => DocStore.getDoc().id=res.id);
     }
     setPixel(pt,new_color) {
+        var model = DocStore.getModel();
         var old_color = model.getData(pt);
         model.setData(pt,new_color);
         this.appendCommand(function() {
@@ -302,25 +294,15 @@ class App extends React.Component {
         this.setState({openVisible:false})
     }
     openDocPerform(id) {
-        this.setState({doclist:null})
+        this.setState({doclist:[], openVisible:false})
         var self = this;
-        DocStore.loadDoc(id,function(obj) {
-            var m2 = BitmapModel.fromJSON(obj.doc.model);
-            model = m2;
-            self.setState({
-                model:m2,
-                doc_id:obj.doc.id,
-                doc_title:obj.doc.title
-            })
+        DocStore.loadDoc(id,function(doc) {
+            self.setState({ doc: doc })
         });
     }
     newDoc() {
-        model = new BitmapModel(16,16);
-        this.setState({
-            model:model,
-            doc_title:"Untitled Artwork",
-            doc_id:null
-        })
+        DocStore.setDoc(DocStore.newDoc());
+        this.setState({ doc:DocStore.getDoc() })
     }
     onLoginCompleted(user) {
         this.setState({user:user, loginVisible:false});
@@ -329,11 +311,12 @@ class App extends React.Component {
         this.setState({loginVisible:false});
     }
     titleEdited() {
-        this.setState({doc_title:this.refs.doc_title.value});
+        DocStore.getDoc().title = this.refs.doc_title.value;
+        this.setState({doc:DocStore.getDoc()});
     }
     render() {
         return (<div className="hbox fill">
-            <div className="vbox">
+            <div className="vbox panel">
                 <label>user = {this.state.user?this.state.user.username:'not logged in'}</label>
                 <label></label>
                 <PopupButton caption="Color"><ColorPicker onSelectColor={this.selectColor.bind(this)}/></PopupButton>
@@ -352,8 +335,8 @@ class App extends React.Component {
                 <button onClick={this.openDoc.bind(this)}>open</button>
             </div>
             <div className="vbox">
-                <input type="text" ref="doc_title" value={this.state.doc_title} onChange={this.titleEdited.bind(this)}/>
-                <DrawingSurface tool={this.state.selected_tool} model={model} drawGrid={this.state.drawGrid}/>
+                <input type="text" ref="doc_title" value={this.state.doc.title} onChange={this.titleEdited.bind(this)}/>
+                <DrawingSurface tool={this.state.selected_tool} model={DocStore.getModel()} drawGrid={this.state.drawGrid}/>
             </div>
 
             <Dialog visible={this.state.loginVisible}>
