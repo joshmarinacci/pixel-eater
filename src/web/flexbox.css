@@ -59,7 +59,7 @@
 
 
 .dialog.narrow > .content {
-    max-width: 30em;
+    max-width: 40em;
 }
 
 .dialog .body {
@@ -75,6 +75,13 @@
     padding: 0.8em;
     font-weight: normal;
     font-size: 150%;
+}
+
+.dialog footer {
+    background-color: #eee;
+    border: 1px solid gray;
+    border-width: 0px 1px 1px 1px;
+    padding: 0.8em;
 }
 
 .hbox .right {

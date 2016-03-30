@@ -122,11 +122,15 @@ class ColorWellButton extends React.Component {
 }
 
 class Dialog extends React.Component {
+    renderChildren() {
+        if(this.props.visible) return this.props.children;
+        return "";
+    }
     render() {
         return <div className="dialog narrow" style={{visibility:this.props.visible?'visible':'hidden'}}>
             <div className="scrim"></div>
             <div className="content">
-                {this.props.children}
+                {this.renderChildren()}
             </div>
         </div>
 
@@ -171,11 +175,10 @@ class OpenDocPanel extends React.Component {
         });
     }
     render() {
-        return <div className="fill" style={{ background:"white"}}>
+        return <div className="body">
             <ul>
                 {this.renderDocs(this.props.docs)}
             </ul>
-            <button onClick={this.props.onCancel}>Cancel</button>
         </div>
     }
 }
@@ -220,7 +223,9 @@ class App extends React.Component {
         this.state.model = model;
         this.state.doc_title = "Untitled Artwork";
         this.state.doc_id = null;
-        this.state.loginVisible = true;
+        this.state.doclist = [];
+        this.state.loginVisible = false;
+        this.state.openVisible = false;
 
         UserStore.checkLoggedIn((user) => this.setState({user:user}));
     }
@@ -290,21 +295,11 @@ class App extends React.Component {
     }
 
     openDoc() {
-        DocStore.loadDocList((docs)=>this.setState({doclist:docs}));
+        DocStore.loadDocList((docs)=>this.setState({doclist:docs, openVisible:true}));
     }
 
-    renderOpenDoc() {
-        if(this.state.doclist) {
-            return <OpenDocPanel
-                docs={this.state.doclist}
-                onCancel={this.openDocCanceled.bind(this)}
-                onSelectDoc={this.openDocPerform.bind(this)}
-            />
-        }
-        return "";
-    }
     openDocCanceled() {
-        this.setState({doclist:null})
+        this.setState({openVisible:false})
     }
     openDocPerform(id) {
         this.setState({doclist:null})
@@ -368,8 +363,14 @@ class App extends React.Component {
                     onCanceled={this.onLoginCanceled.bind(this)}
                 />
             </Dialog>
-
-            {this.renderOpenDoc()}
+            <Dialog visible={this.state.openVisible}>
+                <header>Open</header>
+                <OpenDocPanel
+                    docs={this.state.doclist}
+                    onSelectDoc={this.openDocPerform.bind(this)}
+                />
+                <footer><button onClick={this.openDocCanceled.bind(this)}>cancel</button></footer>
+            </Dialog>
         </div>)
     }
 }
