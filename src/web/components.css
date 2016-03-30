@@ -62,3 +62,25 @@ input {
 .panel {
     border: 1px solid gray;
 }
+
+.panel.left {
+    border-left-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+}
+
+.panel.right {
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+}
+.panel.top {
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+}
+.panel.bottom {
+    border-left-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+}

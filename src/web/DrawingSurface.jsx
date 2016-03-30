@@ -112,7 +112,7 @@ export default class DrawingSurface extends React.Component {
 
     render() {
         return <div className="grow">
-            <canvas ref="canvas" width="800" height="800"
+            <canvas ref="canvas" width="800" height="600"
                     onMouseUp={this.mouseUp.bind(this)}
                     onMouseDown={this.mouseDown.bind(this)}
                     onMouseMove={this.mouseMove.bind(this)}></canvas>
