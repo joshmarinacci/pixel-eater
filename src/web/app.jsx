@@ -125,6 +125,7 @@ class Dialog extends React.Component {
         return "";
     }
     render() {
+        if(!this.props.visible) return <div></div>;
         return <div className="dialog narrow" style={{visibility:this.props.visible?'visible':'hidden'}}>
             <div className="scrim"></div>
             <div className="content">
@@ -316,7 +317,7 @@ class App extends React.Component {
     }
     render() {
         return (<div className="hbox fill">
-            <div className="vbox panel">
+            <div className="vbox panel left">
                 <label>user = {this.state.user?this.state.user.username:'not logged in'}</label>
                 <label></label>
                 <PopupButton caption="Color"><ColorPicker onSelectColor={this.selectColor.bind(this)}/></PopupButton>
@@ -334,9 +335,17 @@ class App extends React.Component {
                 <button onClick={this.saveDoc.bind(this)}>save</button>
                 <button onClick={this.openDoc.bind(this)}>open</button>
             </div>
-            <div className="vbox">
-                <input type="text" ref="doc_title" value={this.state.doc.title} onChange={this.titleEdited.bind(this)}/>
+            <div className="vbox grow">
+                <div className="panel top">
+                    <input type="text" ref="doc_title" value={this.state.doc.title} onChange={this.titleEdited.bind(this)}/>
+                </div>
                 <DrawingSurface tool={this.state.selected_tool} model={DocStore.getModel()} drawGrid={this.state.drawGrid}/>
+                <div className="panel bottom">
+                    status
+                </div>
+            </div>
+            <div className="vbox panel right">
+                <LayersPanel/>
             </div>
 
             <Dialog visible={this.state.loginVisible}>
