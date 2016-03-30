@@ -18,6 +18,9 @@ import ExportPNG from "./ExportPng";
 import US from "./UserStore";
 var UserStore = US.init();
 
+
+var REQUIRE_AUTH = true;
+
 var model = new BitmapModel(16,16);
 
 
@@ -130,13 +133,28 @@ class LoginPanel extends React.Component {
             self.props.onCompleted(user);
         });
     }
+    cancel(e) {
+        e.stopPropagation();
+        this.props.onCanceled();
+    }
     render() {
-        return <div className="fill" style={{ background:"white"}}>
-            <form>
-                <label>username</label><input type="text" ref="username"/><br/>
-                <label>password</label><input type="text" ref="password"/><br/>
-                <input type="button" onClick={this.tryLogin.bind(this)} value="login"/>
-            </form>
+        return <div className="dialog narrow" style={{visibility:this.props.visible?'visible':'hidden'}}>
+            <div className="scrim"></div>
+            <div className="content">
+                <div className="header">Login</div>
+                <div className="body">
+                    <div className="hbox">
+                        <label>username</label><input type="text" ref="username"/><br/>
+                    </div>
+                    <div className="hbox">
+                        <label>password</label><input type="text" ref="password"/><br/>
+                    </div>
+                    <div className="hbox right">
+                        <button onClick={this.cancel.bind(this)}>Cancel</button>
+                        <button type="button" onClick={this.tryLogin.bind(this)}>Login</button>
+                    </div>
+                </div>
+            </div>
         </div>
     }
 }
@@ -201,14 +219,13 @@ class App extends React.Component {
         this.state.model = model;
         this.state.doc_title = "Untitled Artwork";
         this.state.doc_id = null;
+        this.state.loginVisible = true;
 
         UserStore.checkLoggedIn((user) => this.setState({user:user}));
     }
 
     toggleGrid() {
-        this.setState({
-            drawGrid: !this.state.drawGrid
-        })
+        this.setState({ drawGrid: !this.state.drawGrid })
     }
     selectColor(color) {
         this.setState({selectedColor:color});
@@ -309,15 +326,11 @@ class App extends React.Component {
             doc_id:null
         })
     }
-    renderLogin() {
-        if(UserStore.getUser()) {
-            return ""
-        } else {
-            return <LoginPanel onCompleted={this.onLoginCompleted.bind(this)}/>
-        }
-    }
     onLoginCompleted(user) {
         this.setState({user:user});
+    }
+    onLoginCanceled() {
+        this.setState({loginVisible:false});
     }
     titleEdited() {
         this.setState({doc_title:this.refs.doc_title.value});
@@ -346,7 +359,11 @@ class App extends React.Component {
                 <input type="text" ref="doc_title" value={this.state.doc_title} onChange={this.titleEdited.bind(this)}/>
                 <DrawingSurface tool={this.state.selected_tool} model={model} drawGrid={this.state.drawGrid}/>
             </div>
-            {this.renderLogin()}
+            <LoginPanel
+                onCompleted={this.onLoginCompleted.bind(this)}
+                visible={this.state.loginVisible}
+                onCanceled={this.onLoginCanceled.bind(this)}
+            />
             {this.renderOpenDoc()}
         </div>)
     }
