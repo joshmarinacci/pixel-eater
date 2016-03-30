@@ -121,6 +121,17 @@ class ColorWellButton extends React.Component {
     }
 }
 
+class Dialog extends React.Component {
+    render() {
+        return <div className="dialog narrow" style={{visibility:this.props.visible?'visible':'hidden'}}>
+            <div className="scrim"></div>
+            <div className="content">
+                {this.props.children}
+            </div>
+        </div>
+
+    }
+}
 class LoginPanel extends React.Component {
     tryLogin(e) {
         e.stopPropagation();
@@ -133,29 +144,19 @@ class LoginPanel extends React.Component {
             self.props.onCompleted(user);
         });
     }
-    cancel(e) {
-        e.stopPropagation();
-        this.props.onCanceled();
-    }
     render() {
-        return <div className="dialog narrow" style={{visibility:this.props.visible?'visible':'hidden'}}>
-            <div className="scrim"></div>
-            <div className="content">
-                <div className="header">Login</div>
-                <div className="body">
-                    <div className="hbox">
-                        <label>username</label><input type="text" ref="username"/><br/>
-                    </div>
-                    <div className="hbox">
-                        <label>password</label><input type="text" ref="password"/><br/>
-                    </div>
-                    <div className="hbox right">
-                        <button onClick={this.cancel.bind(this)}>Cancel</button>
-                        <button type="button" onClick={this.tryLogin.bind(this)}>Login</button>
-                    </div>
+        return <div className="body">
+                <div className="hbox">
+                    <label>username</label><input type="text" ref="username"/><br/>
+                </div>
+                <div className="hbox">
+                    <label>password</label><input type="text" ref="password"/><br/>
+                </div>
+                <div className="hbox right">
+                    <button onClick={this.props.onCanceled}>Cancel</button>
+                    <button type="button" onClick={this.tryLogin.bind(this)}>Login</button>
                 </div>
             </div>
-        </div>
     }
 }
 
@@ -327,7 +328,7 @@ class App extends React.Component {
         })
     }
     onLoginCompleted(user) {
-        this.setState({user:user});
+        this.setState({user:user, loginVisible:false});
     }
     onLoginCanceled() {
         this.setState({loginVisible:false});
@@ -359,11 +360,15 @@ class App extends React.Component {
                 <input type="text" ref="doc_title" value={this.state.doc_title} onChange={this.titleEdited.bind(this)}/>
                 <DrawingSurface tool={this.state.selected_tool} model={model} drawGrid={this.state.drawGrid}/>
             </div>
-            <LoginPanel
-                onCompleted={this.onLoginCompleted.bind(this)}
-                visible={this.state.loginVisible}
-                onCanceled={this.onLoginCanceled.bind(this)}
-            />
+
+            <Dialog visible={this.state.loginVisible}>
+                <header>Login</header>
+                <LoginPanel
+                    onCompleted={this.onLoginCompleted.bind(this)}
+                    onCanceled={this.onLoginCanceled.bind(this)}
+                />
+            </Dialog>
+
             {this.renderOpenDoc()}
         </div>)
     }
