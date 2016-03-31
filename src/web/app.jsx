@@ -1,5 +1,6 @@
 require('./flexbox.css');
 require('./components.css');
+require('../../node_modules/font-awesome/css/font-awesome.css')
 
 /*
 
@@ -322,18 +323,18 @@ class App extends React.Component {
                 <label></label>
                 <PopupButton caption="Color"><ColorPicker onSelectColor={this.selectColor.bind(this)}/></PopupButton>
                 <ColorWellButton selectedColor={this.state.selectedColor}/>
-                <ToggleButton onToggle={this.selectPencil.bind(this)} selected={this.state.selected_tool === this.state.pencil_tool}>pencil</ToggleButton>
-                <ToggleButton onToggle={this.selectEyedropper.bind(this)} selected={this.state.selected_tool === this.state.eyedropper_tool}>eyedropper</ToggleButton>
-                <button>eraser</button>
+                <ToggleButton onToggle={this.selectPencil.bind(this)} selected={this.state.selected_tool === this.state.pencil_tool}><i className="fa fa-pencil"></i></ToggleButton>
+                <ToggleButton onToggle={this.selectEyedropper.bind(this)} selected={this.state.selected_tool === this.state.eyedropper_tool}><i className="fa fa-eyedropper"></i></ToggleButton>
+                <button className="fa fa-eraser"></button>
                 <label></label>
-                <button onClick={this.execUndo.bind(this)} disabled={!this.isUndoAvailable()}>undo</button>
-                <button onClick={this.execRedo.bind(this)} disabled={!this.isRedoAvailable()}>redo</button>
-                <ToggleButton onToggle={this.toggleGrid.bind(this)} selected={this.state.drawGrid}>Grid</ToggleButton>
+                <button onClick={this.execUndo.bind(this)} disabled={!this.isUndoAvailable()} className="fa fa-undo"></button>
+                <button onClick={this.execRedo.bind(this)} disabled={!this.isRedoAvailable()} className="fa fa-repeat"></button>
+                <ToggleButton onToggle={this.toggleGrid.bind(this)} selected={this.state.drawGrid}><i className="fa fa-table"></i></ToggleButton>
                 <label></label>
-                <button onClick={this.exportPNG.bind(this)}>export</button>
-                <button onClick={this.newDoc.bind(this)}>new</button>
-                <button onClick={this.saveDoc.bind(this)}>save</button>
-                <button onClick={this.openDoc.bind(this)}>open</button>
+                <button onClick={this.exportPNG.bind(this)} className="fa fa-download"></button>
+                <button onClick={this.newDoc.bind(this)} >new</button>
+                <button onClick={this.saveDoc.bind(this)} className="fa fa-save"></button>
+                <button onClick={this.openDoc.bind(this)} className="fa fa-folder-open"></button>
             </div>
             <div className="vbox grow">
                 <div className="panel top">
