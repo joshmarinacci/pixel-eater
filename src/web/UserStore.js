@@ -2,7 +2,7 @@
  * Created by josh on 3/28/16.
  */
 import {GET_JSON, POST_JSON} from "./u";
-
+import Config from "./Config";
 
 var _userStore;
 class UserStore {
@@ -14,7 +14,7 @@ class UserStore {
 
     login(data, cb) {
         var self = this;
-        POST_JSON("http://localhost:30065/login",data,function(val){
+        POST_JSON(Config.url("/login"),data,function(val){
             console.log("got back",val);
             if(val.account) {
                 console.log("logged in okay!");
@@ -28,7 +28,7 @@ class UserStore {
 
     checkLoggedIn(cb) {
         var self = this;
-        GET_JSON("http://localhost:30065/whoami", function(data) {
+        GET_JSON(Config.url('/whoami'), function(data) {
             console.log("got the data",data);
             self.user = data.user;
             if(cb)cb(data.user);
@@ -41,7 +41,7 @@ class UserStore {
 
     logout(cb) {
         var self = this;
-        POST_JSON("http://localhost:30065/logout",{},function(val){
+        POST_JSON(Config.url("/logout"),{},function(val){
             self.user = null;
             if(cb) cb();
         });
@@ -53,7 +53,7 @@ class UserStore {
             password:password,
         };
         var self = this;
-        POST_JSON("http://localhost:30065/register",obj,function(val) {
+        POST_JSON(Config.url("/register"),obj,function(val) {
             if(val.account) {
                 self.user = val.account;
                 if(cb) cb(null, val);
