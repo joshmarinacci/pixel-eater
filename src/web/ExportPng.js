@@ -18,7 +18,7 @@ function exportPNG(model) {
     //c.fillRect(8,8,8,8);
     var data = canvas.toDataURL("image/png");
     console.log('data is',data);
-    location.href=data;
+    window.open(data);
 }
 
 export default exportPNG;
