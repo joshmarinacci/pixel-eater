@@ -26,8 +26,12 @@ export function POST_JSON(path, payload, cb) {
 
     req.onreadystatechange = function() {
         if(req.readyState == 4 && req.status === 200) {
-            var json = JSON.parse(req.responseText);
-            cb(json);
+            try {
+                var json = JSON.parse(req.responseText);
+                cb(json);
+            } catch (err) {
+                cb(err);
+            }
         }
     };
     req.open("POST",path,true);

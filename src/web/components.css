@@ -12,6 +12,10 @@ button {
     padding: 0.25em;
     margin: 0.25em 0.5em;
 }
+button.primary {
+    background-color: #6cf;
+}
+
 button:hover {
     background-color: #fff;
 }

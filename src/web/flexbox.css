@@ -74,12 +74,14 @@
     border: 1px solid gray;
     padding: 0.8em;
     overflow: scroll;
+    border-radius: 0em 0em 1em 1em;
 }
 
 .dialog header {
     background-color: #ccc;
     border: 1px solid gray;
     border-width: 1px 1px 0px 1px;
+    border-radius: 1em 1em 0em 0em;
     padding: 0.8em;
     font-weight: normal;
     font-size: 150%;

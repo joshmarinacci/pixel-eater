@@ -161,7 +161,7 @@ class LoginPanel extends React.Component {
                 </div>
                 <div className="hbox right">
                     <button onClick={this.props.onCanceled}>Cancel</button>
-                    <button type="button" onClick={this.tryLogin.bind(this)}>Login</button>
+                    <button className="primary" onClick={this.tryLogin.bind(this)}>Login</button>
                 </div>
             </div>
     }
@@ -319,6 +319,16 @@ class App extends React.Component {
         DocStore.getDoc().title = this.refs.doc_title.value;
         this.setState({doc:DocStore.getDoc()});
     }
+    loginLogout() {
+        if(!this.state.user) {
+            this.setState({loginVisible:true});
+        } else {
+            var self = this;
+            UserStore.logout(function() {
+                self.setState({user:null});
+            });
+        }
+    }
     render() {
         return (<div className="hbox fill">
             <div className="vbox panel left">
@@ -343,11 +353,9 @@ class App extends React.Component {
                 </div>
                 <DrawingSurface tool={this.state.selected_tool} model={DocStore.getModel()} drawGrid={this.state.drawGrid}/>
                 <div className="panel bottom">
+                    <button onClick={this.loginLogout.bind(this)}>{this.state.user?"logout":"login"}</button>
                     <label>{this.state.user?this.state.user.username:'not logged in'}</label>
                 </div>
-            </div>
-            <div className="vbox panel right">
-                <LayersPanel/>
             </div>
 
             <Dialog visible={this.state.loginVisible}>
@@ -369,7 +377,11 @@ class App extends React.Component {
     }
 }
 //disable layers until we are ready for it           <LayersPanel/>
+/*
+ <div className="vbox panel right">
+ <LayersPanel/>
+ </div>
 
-
+ */
 
 ReactDOM.render(<App/>, document.getElementsByTagName("body")[0]);

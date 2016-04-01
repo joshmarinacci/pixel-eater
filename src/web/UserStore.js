@@ -38,6 +38,12 @@ class UserStore {
     getUser() {
         return this.user;
     }
+
+    logout(cb) {
+        POST_JSON("http://localhost:30065/logout",{},function(val){
+            cb();
+        });
+    }
 }
 
 export default UserStore;
