@@ -14,6 +14,7 @@ import ReactDOM from "react-dom";
 import DrawingSurface from "./DrawingSurface.jsx"
 import LayersPanel from "./LayersPanel.jsx";
 import DocStore from "./DocStore.js";
+import Dialog from "./Dialog.jsx";
 import ExportPNG from "./ExportPng";
 import US from "./UserStore";
 var UserStore = US.init();
@@ -138,22 +139,6 @@ class ColorWellButton extends React.Component {
     }
 }
 
-class Dialog extends React.Component {
-    renderChildren() {
-        if(this.props.visible) return this.props.children;
-        return "";
-    }
-    render() {
-        if(!this.props.visible) return <div></div>;
-        return <div className="dialog narrow" style={{visibility:this.props.visible?'visible':'hidden'}}>
-            <div className="scrim"></div>
-            <div className="content">
-                {this.renderChildren()}
-            </div>
-        </div>
-
-    }
-}
 class LoginPanel extends React.Component {
     tryLogin(e) {
         e.stopPropagation();
