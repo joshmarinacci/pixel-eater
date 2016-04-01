@@ -343,12 +343,24 @@ class App extends React.Component {
         this.setState({doclist:[], openVisible:false})
         var self = this;
         DocStore.loadDoc(id,function(doc) {
-            self.setState({ doc: doc })
+            self.setState({
+                //reset the undo buffer
+                command_buffer:[],
+                command_index: 0,
+                //set the new doc
+                doc: doc
+            })
         });
     }
     newDoc() {
         DocStore.setDoc(DocStore.newDoc());
-        this.setState({ doc:DocStore.getDoc() })
+            this.setState({
+            //reset the undo buffer
+            command_buffer:[],
+            command_index: 0,
+            //set the new doc
+            doc: DocStore.getDoc()
+        });
     }
     onLoginCompleted(user) {
         this.setState({user:user, loginVisible:false});
