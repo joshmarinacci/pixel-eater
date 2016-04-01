@@ -40,9 +40,27 @@ class UserStore {
     }
 
     logout(cb) {
+        var self = this;
         POST_JSON("http://localhost:30065/logout",{},function(val){
-            cb();
+            self.user = null;
+            if(cb) cb();
         });
+    }
+
+    register(email,password,cb) {
+        var obj = {
+            email:email,
+            password:password,
+        };
+        var self = this;
+        POST_JSON("http://localhost:30065/register",obj,function(val) {
+            if(val.account) {
+                self.user = val.account;
+                if(cb) cb(null, val);
+            } else {
+                if(cb) cb(val,null);
+            }
+        })
     }
 }
 

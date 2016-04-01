@@ -92,3 +92,9 @@ input {
     border-right-width: 0;
     border-bottom-width: 0;
 }
+
+
+
+.error {
+    color: red;
+}

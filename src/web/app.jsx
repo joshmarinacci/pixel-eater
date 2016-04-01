@@ -162,8 +162,48 @@ class LoginPanel extends React.Component {
                 <div className="hbox right">
                     <button onClick={this.props.onCanceled}>Cancel</button>
                     <button className="primary" onClick={this.tryLogin.bind(this)}>Login</button>
+                    <label> </label>
+                    <button className="primary" onClick={this.props.switchToRegister}>Register!</button>
                 </div>
             </div>
+    }
+}
+
+class RegistrationPanel extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            errorText:""
+        }
+    }
+    tryRegister(e) {
+        var email = this.refs.email.value;
+        var password = this.refs.password.value;
+        var self = this;
+        UserStore.register(email,password,function(err,user) {
+            if(err) {
+                self.setState({errorText: err.message});
+            } else {
+                self.props.onCompleted(user);
+            }
+        })
+    }
+    render() {
+        return <div className="body">
+            <div className="hbox">
+                <label>email</label><input type="text" ref="email"/><br/>
+            </div>
+            <div className="hbox">
+                <label>password</label><input type="text" ref="password"/><br/>
+            </div>
+            <div className="hbox">
+                <label className="error">{this.state.errorText}</label>
+            </div>
+            <div className="hbox right">
+                <button onClick={this.props.onCanceled}>Cancel</button>
+                <button className="primary" onClick={this.tryRegister.bind(this)}>Login</button>
+            </div>
+        </div>
     }
 }
 
@@ -226,6 +266,7 @@ class App extends React.Component {
         this.state.doc = DocStore.getDoc();
         this.state.doclist = [];
         this.state.loginVisible = false;
+        this.state.registerVisible = false;
         this.state.openVisible = false;
 
         UserStore.checkLoggedIn((user) => this.setState({user:user}));
@@ -315,6 +356,12 @@ class App extends React.Component {
     onLoginCanceled() {
         this.setState({loginVisible:false});
     }
+    onRegistrationCompleted(user) {
+        this.setState({user:user, registerVisible:false});
+    }
+    onRegistrationCanceled() {
+        this.setState({ registerVisible:false});
+    }
     titleEdited() {
         DocStore.getDoc().title = this.refs.doc_title.value;
         this.setState({doc:DocStore.getDoc()});
@@ -328,6 +375,18 @@ class App extends React.Component {
                 self.setState({user:null});
             });
         }
+    }
+    switchToRegister() {
+        this.setState({
+            loginVisible:false,
+            registerVisible:true
+        })
+    }
+    switchToLogin() {
+        this.setState({
+            loginVisible:true,
+            registerVisible:false
+        })
     }
     render() {
         return (<div className="hbox fill">
@@ -363,6 +422,15 @@ class App extends React.Component {
                 <LoginPanel
                     onCompleted={this.onLoginCompleted.bind(this)}
                     onCanceled={this.onLoginCanceled.bind(this)}
+                    switchToRegister={this.switchToRegister.bind(this)}
+                />
+            </Dialog>
+            <Dialog visible={this.state.registerVisible}>
+                <header>Register</header>
+                <RegistrationPanel
+                    onCompleted={this.onRegistrationCompleted.bind(this)}
+                    onCanceled={this.onRegistrationCanceled.bind(this)}
+                    switchToRegister={this.switchToLogin.bind(this)}
                 />
             </Dialog>
             <Dialog visible={this.state.openVisible}>

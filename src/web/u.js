@@ -33,6 +33,15 @@ export function POST_JSON(path, payload, cb) {
                 cb(err);
             }
         }
+        if(req.readyState == 4 && req.status == 400) {
+            console.log("ERROR", req.responseText);
+            try {
+                var json = JSON.parse(req.responseText);
+                cb(json);
+            } catch (err) {
+                cb(err);
+            }
+        }
     };
     req.open("POST",path,true);
     req.setRequestHeader('Accept', 'application/json');

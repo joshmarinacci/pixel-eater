@@ -31,6 +31,19 @@ app.use(stormpath.init(app, {
     },
     web: {
         produces: ['application/json'],
+        register: {
+            autoLogin: true,
+            form: {
+                fields: {
+                    givenName: {
+                        required: false
+                    },
+                    surname: {
+                        required: false
+                    }
+                }
+            }
+        }
     }
 }));
 
