@@ -34,9 +34,8 @@ button.selected:hover {
 
 
 button.color-well {
-    border: 2px solid black;
-    min-width: 1em;
-    min-height: 1em;
+    border: 1px solid black;
+
 }
 
 button:disabled {
@@ -48,19 +47,24 @@ button:disabled:hover {
 
 label {
     padding: 0.25em;
-    margin: 0.25em 0.5em;
+    margin: 0.5em 0.5em;
     text-align: center;
+    display: inline-block;
 }
 
 
 
 input {
     border: 1px solid gray;
+    border-radius: 0.25em;
     padding: 0.5em;
+    margin: 0.5em 0.5em;
 }
 
 .panel {
     border: 1px solid gray;
+    background-color: #eee;
+    flex: 0;
 }
 
 .panel.left {

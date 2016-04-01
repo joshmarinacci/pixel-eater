@@ -66,6 +66,18 @@ class ColorPicker extends React.Component {
 }
 
 class PopupButton extends React.Component {
+    clicked() {
+        this.refs.popup.open();
+    }
+    render() {
+        return <button style={{ position: 'relative' }} onClick={this.clicked.bind(this)}>
+            {this.props.caption}
+            <PopupContainer ref="popup">{this.props.children}</PopupContainer>
+        </button>
+    }
+}
+
+class PopupContainer extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -81,26 +93,24 @@ class PopupButton extends React.Component {
     componentWillUnmount() {
         PopupButton.unlisten(this.listener);
     }
-    clicked() {
+    open() {
         this.setState({
             open:true
         })
     }
     render() {
-        return <button style={{ position: 'relative' }} onClick={this.clicked.bind(this)}>
-            {this.props.caption}
-            <div style={{
+        return <div style={{
                     position: 'absolute',
                     left:'100%',
                     top:0,
-                    border: "1px solid #666",
+                    border: "1px solid red",
                     backgroundColor:'white',
                     padding:'1em',
                     borderRadius:'0.5em',
                     display:this.state.open?'block':'none'
                     }}
-            >{this.props.children}</div>
-        </button>
+        >{this.props.children}
+            </div>
     }
 }
 
@@ -113,10 +123,18 @@ class ToggleButton extends React.Component {
 }
 
 class ColorWellButton extends React.Component {
+    clicked() {
+        this.refs.popup.open();
+    }
     render() {
-        return <button className="color-well" style={{
-            backgroundColor:DocStore.getModel().lookupCanvasColor(this.props.selectedColor)
-        }}></button>
+        return (<button className="color-well "
+                       style={{
+                       backgroundColor:DocStore.getModel().lookupCanvasColor(this.props.selectedColor),
+                       position:'relative'
+                        }}
+                        onClick={this.clicked.bind(this)}
+        ><i className="fa fa-fw"></i><PopupContainer ref="popup">{this.props.children}</PopupContainer>
+        </button>);
     }
 }
 
@@ -319,20 +337,18 @@ class App extends React.Component {
     render() {
         return (<div className="hbox fill">
             <div className="vbox panel left">
-                <label>user = {this.state.user?this.state.user.username:'not logged in'}</label>
                 <label></label>
-                <PopupButton caption="Color"><ColorPicker onSelectColor={this.selectColor.bind(this)}/></PopupButton>
-                <ColorWellButton selectedColor={this.state.selectedColor}/>
+                <ColorWellButton selectedColor={this.state.selectedColor}><ColorPicker onSelectColor={this.selectColor.bind(this)}/></ColorWellButton>
                 <ToggleButton onToggle={this.selectPencil.bind(this)} selected={this.state.selected_tool === this.state.pencil_tool}><i className="fa fa-pencil"></i></ToggleButton>
                 <ToggleButton onToggle={this.selectEyedropper.bind(this)} selected={this.state.selected_tool === this.state.eyedropper_tool}><i className="fa fa-eyedropper"></i></ToggleButton>
                 <button className="fa fa-eraser"></button>
                 <label></label>
                 <button onClick={this.execUndo.bind(this)} disabled={!this.isUndoAvailable()} className="fa fa-undo"></button>
                 <button onClick={this.execRedo.bind(this)} disabled={!this.isRedoAvailable()} className="fa fa-repeat"></button>
-                <ToggleButton onToggle={this.toggleGrid.bind(this)} selected={this.state.drawGrid}><i className="fa fa-table"></i></ToggleButton>
+                <ToggleButton onToggle={this.toggleGrid.bind(this)} selected={this.state.drawGrid}><i className="fa fa-th"></i></ToggleButton>
                 <label></label>
                 <button onClick={this.exportPNG.bind(this)} className="fa fa-download"></button>
-                <button onClick={this.newDoc.bind(this)} >new</button>
+                <button onClick={this.newDoc.bind(this)} className="fa fa-file-o"></button>
                 <button onClick={this.saveDoc.bind(this)} className="fa fa-save"></button>
                 <button onClick={this.openDoc.bind(this)} className="fa fa-folder-open"></button>
             </div>
@@ -342,7 +358,7 @@ class App extends React.Component {
                 </div>
                 <DrawingSurface tool={this.state.selected_tool} model={DocStore.getModel()} drawGrid={this.state.drawGrid}/>
                 <div className="panel bottom">
-                    status
+                    <label>{this.state.user?this.state.user.username:'not logged in'}</label>
                 </div>
             </div>
             <div className="vbox panel right">
