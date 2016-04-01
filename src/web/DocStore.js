@@ -1,5 +1,6 @@
 import {GET_JSON, POST_JSON} from "./u";
 import BitmapModel from "./BitmapModel.js";
+import Config from "./Config";
 
 
 export default {
@@ -19,18 +20,18 @@ export default {
     },
     save: function(doc, cb) {
         doc.version = "1";
-        POST_JSON("http://localhost:30065/save",doc,function(res){
+        POST_JSON(Config.url("/save"),doc,function(res){
             if(cb)cb(res);
         });
     },
     loadDocList:function(cb) {
-        GET_JSON("http://localhost:30065/listfull", function(res) {
+        GET_JSON(Config.url("/listfull"), function(res) {
             if(cb)cb(res);
         })
     },
     loadDoc: function(id,cb) {
         var self = this;
-        POST_JSON("http://localhost:30065/load", {id:id}, function(res) {
+        POST_JSON(Config.url("/load"), {id:id}, function(res) {
             var doc = {
                 model:BitmapModel.fromJSON(res.doc.model),
                 id:res.doc.id,

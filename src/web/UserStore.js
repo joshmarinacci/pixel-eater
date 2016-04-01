@@ -7,7 +7,6 @@ import Config from "./Config";
 var _userStore;
 class UserStore {
     static init() {
-        console.log("initted");
         if(!_userStore) _userStore = new UserStore();
         return _userStore;
     }
@@ -18,7 +17,7 @@ class UserStore {
             console.log("got back",val);
             if(val.account) {
                 console.log("logged in okay!");
-                GET_JSON("http://localhost:30065/whoami", function(data) {
+                GET_JSON(Config.url("/whoami"), function(data) {
                     self.user = data.user;
                     if(cb)cb(data.user);
                 })
