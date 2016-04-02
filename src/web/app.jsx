@@ -117,7 +117,7 @@ class PopupContainer extends React.Component {
 
 class ToggleButton extends React.Component {
     render() {
-        var cls = 'button';
+        var cls = '';
         if(this.props.selected === true)  cls += " selected";
         return <button className={cls} onClick={this.props.onToggle}>{this.props.children}</button>
     }
