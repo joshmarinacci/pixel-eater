@@ -401,6 +401,7 @@ class App extends React.Component {
         })
     }
     render() {
+        var loggedOut = UserStore.getUser()==null;
         return (<div className="hbox fill">
             <div className="vbox panel left">
                 <label></label>
@@ -414,9 +415,9 @@ class App extends React.Component {
                 <ToggleButton onToggle={this.toggleGrid.bind(this)} selected={this.state.drawGrid}><i className="fa fa-th"></i></ToggleButton>
                 <label></label>
                 <button onClick={this.exportPNG.bind(this)} className="fa fa-download"></button>
-                <button onClick={this.newDoc.bind(this)} className="fa fa-file-o"></button>
-                <button onClick={this.saveDoc.bind(this)} className="fa fa-save"></button>
-                <button onClick={this.openDoc.bind(this)} className="fa fa-folder-open"></button>
+                <button onClick={this.newDoc.bind(this)}    disabled={loggedOut} className="fa fa-file-o"></button>
+                <button onClick={this.saveDoc.bind(this)}   disabled={loggedOut} className="fa fa-save"></button>
+                <button onClick={this.openDoc.bind(this)}   disabled={loggedOut} className="fa fa-folder-open"></button>
             </div>
             <div className="vbox grow">
                 <div className="panel top">
