@@ -241,6 +241,11 @@ class App extends React.Component {
                 self.setPixel(pt,self.state.selectedColor);
             },
             mouseUp:function(surf){
+            },
+            contextMenu: function(surf,pt) {
+                self.setState({
+                    selectedColor:DocStore.getModel().getData(pt)
+                })
             }
         };
         this.state.eyedropper_tool = {

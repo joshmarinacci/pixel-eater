@@ -81,9 +81,15 @@ export default class DrawingSurface extends React.Component {
         return false;
     }
 
-    mouseDown(e) {
+    getModelPoint(e) {
         var rect = this.refs.canvas.getBoundingClientRect();
-        var modelPoint = this.mouseToModel(Point.makePoint(e.clientX-rect.left, e.clientY-rect.top));
+        return this.mouseToModel(Point.makePoint(e.clientX-rect.left, e.clientY-rect.top));
+    }
+
+    mouseDown(e) {
+        if(e.button != 0) return;
+        if(e.ctrlKey) return;
+        var modelPoint = this.getModelPoint(e);
         this.setState({down:true, prevPoint:modelPoint});
         this.props.tool.mouseDown(this,modelPoint);
     }
@@ -91,8 +97,7 @@ export default class DrawingSurface extends React.Component {
     mouseMove(e) {
         e.stopPropagation();
         if(!this.state.down) return;
-        var rect = this.refs.canvas.getBoundingClientRect();
-        var modelPoint = this.mouseToModel(Point.makePoint(e.clientX-rect.left, e.clientY-rect.top));
+        var modelPoint = this.getModelPoint(e);
         if(!modelPoint.equals(this.state.prevPoint)) {
             this.props.tool.mouseDrag(this,modelPoint);
             this.setState({prevPoint:modelPoint});
@@ -110,12 +115,22 @@ export default class DrawingSurface extends React.Component {
         this.props.tool.mouseUp(this);
     }
 
+    contextMenu(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if(this.props.tool.contextMenu) {
+            this.props.tool.contextMenu(this,this.getModelPoint(e));
+        }
+    }
+
     render() {
         return <div className="grow scroll">
             <canvas ref="canvas" width={16*25+1} height={16*25+1}
                     onMouseUp={this.mouseUp.bind(this)}
                     onMouseDown={this.mouseDown.bind(this)}
-                    onMouseMove={this.mouseMove.bind(this)}></canvas>
+                    onMouseMove={this.mouseMove.bind(this)}
+                    onContextMenu={this.contextMenu.bind(this)}
+            />
         </div>
     }
 }
