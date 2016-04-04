@@ -9,6 +9,7 @@ save current file
 create a new file
 
  */
+
 import React from "react";
 import ReactDOM from "react-dom";
 import DrawingSurface from "./DrawingSurface.jsx"
@@ -54,7 +55,7 @@ class ColorPicker extends React.Component {
         ></div>
     }
     render() {
-        var wells = DocStore.getModel().getPalette().map((c,i) => this.renderColorWell(c,i));
+        var wells = this.props.model.getPalette().map((c,i) => this.renderColorWell(c,i));
         return <div
             style={{
                     margin:0,
@@ -132,7 +133,7 @@ class ColorWellButton extends React.Component {
     render() {
         return (<button className="color-well "
                        style={{
-                       backgroundColor:DocStore.getModel().lookupCanvasColor(this.props.selectedColor),
+                       backgroundColor:this.props.model.lookupCanvasColor(this.props.selectedColor),
                        position:'relative'
                         }}
                         onClick={this.clicked.bind(this)}
@@ -153,7 +154,7 @@ class PencilTool {
     }
     mouseUp(surf){}
     contextMenu(surf,pt) {
-        this.app.selectColor(DocStore.getModel().getData(pt));
+        this.app.selectColor(DocStore.getDoc().model.getData(pt));
     }
 }
 
@@ -165,13 +166,24 @@ class EyedropperTool {
         this.mouseDrag(surf,pt);
     }
     mouseDrag(surf,pt) {
-        this.app.selectColor(DocStore.getModel().getData(pt));
+        this.app.selectColor(DocStore.getDoc().model.getData(pt));
     }
     mouseUp() {}
 }
 
 
 class App extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {};
+        this.state.doc = DocStore.getDoc();
+        DocStore.changed(()=>this.setState({doc:DocStore.getDoc()}));
+    }
+    render() {
+        return <div><DocPanel doc={this.state.doc}/></div>
+    }
+}
+class DocPanel extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -181,34 +193,32 @@ class App extends React.Component {
         this.state.pencil_tool = new PencilTool(this);
         this.state.eyedropper_tool = new EyedropperTool(this);
         this.state.selected_tool = this.state.pencil_tool;
-
-        this.state.command_buffer = [];
-        this.state.command_index = 0;
         this.state.user = null;
-        this.state.doc = DocStore.getDoc();
         this.state.doclist = [];
         this.state.loginVisible = false;
         this.state.registerVisible = false;
         this.state.openVisible = false;
 
         UserStore.checkLoggedIn((user) => this.setState({user:user}));
+        this.model_listener = this.props.doc.model.changed((mod)=> this.setState({model:mod}));
     }
 
+    componentWillReceiveProps(nextProps) {
+        this.props.doc.model.unlisten(this.model_listener);
+        this.model_listener = nextProps.doc.model.changed((mod)=>this.setState({model:mod}));
+    }
     toggleGrid() {
         this.setState({ drawGrid: !this.state.drawGrid })
     }
     selectColor(color) {
         this.setState({selectedColor:color});
     }
-
     selectPencil() {
         this.setState({ selected_tool: this.state.pencil_tool});
     }
-
     selectEyedropper() {
         this.setState({ selected_tool: this.state.eyedropper_tool});
     }
-
     exportPNG() {
         ExportPNG(DocStore.getModel());
     }
@@ -216,42 +226,13 @@ class App extends React.Component {
         DocStore.save(DocStore.getDoc(), (res) => DocStore.getDoc().id=res.id);
     }
     setPixel(pt,new_color) {
-        var model = DocStore.getModel();
-        var old_color = model.getData(pt);
-        model.setData(pt,new_color);
-        this.appendCommand(function() {
-            model.setData(pt,old_color);
-        }, function() {
-            model.setData(pt,new_color);
-        });
-    }
-    appendCommand(undo,redo) {
-        var newbuff = this.state.command_buffer.slice(0,this.state.command_index);
-        newbuff.push({undo:undo,redo:redo});
-        this.setState({
-            command_buffer:newbuff,
-            command_index: this.state.command_index+1
-        })
+        this.props.doc.model.setPixel(pt,new_color);
     }
     execUndo() {
-        var cmd = this.state.command_buffer[this.state.command_index-1];
-        cmd.undo();
-        this.setState({
-            command_index:this.state.command_index-1
-        });
+        this.props.doc.model.execUndo();
     }
     execRedo() {
-        var cmd = this.state.command_buffer[this.state.command_index];
-        cmd.redo();
-        this.setState({
-            command_index:this.state.command_index+1
-        })
-    }
-    isUndoAvailable() {
-        return this.state.command_index > 0;
-    }
-    isRedoAvailable() {
-        return this.state.command_index < this.state.command_buffer.length;
+        this.props.doc.model.execRedo();
     }
 
     openDoc() {
@@ -263,26 +244,11 @@ class App extends React.Component {
     }
     openDocPerform(id) {
         this.setState({doclist:[], openVisible:false})
-        var self = this;
-        DocStore.loadDoc(id,function(doc) {
-            self.setState({
-                //reset the undo buffer
-                command_buffer:[],
-                command_index: 0,
-                //set the new doc
-                doc: doc
-            })
-        });
+        DocStore.loadDoc(id);
     }
     newDoc() {
         DocStore.setDoc(DocStore.newDoc());
-            this.setState({
-            //reset the undo buffer
-            command_buffer:[],
-            command_index: 0,
-            //set the new doc
-            doc: DocStore.getDoc()
-        });
+        this.setState({ doc: DocStore.getDoc()});
     }
     onLoginCompleted(user) {
         this.setState({user:user, loginVisible:false});
@@ -324,28 +290,30 @@ class App extends React.Component {
     }
     render() {
         var loggedOut = UserStore.getUser()==null;
+        var model = this.props.doc.model;
         return (<div className="hbox fill">
             <div className="vbox panel left">
-                <label></label>
-                <ColorWellButton selectedColor={this.state.selectedColor}><ColorPicker onSelectColor={this.selectColor.bind(this)}/></ColorWellButton>
+                <ColorWellButton model={model} selectedColor={this.state.selectedColor}>
+                    <ColorPicker model={model} onSelectColor={this.selectColor.bind(this)}/>
+                </ColorWellButton>
                 <ToggleButton onToggle={this.selectPencil.bind(this)} selected={this.state.selected_tool === this.state.pencil_tool}><i className="fa fa-pencil"></i></ToggleButton>
                 <ToggleButton onToggle={this.selectEyedropper.bind(this)} selected={this.state.selected_tool === this.state.eyedropper_tool}><i className="fa fa-eyedropper"></i></ToggleButton>
-                <button className="fa fa-eraser"></button>
-                <label></label>
-                <button onClick={this.execUndo.bind(this)} disabled={!this.isUndoAvailable()} className="fa fa-undo"></button>
-                <button onClick={this.execRedo.bind(this)} disabled={!this.isRedoAvailable()} className="fa fa-repeat"></button>
-                <ToggleButton onToggle={this.toggleGrid.bind(this)} selected={this.state.drawGrid}><i className="fa fa-th"></i></ToggleButton>
-                <label></label>
-                <button onClick={this.exportPNG.bind(this)} className="fa fa-download"></button>
-                <button onClick={this.newDoc.bind(this)}    disabled={loggedOut} className="fa fa-file-o"></button>
-                <button onClick={this.saveDoc.bind(this)}   disabled={loggedOut} className="fa fa-save"></button>
-                <button onClick={this.openDoc.bind(this)}   disabled={loggedOut} className="fa fa-folder-open"></button>
+                <button className="fa fa-eraser"/>
+                <label/>
+                <button onClick={this.execUndo.bind(this)} disabled={!model.isUndoAvailable()} className="fa fa-undo"/>
+                <button onClick={this.execRedo.bind(this)} disabled={!model.isRedoAvailable()} className="fa fa-repeat"/>
+                <ToggleButton onToggle={this.toggleGrid.bind(this)} selected={this.state.drawGrid}><i className="fa fa-th"/></ToggleButton>
+                <label/>
+                <button onClick={this.exportPNG.bind(this)} className="fa fa-download"/>
+                <button onClick={this.newDoc.bind(this)}    disabled={loggedOut} className="fa fa-file-o"/>
+                <button onClick={this.saveDoc.bind(this)}   disabled={loggedOut} className="fa fa-save"/>
+                <button onClick={this.openDoc.bind(this)}   disabled={loggedOut} className="fa fa-folder-open"/>
             </div>
             <div className="vbox grow">
                 <div className="panel top">
-                    <input type="text" ref="doc_title" value={this.state.doc.title} onChange={this.titleEdited.bind(this)}/>
+                    <input type="text" ref="doc_title" value={this.props.doc.title} onChange={this.titleEdited.bind(this)}/>
                 </div>
-                <DrawingSurface tool={this.state.selected_tool} model={DocStore.getModel()} drawGrid={this.state.drawGrid}/>
+                <DrawingSurface tool={this.state.selected_tool} model={model} drawGrid={this.state.drawGrid}/>
                 <div className="panel bottom">
                     <button onClick={this.loginLogout.bind(this)}>{this.state.user?"logout":"login"}</button>
                     <label>{this.state.user?this.state.user.username:'not logged in'}</label>

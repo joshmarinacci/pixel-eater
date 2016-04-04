@@ -80,6 +80,8 @@ export default class BitmapModel {
             "#000000",
             "#000000"
           ]
+        this.command_buffer = [];
+        this.command_index = 0;
     }
 
     toJSON() {
@@ -119,6 +121,12 @@ export default class BitmapModel {
 
     changed(cb) {
         this.cbs.push(cb);
+        return cb;
+    }
+
+    unlisten(cb) {
+        var n = this.cbs.indexOf(cb);
+        this.cbs.splice(n,1);
     }
 
     getWidth() {
@@ -133,12 +141,46 @@ export default class BitmapModel {
         return this.data[x+y*16];
     }
 
+    setPixel(pt, new_color){
+        var old_color = this.getData(pt);
+        this.setData(pt,new_color);
+        this.appendCommand(
+            () => this.setData(pt, old_color),
+            () => this.setData(pt, new_color)
+        );
+    }
+    appendCommand(undo,redo) {
+        var newbuff = this.command_buffer.slice(0,this.command_index);
+        newbuff.push({undo:undo,redo:redo});
+        this.command_buffer = newbuff;
+        this.command_index= this.command_index+1;
+        this.fireUpdate();
+    }
     lookupCanvasColor(val) {
         return this.palette[val];
     }
 
     getPalette() {
         return this.palette;
+    }
+
+
+    // undo / redo implementation
+    isUndoAvailable() {
+        return this.command_index > 0;
+    }
+    execUndo() {
+        var cmd = this.command_buffer[this.command_index-1];
+        cmd.undo();
+        this.command_index = this.command_index - 1;
+    }
+    isRedoAvailable() {
+        return this.command_index < this.command_buffer.length;
+    }
+    execRedo() {
+        var cmd = this.command_buffer[this.command_index];
+        cmd.redo();
+        this.command_index = this.command_index + 1;
     }
 
 }
