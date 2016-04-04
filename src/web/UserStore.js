@@ -4,13 +4,7 @@
 import {GET_JSON, POST_JSON} from "./u";
 import Config from "./Config";
 
-var _userStore;
-class UserStore {
-    static init() {
-        if(!_userStore) _userStore = new UserStore();
-        return _userStore;
-    }
-
+export default {
     login(data, cb) {
         var self = this;
         POST_JSON(Config.url("/login"),data,function(val){
@@ -23,7 +17,7 @@ class UserStore {
                 })
             }
         })
-    }
+    },
 
     checkLoggedIn(cb) {
         var self = this;
@@ -32,11 +26,11 @@ class UserStore {
             self.user = data.user;
             if(cb)cb(data.user);
         });
-    }
+    },
 
     getUser() {
         return this.user;
-    }
+    },
 
     logout(cb) {
         var self = this;
@@ -44,7 +38,7 @@ class UserStore {
             self.user = null;
             if(cb) cb();
         });
-    }
+    },
 
     register(email,password,cb) {
         var obj = {
@@ -63,4 +57,3 @@ class UserStore {
     }
 }
 
-export default UserStore;
