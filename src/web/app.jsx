@@ -220,7 +220,7 @@ class DocPanel extends React.Component {
         this.setState({ selected_tool: this.state.eyedropper_tool});
     }
     exportPNG() {
-        ExportPNG(DocStore.getModel());
+        ExportPNG(DocStore.getDoc().model);
     }
     saveDoc() {
         DocStore.save(DocStore.getDoc(), (res) => DocStore.getDoc().id=res.id);
