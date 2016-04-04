@@ -141,6 +141,34 @@ class ColorWellButton extends React.Component {
     }
 }
 
+class PencilTool {
+    constructor(app) {
+        this.app = app;
+    }
+    mouseDown(surf, pt) {
+        this.mouseDrag(surf,pt);
+    }
+    mouseDrag(surf,pt) {
+        this.app.setPixel(pt,this.app.state.selectedColor);
+    }
+    mouseUp(surf){}
+    contextMenu(surf,pt) {
+        this.app.selectColor(DocStore.getModel().getData(pt));
+    }
+}
+
+class EyedropperTool {
+    constructor(app) {
+        this.app = app;
+    }
+    mouseDown(surf,pt) {
+        this.mouseDrag(surf,pt);
+    }
+    mouseDrag(surf,pt) {
+        this.app.selectColor(DocStore.getModel().getData(pt));
+    }
+    mouseUp() {}
+}
 
 
 class App extends React.Component {
@@ -150,37 +178,8 @@ class App extends React.Component {
             drawGrid:true,
             selectedColor:1
         };
-        var self = this;
-        this.state.pencil_tool = {
-            mouseDown: function(surf, pt) {
-                self.setPixel(pt,self.state.selectedColor);
-            },
-            mouseDrag: function(surf,pt) {
-                self.setPixel(pt,self.state.selectedColor);
-            },
-            mouseUp:function(surf){
-            },
-            contextMenu: function(surf,pt) {
-                self.setState({
-                    selectedColor:DocStore.getModel().getData(pt)
-                })
-            }
-        };
-        this.state.eyedropper_tool = {
-            mouseDown: function(surf,pt) {
-                self.setState({
-                    selectedColor:DocStore.getModel().getData(pt)
-                })
-            },
-            mouseDrag: function(surf,pt) {
-                self.setState({
-                    selectedColor:DocStore.getModel().getData(pt)
-                })
-            },
-            mouseUp: function() {
-
-            }
-        };
+        this.state.pencil_tool = new PencilTool(this);
+        this.state.eyedropper_tool = new EyedropperTool(this);
         this.state.selected_tool = this.state.pencil_tool;
 
         this.state.command_buffer = [];
