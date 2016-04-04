@@ -18,6 +18,8 @@ import Dialog from "./Dialog.jsx";
 import ExportPNG from "./ExportPng";
 import UserStore from "./UserStore";
 import LoginPanel from "./LoginPanel.jsx"
+import RegistrationPanel from "./RegistrationPanel.jsx";
+import OpenDocPanel from "./OpenDocPanel.jsx";
 
 
 var REQUIRE_AUTH = true;
@@ -140,62 +142,7 @@ class ColorWellButton extends React.Component {
 }
 
 
-class RegistrationPanel extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            errorText:""
-        }
-    }
-    tryRegister(e) {
-        var email = this.refs.email.value;
-        var password = this.refs.password.value;
-        var self = this;
-        UserStore.register(email,password,function(err,user) {
-            if(err) {
-                self.setState({errorText: err.message});
-            } else {
-                self.props.onCompleted(user);
-            }
-        })
-    }
-    render() {
-        return <div className="body">
-            <div className="hbox">
-                <label>email</label><input type="text" ref="email"/><br/>
-            </div>
-            <div className="hbox">
-                <label>password</label><input type="text" ref="password"/><br/>
-            </div>
-            <div className="hbox">
-                <label className="error">{this.state.errorText}</label>
-            </div>
-            <div className="hbox right">
-                <button onClick={this.props.onCanceled}>Cancel</button>
-                <button className="primary" onClick={this.tryRegister.bind(this)}>Login</button>
-            </div>
-        </div>
-    }
-}
 
-class OpenDocPanel extends React.Component {
-    loadDoc(id) {
-        this.props.onSelectDoc(id);
-    }
-    renderDocs(docs) {
-        var self = this;
-        return docs.map((doc)=> {
-            return <li key={doc.id}><button onClick={self.loadDoc.bind(self,doc.id)}>{doc.title}</button></li>
-        });
-    }
-    render() {
-        return <div className="body">
-            <ul>
-                {this.renderDocs(this.props.docs)}
-            </ul>
-        </div>
-    }
-}
 class App extends React.Component {
     constructor(props) {
         super(props);
