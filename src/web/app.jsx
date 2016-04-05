@@ -163,6 +163,18 @@ class EyedropperTool {
     mouseUp() {}
 }
 
+class EraserTool {
+    constructor(app) {
+        this.app = app;
+    }
+    mouseDown(surf,pt) {
+        this.mouseDrag(surf,pt);
+    }
+    mouseDrag(surf,pt) {
+        this.app.setPixel(pt, -1);
+    }
+    mouseUp() {}
+}
 
 class App extends React.Component {
     constructor(props) {
@@ -185,6 +197,7 @@ class DocPanel extends React.Component {
         };
         this.state.pencil_tool = new PencilTool(this);
         this.state.eyedropper_tool = new EyedropperTool(this);
+        this.state.eraser_tool = new EraserTool(this);
         this.state.selected_tool = this.state.pencil_tool;
         this.state.user = null;
         this.state.doclist = [];
@@ -211,6 +224,9 @@ class DocPanel extends React.Component {
     }
     selectEyedropper() {
         this.setState({ selected_tool: this.state.eyedropper_tool});
+    }
+    selectEraser() {
+        this.setState({ selected_tool: this.state.eraser_tool});
     }
     exportPNG() {
         ExportPNG(DocStore.getDoc().model);
@@ -291,7 +307,7 @@ class DocPanel extends React.Component {
                 </ColorWellButton>
                 <ToggleButton onToggle={this.selectPencil.bind(this)} selected={this.state.selected_tool === this.state.pencil_tool}><i className="fa fa-pencil"></i></ToggleButton>
                 <ToggleButton onToggle={this.selectEyedropper.bind(this)} selected={this.state.selected_tool === this.state.eyedropper_tool}><i className="fa fa-eyedropper"></i></ToggleButton>
-                <button className="fa fa-eraser"/>
+                <ToggleButton onToggle={this.selectEraser.bind(this)} selected={this.state.selected_tool === this.state.eraser_tool}><i className="fa fa-eraser"></i></ToggleButton>
                 <label/>
                 <button onClick={this.execUndo.bind(this)} disabled={!model.isUndoAvailable()} className="fa fa-undo"/>
                 <button onClick={this.execRedo.bind(this)} disabled={!model.isRedoAvailable()} className="fa fa-repeat"/>
