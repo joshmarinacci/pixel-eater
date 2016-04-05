@@ -7,7 +7,7 @@ var RethinkDB = require('rethinkdb');
 var express = require('express');
 var cors = require('cors');
 var bodyParser = require('body-parser');
-
+var fs = require('fs');
 
 var stormpath = require('express-stormpath');
 
@@ -24,7 +24,7 @@ app.use(cors({origin:true, credentials:true}));
 app.use(bodyParser.json());
 
 
-app.use(stormpath.init(app, {
+var stormpathcfg = {
     // Optional configuration options.
     application: {
         href: 'https://api.stormpath.com/v1/applications/YsU8xiLUaoZBupUPBld1x'
@@ -45,8 +45,17 @@ app.use(stormpath.init(app, {
             }
         }
     }
-}));
+};
 
+if(fs.existsSync("config.json")) {
+    var cfg = JSON.parse(fs.readFileSync("config.json").toString());
+    stormpathcfg.apiKey = {
+        id: cfg.STORMPATH_CLIENT_APIKEY_ID,
+        secret: cfg.STORMPATH_CLIENT_APIKEY_SECRET
+    }
+}
+
+app.use(stormpath.init(app, stormpathcfg));
 
 //database connection
 var conn = null;

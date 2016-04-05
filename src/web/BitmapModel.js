@@ -106,15 +106,7 @@ export default class BitmapModel {
         this.command_index = 0;
     }
 
-    _makeLayer() {
-        var data = [];
-        this.fillData(data, this.pw * this.ph, -1);
-        return {
-            data: data,
-            visible:true,
-            title:'Layer ' + (this.layers.length+1)
-        }
-    }
+    // encoding
 
     toJSON() {
         return {
@@ -124,7 +116,6 @@ export default class BitmapModel {
             palette:this.palette
         }
     }
-
     static fromJSON(json) {
         var model = new BitmapModel(json.width,json.height);
         model.layers = json.layers;
@@ -135,12 +126,14 @@ export default class BitmapModel {
         var layer = {
             data: json.data,
             visible:true,
-            title:'Layer 1'
+            title:'Layer 1',
+            opacity: 1.0,
         };
         model.layers = [layer];
         return model;
     }
 
+    // data access
     fillData(array, len, val) {
         for(let i=0; i<len; i++) {
             array[i] = val;
@@ -156,57 +149,8 @@ export default class BitmapModel {
         var layer = this.getCurrentLayer();
         return layer.data[point.x+point.y*16];
     }
-
-    fireUpdate() {
-        this.cbs.forEach(function(cb) {
-            cb(this);
-        })
-    }
-
-    changed(cb) {
-        this.cbs.push(cb);
-        return cb;
-    }
-
-    unlisten(cb) {
-        var n = this.cbs.indexOf(cb);
-        this.cbs.splice(n,1);
-    }
-
-    getWidth() {
-        return this.pw;
-    }
-
-    getHeight() {
-        return this.ph;
-    }
-
-
-    getLayers() {
-        return this.layers;
-    }
-
-    getReverseLayers() {
-        var sc = this.layers.slice();
-        sc.reverse();
-        return sc;
-    }
-
-    getCurrentLayer() {
-        return this.layers[this.selectedLayerIndex];
-    }
-    isLayerVisible(layer) {
-        return layer.visible;
-    }
-    setLayerVisible(layer, val) {
-        layer.visible = val;
-    }
-
     getPixel(x,y) {
         var layer = this.getCurrentLayer();
-        return layer.data[x+y*16];
-    }
-    getPixelFromLayer(x,y,layer) {
         return layer.data[x+y*16];
     }
     setPixel(pt, new_color){
@@ -217,6 +161,87 @@ export default class BitmapModel {
             () => this.setData(pt, new_color)
         );
     }
+
+    //structure
+    getWidth() {
+        return this.pw;
+    }
+    getHeight() {
+        return this.ph;
+    }
+    getBackgroundColor() {
+        return this.bgcolor;
+    }
+
+    //events
+    fireUpdate() {
+        this.cbs.forEach(function(cb) {
+            cb(this);
+        })
+    }
+    changed(cb) {
+        this.cbs.push(cb);
+        return cb;
+    }
+    unlisten(cb) {
+        var n = this.cbs.indexOf(cb);
+        this.cbs.splice(n,1);
+    }
+
+    // layer stuff
+    getLayers() {
+        return this.layers;
+    }
+    getReverseLayers() {
+        var sc = this.layers.slice();
+        sc.reverse();
+        return sc;
+    }
+    _makeLayer() {
+        var data = [];
+        this.fillData(data, this.pw * this.ph, -1);
+        return {
+            data: data,
+            visible:true,
+            opacity:1.0,
+            title:'Layer ' + (this.layers.length+1)
+        }
+    }
+    getCurrentLayer() {
+        return this.layers[this.selectedLayerIndex];
+    }
+    isLayerVisible(layer) {
+        return layer.visible;
+    }
+    setLayerVisible(layer, val) {
+        layer.visible = val;
+    }
+    getPixelFromLayer(x,y,layer) {
+        return layer.data[x+y*16];
+    }
+    setSelectedLayer(layer) {
+        this.selectedLayerIndex = this.layers.indexOf(layer);
+        this.fireUpdate();
+    }
+    appendLayer() {
+        this.layers.push(this._makeLayer());
+        this.fireUpdate();
+    }
+    setLayerOpacity(layer,value) {
+        layer.opacity = value;
+        this.fireUpdate()
+    }
+
+
+    // palette
+    lookupCanvasColor(val) {
+        return this.palette[val];
+    }
+    getPalette() {
+        return this.palette;
+    }
+
+    // undo / redo implementation
     appendCommand(undo,redo) {
         var newbuff = this.command_buffer.slice(0,this.command_index);
         newbuff.push({undo:undo,redo:redo});
@@ -224,24 +249,6 @@ export default class BitmapModel {
         this.command_index= this.command_index+1;
         this.fireUpdate();
     }
-    lookupCanvasColor(val) {
-        return this.palette[val];
-    }
-
-    getPalette() {
-        return this.palette;
-    }
-
-    setSelectedLayer(layer) {
-        this.selectedLayerIndex = this.layers.indexOf(layer);
-        this.fireUpdate();
-    }
-
-    appendLayer() {
-        this.layers.push(this._makeLayer());
-        this.fireUpdate();
-    }
-    // undo / redo implementation
     isUndoAvailable() {
         return this.command_index > 0;
     }

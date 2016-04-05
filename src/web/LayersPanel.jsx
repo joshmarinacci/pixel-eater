@@ -1,6 +1,12 @@
 import React from "react";
 
 class LayerItem extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            opacity:this.props.layer.opacity
+        };
+    }
     selectItem(e) {
         e.preventDefault();
         e.stopPropagation();
@@ -9,6 +15,17 @@ class LayerItem extends React.Component {
     toggleVisibility() {
         var vis = this.props.model.isLayerVisible(this.props.layer);
         this.props.model.setLayerVisible(this.props.layer, !vis);
+    }
+    changedOpacity() {
+        var opacity = this.refs.opacity.value;
+        this.setState({opacity:opacity});
+    }
+    blurredOpacity() {
+        var opacity = parseFloat(this.refs.opacity.value);
+        if(opacity < 0) opacity = 0;
+        if(opacity > 1.0) opacity = 1.0;
+        this.props.model.setLayerOpacity(this.props.layer,opacity);
+        this.setState({opacity:opacity+""});
     }
     render() {
         var cls = "hbox ";
@@ -21,6 +38,12 @@ class LayerItem extends React.Component {
         }
         return <li className={cls} onClick={this.selectItem.bind(this)}>
             <label className="grow" style={{ textAlign:'left'}}>{this.props.layer.title}</label>
+            <input ref="opacity"
+                   className="opacity"
+                   type="number"
+                   value={this.state.opacity}
+                   onChange={this.changedOpacity.bind(this)}
+                   onBlur={this.blurredOpacity.bind(this)}/>
             <button onClick={this.toggleVisibility.bind(this)}><i className={clsname}/></button>
         </li>
     }
