@@ -2,14 +2,6 @@ require('./flexbox.css');
 require('./components.css');
 require('../../node_modules/font-awesome/css/font-awesome.css')
 
-/*
-
-get list of files
-save current file
-create a new file
-
- */
-
 import React from "react";
 import ReactDOM from "react-dom";
 import DrawingSurface from "./DrawingSurface.jsx"
@@ -183,6 +175,7 @@ class App extends React.Component {
         return <div><DocPanel doc={this.state.doc}/></div>
     }
 }
+
 class DocPanel extends React.Component {
     constructor(props) {
         super(props);
@@ -319,6 +312,9 @@ class DocPanel extends React.Component {
                     <label>{this.state.user?this.state.user.username:'not logged in'}</label>
                 </div>
             </div>
+            <div className="vbox panel right">
+                <LayersPanel model={model}/>
+            </div>
 
             <Dialog visible={this.state.loginVisible}>
                 <header>Login</header>
@@ -347,12 +343,5 @@ class DocPanel extends React.Component {
         </div>)
     }
 }
-//disable layers until we are ready for it           <LayersPanel/>
-/*
- <div className="vbox panel right">
- <LayersPanel/>
- </div>
-
- */
 
 ReactDOM.render(<App/>, document.getElementsByTagName("body")[0]);

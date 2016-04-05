@@ -1,5 +1,25 @@
 /**
  * Created by josh on 3/20/16.
+ *
+ *
+ new model. there are multiple layers
+ each layer is the same size as the overall model.
+ each layer has an attached opacity. there is no alpha channel since that doesn't make much sense for indexed colors (right?)
+ setting the pixel automatically sets it on the currently selected layer
+ model has a concept of the currently selected layer. stored and saved in the document
+ can  add or remove layers
+ also a background layer that you can't remove, but you can change the color or make it transparent
+ pixel may have a value of 'transparent', which is -1 (right?)
+ palette includes whether particular color is transparent or translucent or whatever.
+ erasing chooses a transparent value from the palette?
+ can't delete background layer. don't show the background layer in the list, instead have a button to pick the BG color from the palette, or choose transparent to show a checkerboard
+ must always have at least one pixel layer
+
+ layers can be moved up and down by dragging or with arrows. must be reversible
+ selected layer(s) can be deleted by icon or delete key. must be reversible
+
+ upgrade older versions of the format automatically.
+
  */
 
 export default class BitmapModel {
@@ -7,8 +27,10 @@ export default class BitmapModel {
     constructor(pw, ph) {
         this.pw = pw;
         this.ph = ph;
-        this.data = [];
-        this.fillData(this.data,this.pw*this.ph,0);
+        this.layers = [];
+        this.layers.push(this._makeLayer())
+        this.selectedLayerIndex = 0;
+        this.bgcolor = 0;
         this.cbs = [];
         this.palette = [
             '#7C7C7C',
@@ -84,18 +106,38 @@ export default class BitmapModel {
         this.command_index = 0;
     }
 
+    _makeLayer() {
+        var data = [];
+        this.fillData(data, this.pw * this.ph, -1);
+        return {
+            data: data,
+            visible:true,
+            title:'Layer ' + (this.layers.length+1)
+        }
+    }
+
     toJSON() {
         return {
             width:this.pw,
             height:this.ph,
-            data:this.data,
+            layers: this.layers,
             palette:this.palette
         }
     }
 
     static fromJSON(json) {
         var model = new BitmapModel(json.width,json.height);
-        model.data = json.data;
+        model.layers = json.layers;
+        return model;
+    }
+    static fromJSONV1(json) {
+        var model = new BitmapModel(json.width,json.height);
+        var layer = {
+            data: json.data,
+            visible:true,
+            title:'Layer 1'
+        };
+        model.layers = [layer];
         return model;
     }
 
@@ -105,12 +147,14 @@ export default class BitmapModel {
         }
     }
     setData(point, val) {
+        var layer = this.getCurrentLayer();
         var n = point.x + point.y*16;
-        this.data[n] = val;
+        layer.data[n] = val;
         this.fireUpdate();
     }
     getData(point) {
-        return this.data[point.x+point.y*16];
+        var layer = this.getCurrentLayer();
+        return layer.data[point.x+point.y*16];
     }
 
     fireUpdate() {
@@ -137,10 +181,34 @@ export default class BitmapModel {
         return this.ph;
     }
 
-    getPixel(x,y) {
-        return this.data[x+y*16];
+
+    getLayers() {
+        return this.layers;
     }
 
+    getReverseLayers() {
+        var sc = this.layers.slice();
+        sc.reverse();
+        return sc;
+    }
+
+    getCurrentLayer() {
+        return this.layers[this.selectedLayerIndex];
+    }
+    isLayerVisible(layer) {
+        return layer.visible;
+    }
+    setLayerVisible(layer, val) {
+        layer.visible = val;
+    }
+
+    getPixel(x,y) {
+        var layer = this.getCurrentLayer();
+        return layer.data[x+y*16];
+    }
+    getPixelFromLayer(x,y,layer) {
+        return layer.data[x+y*16];
+    }
     setPixel(pt, new_color){
         var old_color = this.getData(pt);
         this.setData(pt,new_color);
@@ -164,7 +232,15 @@ export default class BitmapModel {
         return this.palette;
     }
 
+    setSelectedLayer(layer) {
+        this.selectedLayerIndex = this.layers.indexOf(layer);
+        this.fireUpdate();
+    }
 
+    appendLayer() {
+        this.layers.push(this._makeLayer());
+        this.fireUpdate();
+    }
     // undo / redo implementation
     isUndoAvailable() {
         return this.command_index > 0;

@@ -33,25 +33,31 @@ export default class DrawingSurface extends React.Component {
 
     }
 
+    drawLayer(c, sc, layer) {
+        if(!layer.visible) return;
+        for(let y=0; y<16; y++) {
+            for (let x = 0; x < 16; x++) {
+                var val = this.props.model.getPixelFromLayer(x,y,layer);
+                if(val == -1) continue;
+                c.fillStyle = this.props.model.lookupCanvasColor(val);
+                c.fillRect(x * sc, y * sc, sc, sc);
+            }
+        }
+    }
+
     drawCanvas() {
         var sc = this.state.scale;
         var width = this.props.model.getWidth() * sc;
         var height = this.props.model.getHeight() * sc;
         var canvas = this.refs.canvas;
         var c = canvas.getContext('2d');
-        c.fillStyle = 'red';
-        c.fillRect(0 + this.state.xoff,0 + this.state.yoff,width,height);
+        c.fillStyle = 'white';
+        c.fillRect(this.state.xoff, this.state.yoff, width, height);
 
         c.strokeStyle = 'black';
         c.save();
 
-        for(let y=0; y<16; y++) {
-            for (let x = 0; x < 16; x++) {
-                var val = this.props.model.getPixel(x,y);
-                c.fillStyle = this.props.model.lookupCanvasColor(val);
-                c.fillRect(x * sc, y * sc, sc, sc);
-            }
-        }
+        this.props.model.getReverseLayers().map((layer) => this.drawLayer(c, sc, layer));
 
         if(this.props.drawGrid === true) {
             c.translate(0.5+this.state.xoff,0.5+this.state.yoff);

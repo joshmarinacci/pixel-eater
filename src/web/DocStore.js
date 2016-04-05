@@ -25,7 +25,7 @@ export default {
         this.fireUpdate();
     },
     save: function(doc, cb) {
-        doc.version = "1";
+        doc.version = "2";
         POST_JSON(Config.url("/save"),doc,(res) => {if(cb)cb(res);} );
     },
     loadDocList:function(cb) {
@@ -35,10 +35,15 @@ export default {
         POST_JSON(Config.url("/load"), {id:id}, (res) => {
             console.log("res = ", res);
             var doc = {
-                model:BitmapModel.fromJSON(res.doc.model),
                 id:res.doc.id,
                 title:res.doc.title
             };
+            if(res.doc.version == '1') {
+                doc.model = BitmapModel.fromJSONV1(res.doc.model);
+            }
+            if(res.doc.version == '2') {
+                doc.model = BitmapModel.fromJSON(res.doc.model);
+            }
             this.setDoc(doc);
             if(cb)cb(doc);
         });
