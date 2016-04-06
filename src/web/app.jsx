@@ -229,10 +229,16 @@ class DocPanel extends React.Component {
         this.setState({ selected_tool: this.state.eraser_tool});
     }
     exportPNG() {
-        ExportPNG(DocStore.getDoc().model);
+        this.saveDoc(function() {
+            var url = "http://localhost:30065/preview/"+ DocStore.getDoc().id;
+            document.location.href = url;
+        });
     }
-    saveDoc() {
-        DocStore.save(DocStore.getDoc(), (res) => DocStore.getDoc().id=res.id);
+    saveDoc(cb) {
+        DocStore.save(DocStore.getDoc(), (res) => {
+            DocStore.getDoc().id=res.id;
+            if(cb)cb();
+        });
     }
     setPixel(pt,new_color) {
         this.props.doc.model.setPixel(pt,new_color);
