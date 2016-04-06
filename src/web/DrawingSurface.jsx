@@ -35,7 +35,6 @@ export default class DrawingSurface extends React.Component {
 
 
     drawCanvas() {
-        let sc = this.state.scale;
         let c = this.refs.canvas.getContext('2d');
 
         this.drawBackground(c);
