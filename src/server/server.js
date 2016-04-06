@@ -7,7 +7,9 @@ var RethinkDB = require('rethinkdb');
 var express = require('express');
 var cors = require('cors');
 var bodyParser = require('body-parser');
-
+var fs = require('fs');
+var PngRender = require("./PngRenderer");
+var PI = require('pureimage');
 
 var stormpath = require('express-stormpath');
 
@@ -24,7 +26,7 @@ app.use(cors({origin:true, credentials:true}));
 app.use(bodyParser.json());
 
 
-app.use(stormpath.init(app, {
+var stormpathcfg = {
     // Optional configuration options.
     application: {
         href: 'https://api.stormpath.com/v1/applications/YsU8xiLUaoZBupUPBld1x'
@@ -45,8 +47,17 @@ app.use(stormpath.init(app, {
             }
         }
     }
-}));
+};
 
+if(fs.existsSync("config.json")) {
+    var cfg = JSON.parse(fs.readFileSync("config.json").toString());
+    stormpathcfg.apiKey = {
+        id: cfg.STORMPATH_CLIENT_APIKEY_ID,
+        secret: cfg.STORMPATH_CLIENT_APIKEY_SECRET
+    }
+}
+
+app.use(stormpath.init(app, stormpathcfg));
 
 //database connection
 var conn = null;
@@ -134,6 +145,22 @@ app.post("/load", stormpath.loginRequired, function(req,res) {
         })
         .catch(function(err){
             console.log("there was an error while loading doc",req.body.id,err);
+        })
+});
+
+app.get('/preview/:id',function(req,res) {
+    RethinkDB.table('docs').get(req.params.id).run(conn)
+        .then(function(doc,err) {
+            if(doc == null) throw Error("doc not found");
+            var img = PngRender.renderBitmap(doc.model);
+            res.attachment(doc.title+".png");
+            PI.encodePNG(img, res, function(err) {
+                console.log('done rendering PNG');
+            });
+        })
+        .catch(function(err) {
+            console.log("there was an error while loading doc",req.params.id,err);
+            res.json({status:'failure',message:err.toString()});
         })
 });
 

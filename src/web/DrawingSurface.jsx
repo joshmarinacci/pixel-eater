@@ -33,39 +33,57 @@ export default class DrawingSurface extends React.Component {
 
     }
 
+
     drawCanvas() {
+        let c = this.refs.canvas.getContext('2d');
+
+        this.drawBackground(c);
+        this.props.model.getReverseLayers().map((layer) => this.drawLayer(c, layer));
+        if(this.props.drawGrid === true) this.drawGrid(c);
+    }
+
+    drawBackground(c) {
         var sc = this.state.scale;
         var width = this.props.model.getWidth() * sc;
         var height = this.props.model.getHeight() * sc;
-        var canvas = this.refs.canvas;
-        var c = canvas.getContext('2d');
-        c.fillStyle = 'red';
-        c.fillRect(0 + this.state.xoff,0 + this.state.yoff,width,height);
+        var bg = this.props.model.getBackgroundColor();
+        c.fillStyle = this.props.model.lookupCanvasColor(bg);
+        c.fillRect(this.state.xoff, this.state.yoff, width, height);
+    }
 
-        c.strokeStyle = 'black';
+    drawLayer(c, layer) {
+        if(!layer.visible) return;
         c.save();
-
+        c.globalAlpha = layer.opacity;
+        let sc = this.state.scale;
         for(let y=0; y<16; y++) {
             for (let x = 0; x < 16; x++) {
-                var val = this.props.model.getPixel(x,y);
+                var val = this.props.model.getPixelFromLayer(x,y,layer);
+                if(val == -1) continue;
                 c.fillStyle = this.props.model.lookupCanvasColor(val);
                 c.fillRect(x * sc, y * sc, sc, sc);
             }
         }
+        c.restore();
+    }
 
-        if(this.props.drawGrid === true) {
-            c.translate(0.5+this.state.xoff,0.5+this.state.yoff);
-            c.beginPath();
-            for (let i = 0; i <= this.props.model.getWidth(); i++) {
-                c.moveTo(0, i * sc);
-                c.lineTo(width, i * sc);
-            }
-            for (let i = 0; i <= this.props.model.getWidth(); i++) {
-                c.moveTo(i * sc, 0);
-                c.lineTo(i * sc, height);
-            }
-            c.stroke();
+    drawGrid(c) {
+        c.strokeStyle = 'black';
+        var sc = this.state.scale;
+        var width = this.props.model.getWidth() * sc;
+        var height = this.props.model.getHeight() * sc;
+        c.save();
+        c.translate(0.5+this.state.xoff,0.5+this.state.yoff);
+        c.beginPath();
+        for (let i = 0; i <= this.props.model.getWidth(); i++) {
+            c.moveTo(0, i * sc);
+            c.lineTo(width, i * sc);
         }
+        for (let i = 0; i <= this.props.model.getWidth(); i++) {
+            c.moveTo(i * sc, 0);
+            c.lineTo(i * sc, height);
+        }
+        c.stroke();
         c.restore();
     }
 

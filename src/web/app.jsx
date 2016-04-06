@@ -2,14 +2,6 @@ require('./flexbox.css');
 require('./components.css');
 require('../../node_modules/font-awesome/css/font-awesome.css')
 
-/*
-
-get list of files
-save current file
-create a new file
-
- */
-
 import React from "react";
 import ReactDOM from "react-dom";
 import DrawingSurface from "./DrawingSurface.jsx"
@@ -171,6 +163,18 @@ class EyedropperTool {
     mouseUp() {}
 }
 
+class EraserTool {
+    constructor(app) {
+        this.app = app;
+    }
+    mouseDown(surf,pt) {
+        this.mouseDrag(surf,pt);
+    }
+    mouseDrag(surf,pt) {
+        this.app.setPixel(pt, -1);
+    }
+    mouseUp() {}
+}
 
 class App extends React.Component {
     constructor(props) {
@@ -183,6 +187,7 @@ class App extends React.Component {
         return <div><DocPanel doc={this.state.doc}/></div>
     }
 }
+
 class DocPanel extends React.Component {
     constructor(props) {
         super(props);
@@ -192,6 +197,7 @@ class DocPanel extends React.Component {
         };
         this.state.pencil_tool = new PencilTool(this);
         this.state.eyedropper_tool = new EyedropperTool(this);
+        this.state.eraser_tool = new EraserTool(this);
         this.state.selected_tool = this.state.pencil_tool;
         this.state.user = null;
         this.state.doclist = [];
@@ -219,11 +225,20 @@ class DocPanel extends React.Component {
     selectEyedropper() {
         this.setState({ selected_tool: this.state.eyedropper_tool});
     }
-    exportPNG() {
-        ExportPNG(DocStore.getDoc().model);
+    selectEraser() {
+        this.setState({ selected_tool: this.state.eraser_tool});
     }
-    saveDoc() {
-        DocStore.save(DocStore.getDoc(), (res) => DocStore.getDoc().id=res.id);
+    exportPNG() {
+        this.saveDoc(function() {
+            var url = "http://localhost:30065/preview/"+ DocStore.getDoc().id;
+            document.location.href = url;
+        });
+    }
+    saveDoc(cb) {
+        DocStore.save(DocStore.getDoc(), (res) => {
+            DocStore.getDoc().id=res.id;
+            if(cb)cb();
+        });
     }
     setPixel(pt,new_color) {
         this.props.doc.model.setPixel(pt,new_color);
@@ -298,7 +313,7 @@ class DocPanel extends React.Component {
                 </ColorWellButton>
                 <ToggleButton onToggle={this.selectPencil.bind(this)} selected={this.state.selected_tool === this.state.pencil_tool}><i className="fa fa-pencil"></i></ToggleButton>
                 <ToggleButton onToggle={this.selectEyedropper.bind(this)} selected={this.state.selected_tool === this.state.eyedropper_tool}><i className="fa fa-eyedropper"></i></ToggleButton>
-                <button className="fa fa-eraser"/>
+                <ToggleButton onToggle={this.selectEraser.bind(this)} selected={this.state.selected_tool === this.state.eraser_tool}><i className="fa fa-eraser"></i></ToggleButton>
                 <label/>
                 <button onClick={this.execUndo.bind(this)} disabled={!model.isUndoAvailable()} className="fa fa-undo"/>
                 <button onClick={this.execRedo.bind(this)} disabled={!model.isRedoAvailable()} className="fa fa-repeat"/>
@@ -318,6 +333,9 @@ class DocPanel extends React.Component {
                     <button onClick={this.loginLogout.bind(this)}>{this.state.user?"logout":"login"}</button>
                     <label>{this.state.user?this.state.user.username:'not logged in'}</label>
                 </div>
+            </div>
+            <div className="vbox panel right">
+                <LayersPanel model={model}/>
             </div>
 
             <Dialog visible={this.state.loginVisible}>
@@ -347,12 +365,5 @@ class DocPanel extends React.Component {
         </div>)
     }
 }
-//disable layers until we are ready for it           <LayersPanel/>
-/*
- <div className="vbox panel right">
- <LayersPanel/>
- </div>
-
- */
 
 ReactDOM.render(<App/>, document.getElementsByTagName("body")[0]);
