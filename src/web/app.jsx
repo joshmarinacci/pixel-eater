@@ -13,6 +13,7 @@ import UserStore from "./UserStore";
 import LoginPanel from "./LoginPanel.jsx"
 import RegistrationPanel from "./RegistrationPanel.jsx";
 import OpenDocPanel from "./OpenDocPanel.jsx";
+import Config from "./Config"
 
 
 var REQUIRE_AUTH = true;
@@ -230,8 +231,7 @@ class DocPanel extends React.Component {
     }
     exportPNG() {
         this.saveDoc(function() {
-            var url = "http://localhost:30065/preview/"+ DocStore.getDoc().id;
-            document.location.href = url;
+            document.location.href = Config.url("/preview/")+ DocStore.getDoc().id;
         });
     }
     saveDoc(cb) {
