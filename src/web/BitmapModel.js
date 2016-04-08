@@ -233,6 +233,10 @@ export default class BitmapModel {
         layer.opacity = value;
         this.fireUpdate()
     }
+    setLayerTitle(layer, value) {
+        layer.title = value;
+        this.fireUpdate();
+    }
 
 
     // palette
