@@ -111,11 +111,64 @@ class PopupContainer extends React.Component {
     }
 }
 
-class ToggleButton extends React.Component {
+class Button extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            hoverVisible:false
+        }
+    }
+    mouseOver() {
+        this.timeout = setTimeout(this.onHover.bind(this),1000);
+    }
+    mouseOut() {
+        clearTimeout(this.timeout);
+        this.setState({hoverVisible:false});
+    }
+    onHover() {
+        this.setState({hoverVisible:true});
+    }
+    renderHover() {
+        var hover = "";
+        if(this.state.hoverVisible) {
+            hover = <p className="tooltip">{this.props.tooltip}</p>
+        }
+        return hover;
+    }
+    onClick() {
+        if(this.props.onClick) {
+            this.props.onClick();
+        } else {
+            console.log("no click defined");
+        }
+    }
+    generateStyle() {
+        return "tooltip-button";
+    }
     render() {
-        var cls = '';
+        var hover = this.renderHover();
+        var cls = this.generateStyle();
+        return <button className={cls}
+                       onMouseOver={this.mouseOver.bind(this)}
+                       onMouseOut={this.mouseOut.bind(this)}
+                       onClick={this.onClick.bind(this)}
+            {...this.props}
+        >{this.props.children}{hover}</button>
+    }
+}
+
+class ToggleButton extends Button {
+    onClick() {
+        if(this.props.onToggle) {
+            this.props.onToggle();
+        } else {
+            super.onClick();
+        }
+    }
+    generateStyle() {
+        var cls = super.generateStyle();
         if(this.props.selected === true)  cls += " selected";
-        return <button className={cls} onClick={this.props.onToggle}>{this.props.children}</button>
+        return cls;
     }
 }
 
@@ -311,18 +364,18 @@ class DocPanel extends React.Component {
                 <ColorWellButton model={model} selectedColor={this.state.selectedColor}>
                     <ColorPicker model={model} onSelectColor={this.selectColor.bind(this)}/>
                 </ColorWellButton>
-                <ToggleButton onToggle={this.selectPencil.bind(this)} selected={this.state.selected_tool === this.state.pencil_tool}><i className="fa fa-pencil"></i></ToggleButton>
-                <ToggleButton onToggle={this.selectEyedropper.bind(this)} selected={this.state.selected_tool === this.state.eyedropper_tool}><i className="fa fa-eyedropper"></i></ToggleButton>
-                <ToggleButton onToggle={this.selectEraser.bind(this)} selected={this.state.selected_tool === this.state.eraser_tool}><i className="fa fa-eraser"></i></ToggleButton>
+                <ToggleButton onToggle={this.selectPencil.bind(this)} selected={this.state.selected_tool === this.state.pencil_tool} tooltip="Pencil"><i className="fa fa-pencil"></i></ToggleButton>
+                <ToggleButton onToggle={this.selectEyedropper.bind(this)} selected={this.state.selected_tool === this.state.eyedropper_tool} tooltip="Eyedropper"><i className="fa fa-eyedropper"></i></ToggleButton>
+                <ToggleButton onToggle={this.selectEraser.bind(this)} selected={this.state.selected_tool === this.state.eraser_tool} tooltip="Eraser"><i className="fa fa-eraser"></i></ToggleButton>
                 <label/>
-                <button onClick={this.execUndo.bind(this)} disabled={!model.isUndoAvailable()} className="fa fa-undo"/>
-                <button onClick={this.execRedo.bind(this)} disabled={!model.isRedoAvailable()} className="fa fa-repeat"/>
-                <ToggleButton onToggle={this.toggleGrid.bind(this)} selected={this.state.drawGrid}><i className="fa fa-th"/></ToggleButton>
+                <Button onClick={this.execUndo.bind(this)} disabled={!model.isUndoAvailable()} tooltip="Undo"><i className="fa fa-undo"/></Button>
+                <Button onClick={this.execRedo.bind(this)} disabled={!model.isRedoAvailable()} tooltip="Redo"><i className="fa fa-repeat"/></Button>
+                <ToggleButton onToggle={this.toggleGrid.bind(this)} selected={this.state.drawGrid} tooltip="Show/Hide Grid"><i className="fa fa-th"/></ToggleButton>
                 <label/>
-                <button onClick={this.exportPNG.bind(this)} className="fa fa-download"/>
-                <button onClick={this.newDoc.bind(this)}    disabled={loggedOut} className="fa fa-file-o"/>
-                <button onClick={this.saveDoc.bind(this)}   disabled={loggedOut} className="fa fa-save"/>
-                <button onClick={this.openDoc.bind(this)}   disabled={loggedOut} className="fa fa-folder-open"/>
+                <Button onClick={this.exportPNG.bind(this)} tooltip="Export as PNG"><i className="fa fa-download"/></Button>
+                <Button onClick={this.newDoc.bind(this)}    disabled={loggedOut} tooltip="New Image"><i className="fa fa-file-o"/></Button>
+                <Button onClick={this.saveDoc.bind(this)}   disabled={loggedOut} tooltip="Save Image"><i className="fa fa-save"/></Button>
+                <Button onClick={this.openDoc.bind(this)}   disabled={loggedOut} tooltip="Open Image"><i className="fa fa-folder-open"/></Button>
             </div>
             <div className="vbox grow">
                 <div className="panel top">

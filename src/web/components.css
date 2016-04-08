@@ -130,3 +130,21 @@ input {
 #layers-panel li .opacity {
     max-width: 3em;
 }
+
+.tooltip-button {
+    position: relative;
+}
+
+.tooltip-button .tooltip {
+    white-space: nowrap;
+    border: 1px solid black;
+    display: block;
+    position: absolute;
+    left: 120%;
+    top: 0;
+    margin: 0;
+    padding: 0.25em 0.5em;
+    background-color: white;
+    color: black;
+    border-radius: 0.25em;
+}
