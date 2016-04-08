@@ -13,6 +13,7 @@ import UserStore from "./UserStore";
 import LoginPanel from "./LoginPanel.jsx"
 import RegistrationPanel from "./RegistrationPanel.jsx";
 import OpenDocPanel from "./OpenDocPanel.jsx";
+import SharePanel from "./SharePanel.jsx";
 import Config from "./Config"
 
 
@@ -309,6 +310,7 @@ class DocPanel extends React.Component {
         this.state.loginVisible = false;
         this.state.registerVisible = false;
         this.state.openVisible = false;
+        this.state.shareVisible = false;
 
         UserStore.checkLoggedIn((user) => this.setState({user:user}));
         this.model_listener = this.props.doc.model.changed((mod)=> this.setState({model:mod}));
@@ -361,6 +363,13 @@ class DocPanel extends React.Component {
 
     openDoc() {
         DocStore.loadDocList((docs)=>this.setState({doclist:docs, openVisible:true}));
+    }
+
+    openShare() {
+        this.setState({shareVisible:true});
+    }
+    openShareCanceled() {
+        this.setState({shareVisible:false});
     }
 
     openDocCanceled() {
@@ -438,6 +447,7 @@ class DocPanel extends React.Component {
                 <Button onClick={this.newDoc.bind(this)}    disabled={loggedOut} tooltip="New Image"><i className="fa fa-file-o"/></Button>
                 <Button onClick={this.saveDoc.bind(this)}   disabled={loggedOut} tooltip="Save Image"><i className="fa fa-save"/></Button>
                 <Button onClick={this.openDoc.bind(this)}   disabled={loggedOut} tooltip="Open Image"><i className="fa fa-folder-open"/></Button>
+                <Button onClick={this.openShare.bind(this)}   disabled={loggedOut} tooltip="Get Sharing Link"><i className="fa fa-share"/></Button>
             </div>
             <div className="vbox grow">
                 <div className="panel top">
@@ -473,6 +483,12 @@ class DocPanel extends React.Component {
                 onSelectDoc={this.openDocPerform.bind(this)}
                 onCanceled={this.openDocCanceled.bind(this)}
                 onDeleteDoc={this.deleteDoc.bind(this)}
+            />
+
+            <SharePanel
+                visible={this.state.shareVisible}
+                onCanceled={this.openShareCanceled.bind(this)}
+                id={DocStore.getDoc().id}
             />
 
         </div>)
