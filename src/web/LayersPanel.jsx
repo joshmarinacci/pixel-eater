@@ -4,7 +4,8 @@ class LayerItem extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            opacity:this.props.layer.opacity
+            opacity:this.props.layer.opacity,
+            editingName:false
         };
     }
     selectItem(e) {
@@ -27,6 +28,26 @@ class LayerItem extends React.Component {
         this.props.model.setLayerOpacity(this.props.layer,opacity);
         this.setState({opacity:opacity+""});
     }
+    doubleClick(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        this.setState({editingName:true})
+    }
+    saveEditedName() {
+        this.props.model.setLayerTitle(this.props.layer,this.refs.title.value);
+        this.setState({editingName:false})
+    }
+    renderName(editing) {
+        if(editing) {
+            return <div className="hbox">
+                <input ref="title" type="text" defaultValue={this.props.layer.title}/>
+                <button onClick={this.saveEditedName.bind(this)}>set</button>
+            </div>;
+        } else {
+            return <label className="grow" style={{ textAlign:'left'}}
+                   onDoubleClick={this.doubleClick.bind(this)}>{this.props.layer.title}</label>;
+        }
+    }
     render() {
         var cls = "hbox ";
         if(this.props.model.getCurrentLayer() == this.props.layer) cls += "selected ";
@@ -37,7 +58,7 @@ class LayerItem extends React.Component {
             clsname += " fa-eye-slash"
         }
         return <li className={cls} onClick={this.selectItem.bind(this)}>
-            <label className="grow" style={{ textAlign:'left'}}>{this.props.layer.title}</label>
+            {this.renderName(this.state.editingName)}
             <input ref="opacity"
                    className="opacity"
                    type="number"
@@ -51,7 +72,8 @@ class LayerItem extends React.Component {
 
 export default class LayersPanel extends React.Component {
     addLayer() {
-        this.props.model.appendLayer();
+        var layer = this.props.model.appendLayer();
+        this.props.model.setSelectedLayer(layer);
     }
     render() {
         var model = this.props.model;

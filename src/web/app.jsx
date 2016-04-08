@@ -13,6 +13,7 @@ import UserStore from "./UserStore";
 import LoginPanel from "./LoginPanel.jsx"
 import RegistrationPanel from "./RegistrationPanel.jsx";
 import OpenDocPanel from "./OpenDocPanel.jsx";
+import SharePanel from "./SharePanel.jsx";
 import Config from "./Config"
 
 
@@ -111,11 +112,64 @@ class PopupContainer extends React.Component {
     }
 }
 
-class ToggleButton extends React.Component {
+class Button extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            hoverVisible:false
+        }
+    }
+    mouseOver() {
+        this.timeout = setTimeout(this.onHover.bind(this),1000);
+    }
+    mouseOut() {
+        clearTimeout(this.timeout);
+        this.setState({hoverVisible:false});
+    }
+    onHover() {
+        this.setState({hoverVisible:true});
+    }
+    renderHover() {
+        var hover = "";
+        if(this.state.hoverVisible) {
+            hover = <p className="tooltip">{this.props.tooltip}</p>
+        }
+        return hover;
+    }
+    onClick() {
+        if(this.props.onClick) {
+            this.props.onClick();
+        } else {
+            console.log("no click defined");
+        }
+    }
+    generateStyle() {
+        return "tooltip-button";
+    }
     render() {
-        var cls = '';
+        var hover = this.renderHover();
+        var cls = this.generateStyle();
+        return <button className={cls}
+                       onMouseOver={this.mouseOver.bind(this)}
+                       onMouseOut={this.mouseOut.bind(this)}
+                       onClick={this.onClick.bind(this)}
+            {...this.props}
+        >{this.props.children}{hover}</button>
+    }
+}
+
+class ToggleButton extends Button {
+    onClick() {
+        if(this.props.onToggle) {
+            this.props.onToggle();
+        } else {
+            super.onClick();
+        }
+    }
+    generateStyle() {
+        var cls = super.generateStyle();
         if(this.props.selected === true)  cls += " selected";
-        return <button className={cls} onClick={this.props.onToggle}>{this.props.children}</button>
+        return cls;
     }
 }
 
@@ -177,6 +231,56 @@ class EraserTool {
     mouseUp() {}
 }
 
+class PreviewPanel extends React.Component {
+    componentDidMount() {
+        this.drawCanvas();
+    }
+    componentWillReceiveProps(props) {
+        setTimeout(this.drawCanvas.bind(this),0);
+    }
+    shouldComponentUpdate() {
+        return false;
+    }
+    drawCanvas() {
+        let c = this.refs.canvas.getContext('2d');
+        var w = this.props.model.getWidth();
+        this.drawScaled(c,0,w*0,w,1);
+        this.drawScaled(c,0,w*1,w,2);
+        this.drawScaled(c,0,w*3,w,4);
+        this.drawScaled(c,0,w*7,w,8);
+        this.drawScaled(c,0,w*15,w,16);
+    }
+    drawScaled(c,ox,oy,w,s) {
+        c.save();
+        c.translate(ox,oy);
+        c.fillStyle = 'white';
+        c.fillRect(0,0,w*s,w*s);
+        c.strokeStyle = 'black';
+        c.strokeRect(0+0.5,0.5,w*s,w*s);
+        this.props.model.getReverseLayers().map((layer) => this.drawLayer(c, layer,s));
+        c.restore();
+    }
+    drawLayer(c,layer,sc) {
+        if(!layer.visible) return;
+        c.save();
+        c.globalAlpha = layer.opacity;
+        for(let y=0; y<16; y++) {
+            for (let x = 0; x < 16; x++) {
+                var val = this.props.model.getPixelFromLayer(x,y,layer);
+                if(val == -1) continue;
+                c.fillStyle = this.props.model.lookupCanvasColor(val);
+                c.fillRect(x * sc, y * sc, sc, sc);
+            }
+        }
+        c.restore();
+    }
+    render() {
+        return <div className="grow scroll">
+            <canvas ref="canvas" width={16*16+1} height={16*31+1}/>
+        </div>
+    }
+}
+
 class App extends React.Component {
     constructor(props) {
         super(props);
@@ -194,6 +298,7 @@ class DocPanel extends React.Component {
         super(props);
         this.state = {
             drawGrid:true,
+            drawPreview:true,
             selectedColor:1
         };
         this.state.pencil_tool = new PencilTool(this);
@@ -205,6 +310,7 @@ class DocPanel extends React.Component {
         this.state.loginVisible = false;
         this.state.registerVisible = false;
         this.state.openVisible = false;
+        this.state.shareVisible = false;
 
         UserStore.checkLoggedIn((user) => this.setState({user:user}));
         this.model_listener = this.props.doc.model.changed((mod)=> this.setState({model:mod}));
@@ -216,6 +322,9 @@ class DocPanel extends React.Component {
     }
     toggleGrid() {
         this.setState({ drawGrid: !this.state.drawGrid })
+    }
+    togglePreview() {
+        this.setState({ drawPreview: !this.state.drawPreview})
     }
     selectColor(color) {
         this.setState({selectedColor:color});
@@ -231,13 +340,15 @@ class DocPanel extends React.Component {
     }
     exportPNG() {
         this.saveDoc(function() {
-            document.location.href = Config.url("/preview/")+ DocStore.getDoc().id;
+            document.location.href = Config.url("/preview/")
+                + DocStore.getDoc().id
+                + "?download=true";
         });
     }
     saveDoc(cb) {
         DocStore.save(DocStore.getDoc(), (res) => {
             DocStore.getDoc().id=res.id;
-            if(cb)cb();
+            if(typeof cb == 'function') cb();
         });
     }
     setPixel(pt,new_color) {
@@ -254,12 +365,24 @@ class DocPanel extends React.Component {
         DocStore.loadDocList((docs)=>this.setState({doclist:docs, openVisible:true}));
     }
 
+    openShare() {
+        this.setState({shareVisible:true});
+    }
+    openShareCanceled() {
+        this.setState({shareVisible:false});
+    }
+
     openDocCanceled() {
         this.setState({openVisible:false})
     }
     openDocPerform(id) {
         this.setState({doclist:[], openVisible:false})
         DocStore.loadDoc(id);
+    }
+    deleteDoc(id) {
+        DocStore.deleteDoc(id, function(err,status) {
+            console.log("result is",err,status);
+        });
     }
     newDoc() {
         DocStore.setDoc(DocStore.newDoc());
@@ -311,18 +434,20 @@ class DocPanel extends React.Component {
                 <ColorWellButton model={model} selectedColor={this.state.selectedColor}>
                     <ColorPicker model={model} onSelectColor={this.selectColor.bind(this)}/>
                 </ColorWellButton>
-                <ToggleButton onToggle={this.selectPencil.bind(this)} selected={this.state.selected_tool === this.state.pencil_tool}><i className="fa fa-pencil"></i></ToggleButton>
-                <ToggleButton onToggle={this.selectEyedropper.bind(this)} selected={this.state.selected_tool === this.state.eyedropper_tool}><i className="fa fa-eyedropper"></i></ToggleButton>
-                <ToggleButton onToggle={this.selectEraser.bind(this)} selected={this.state.selected_tool === this.state.eraser_tool}><i className="fa fa-eraser"></i></ToggleButton>
+                <ToggleButton onToggle={this.selectPencil.bind(this)} selected={this.state.selected_tool === this.state.pencil_tool} tooltip="Pencil"><i className="fa fa-pencil"></i></ToggleButton>
+                <ToggleButton onToggle={this.selectEyedropper.bind(this)} selected={this.state.selected_tool === this.state.eyedropper_tool} tooltip="Eyedropper"><i className="fa fa-eyedropper"></i></ToggleButton>
+                <ToggleButton onToggle={this.selectEraser.bind(this)} selected={this.state.selected_tool === this.state.eraser_tool} tooltip="Eraser"><i className="fa fa-eraser"></i></ToggleButton>
                 <label/>
-                <button onClick={this.execUndo.bind(this)} disabled={!model.isUndoAvailable()} className="fa fa-undo"/>
-                <button onClick={this.execRedo.bind(this)} disabled={!model.isRedoAvailable()} className="fa fa-repeat"/>
-                <ToggleButton onToggle={this.toggleGrid.bind(this)} selected={this.state.drawGrid}><i className="fa fa-th"/></ToggleButton>
+                <Button onClick={this.execUndo.bind(this)} disabled={!model.isUndoAvailable()} tooltip="Undo"><i className="fa fa-undo"/></Button>
+                <Button onClick={this.execRedo.bind(this)} disabled={!model.isRedoAvailable()} tooltip="Redo"><i className="fa fa-repeat"/></Button>
+                <ToggleButton onToggle={this.toggleGrid.bind(this)} selected={this.state.drawGrid} tooltip="Show/Hide Grid"><i className="fa fa-th"/></ToggleButton>
+                <ToggleButton onToggle={this.togglePreview.bind(this)} selected={this.state.drawPreview} tooltip="Show/Hide Preview"><i className="fa fa-image"/></ToggleButton>
                 <label/>
-                <button onClick={this.exportPNG.bind(this)} className="fa fa-download"/>
-                <button onClick={this.newDoc.bind(this)}    disabled={loggedOut} className="fa fa-file-o"/>
-                <button onClick={this.saveDoc.bind(this)}   disabled={loggedOut} className="fa fa-save"/>
-                <button onClick={this.openDoc.bind(this)}   disabled={loggedOut} className="fa fa-folder-open"/>
+                <Button onClick={this.exportPNG.bind(this)} tooltip="Export as PNG"><i className="fa fa-download"/></Button>
+                <Button onClick={this.newDoc.bind(this)}    disabled={loggedOut} tooltip="New Image"><i className="fa fa-file-o"/></Button>
+                <Button onClick={this.saveDoc.bind(this)}   disabled={loggedOut} tooltip="Save Image"><i className="fa fa-save"/></Button>
+                <Button onClick={this.openDoc.bind(this)}   disabled={loggedOut} tooltip="Open Image"><i className="fa fa-folder-open"/></Button>
+                <Button onClick={this.openShare.bind(this)}   disabled={loggedOut} tooltip="Get Sharing Link"><i className="fa fa-share"/></Button>
             </div>
             <div className="vbox grow">
                 <div className="panel top">
@@ -334,34 +459,38 @@ class DocPanel extends React.Component {
                     <label>{this.state.user?this.state.user.username:'not logged in'}</label>
                 </div>
             </div>
+            {this.state.drawPreview?<div className="vbox panel right"><PreviewPanel model={model}/></div>:""}
             <div className="vbox panel right">
                 <LayersPanel model={model}/>
             </div>
 
-            <Dialog visible={this.state.loginVisible}>
-                <header>Login</header>
-                <LoginPanel
-                    onCompleted={this.onLoginCompleted.bind(this)}
-                    onCanceled={this.onLoginCanceled.bind(this)}
-                    switchToRegister={this.switchToRegister.bind(this)}
-                />
-            </Dialog>
-            <Dialog visible={this.state.registerVisible}>
-                <header>Register</header>
-                <RegistrationPanel
-                    onCompleted={this.onRegistrationCompleted.bind(this)}
-                    onCanceled={this.onRegistrationCanceled.bind(this)}
-                    switchToRegister={this.switchToLogin.bind(this)}
-                />
-            </Dialog>
-            <Dialog visible={this.state.openVisible}>
-                <header>Open</header>
-                <OpenDocPanel
-                    docs={this.state.doclist}
-                    onSelectDoc={this.openDocPerform.bind(this)}
-                />
-                <footer><button onClick={this.openDocCanceled.bind(this)}>cancel</button></footer>
-            </Dialog>
+            <LoginPanel
+                visible={this.state.loginVisible}
+                onCompleted={this.onLoginCompleted.bind(this)}
+                onCanceled={this.onLoginCanceled.bind(this)}
+                switchToRegister={this.switchToRegister.bind(this)}
+            />
+            <RegistrationPanel
+                visible={this.state.registerVisible}
+                onCompleted={this.onRegistrationCompleted.bind(this)}
+                onCanceled={this.onRegistrationCanceled.bind(this)}
+                switchToRegister={this.switchToLogin.bind(this)}
+            />
+
+            <OpenDocPanel
+                visible={this.state.openVisible}
+                docs={this.state.doclist}
+                onSelectDoc={this.openDocPerform.bind(this)}
+                onCanceled={this.openDocCanceled.bind(this)}
+                onDeleteDoc={this.deleteDoc.bind(this)}
+            />
+
+            <SharePanel
+                visible={this.state.shareVisible}
+                onCanceled={this.openShareCanceled.bind(this)}
+                id={DocStore.getDoc().id}
+            />
+
         </div>)
     }
 }

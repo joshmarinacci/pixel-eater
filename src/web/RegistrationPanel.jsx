@@ -1,5 +1,6 @@
 import React from "react";
 import UserStore from "./UserStore";
+import Dialog from "./Dialog.jsx";
 
 export default class RegistrationPanel extends React.Component {
     constructor(props) {
@@ -21,20 +22,25 @@ export default class RegistrationPanel extends React.Component {
         })
     }
     render() {
-        return <div className="body">
-            <div className="hbox">
-                <label>email</label><input type="text" ref="email"/><br/>
+        return <Dialog visible={this.props.visible}>
+            <header>Register</header>
+            <div className="body">
+                <div className="hbox">
+                    <label>email</label><input type="text" ref="email"/><br/>
+                </div>
+                <div className="hbox">
+                    <label>password</label><input type="text" ref="password"/><br/>
+                </div>
+                <div className="hbox">
+                    <label className="error">{this.state.errorText}</label>
+                </div>
             </div>
-            <div className="hbox">
-                <label>password</label><input type="text" ref="password"/><br/>
-            </div>
-            <div className="hbox">
-                <label className="error">{this.state.errorText}</label>
-            </div>
-            <div className="hbox right">
-                <button onClick={this.props.onCanceled}>Cancel</button>
-                <button className="primary" onClick={this.tryRegister.bind(this)}>Login</button>
-            </div>
-        </div>
+            <footer>
+                <div className="hbox right">
+                    <button onClick={this.props.onCanceled}>Cancel</button>
+                    <button className="primary" onClick={this.tryRegister.bind(this)}>Login</button>
+                </div>
+            </footer>
+        </Dialog>
     }
 }

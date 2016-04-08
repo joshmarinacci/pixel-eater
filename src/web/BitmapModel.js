@@ -224,12 +224,18 @@ export default class BitmapModel {
         this.fireUpdate();
     }
     appendLayer() {
-        this.layers.push(this._makeLayer());
+        var layer = this._makeLayer();
+        this.layers.push(layer);
         this.fireUpdate();
+        return layer;
     }
     setLayerOpacity(layer,value) {
         layer.opacity = value;
         this.fireUpdate()
+    }
+    setLayerTitle(layer, value) {
+        layer.title = value;
+        this.fireUpdate();
     }
 
 

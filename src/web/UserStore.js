@@ -13,8 +13,10 @@ export default {
                 console.log("logged in okay!");
                 GET_JSON(Config.url("/whoami"), function(data) {
                     self.user = data.user;
-                    if(cb)cb(data.user);
+                    if(cb)cb(null,data.user);
                 })
+            } else {
+                if(cb) cb(val,null);
             }
         })
     },
