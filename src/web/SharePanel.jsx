@@ -7,14 +7,16 @@ export default class SharePanel extends React.Component {
     generateURL() {
         return Config.url("/preview/")
             + this.props.id
-            + "?download=false";
+            + "?download=false"
+            + "&scale=8"
+            ;
     }
 
     render() {
         return <Dialog visible={this.props.visible}>
             <header>Share</header>
-            <div className="body">
-                <input type="text" value={this.generateURL()}/>
+            <div className="body hbox">
+                <input className="grow" type="text" defaultValue={this.generateURL()}/>
             </div>
             <footer>
                 <div className="hbox right">

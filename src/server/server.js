@@ -169,7 +169,9 @@ app.get('/preview/:id',function(req,res) {
     RethinkDB.table('docs').get(req.params.id).run(conn)
         .then(function(doc,err) {
             if(doc == null) throw Error("doc not found");
-            var img = PngRender.renderBitmap(doc.model);
+            var scale = 1;
+            if(req.query.scale) scale = parseInt(req.query.scale);
+            var img = PngRender.renderBitmap(doc.model,scale);
             if(req.query.download == 'true') {
                 res.attachment(doc.title + ".png");
             } else {
