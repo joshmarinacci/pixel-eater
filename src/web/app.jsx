@@ -346,7 +346,7 @@ class DocPanel extends React.Component {
     saveDoc(cb) {
         DocStore.save(DocStore.getDoc(), (res) => {
             DocStore.getDoc().id=res.id;
-            if(cb)cb();
+            if(typeof cb == 'function') cb();
         });
     }
     setPixel(pt,new_color) {
