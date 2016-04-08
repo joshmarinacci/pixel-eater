@@ -33,7 +33,6 @@ export default {
     },
     loadDoc: function(id,cb) {
         POST_JSON(Config.url("/load"), {id:id}, (res) => {
-            console.log("res = ", res);
             var doc = {
                 id:res.doc.id,
                 title:res.doc.title
@@ -54,5 +53,10 @@ export default {
             title:"Untitled Artwork",
             id:null
         }
+    },
+    deleteDoc: function(id,cb) {
+        POST_JSON(Config.url("/delete"), {id:id}, (res) => {
+            if(cb)cb(null,res);
+        });
     }
 }

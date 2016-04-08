@@ -148,12 +148,33 @@ app.post("/load", stormpath.loginRequired, function(req,res) {
         })
 });
 
+app.post("/delete", stormpath.loginRequired, function(req,res) {
+    if(!req.body.id) {
+        res.json({status:'error', message:"missing id parameter", id:req.body.id});
+        return;
+    }
+    RethinkDB.table('docs').get(req.body.id).delete().run(conn)
+        .then(function(ans) {
+            console.log("ans = ", ans);
+            res.json({status:'success', id:req.body.id})
+        })
+        .catch(function(err) {
+            console.log("failed to delete",err);
+            res.json({status:'error', message:"failure: " + err.toString(), id:req.body.id});
+        });
+
+});
+
 app.get('/preview/:id',function(req,res) {
     RethinkDB.table('docs').get(req.params.id).run(conn)
         .then(function(doc,err) {
             if(doc == null) throw Error("doc not found");
             var img = PngRender.renderBitmap(doc.model);
-            res.attachment(doc.title+".png");
+            if(req.query.download == 'true') {
+                res.attachment(doc.title + ".png");
+            } else {
+                res.type('png');
+            }
             PI.encodePNG(img, res, function(err) {
                 console.log('done rendering PNG');
             });

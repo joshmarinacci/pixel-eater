@@ -338,7 +338,9 @@ class DocPanel extends React.Component {
     }
     exportPNG() {
         this.saveDoc(function() {
-            document.location.href = Config.url("/preview/")+ DocStore.getDoc().id;
+            document.location.href = Config.url("/preview/")
+                + DocStore.getDoc().id
+                + "?download=true";
         });
     }
     saveDoc(cb) {
@@ -367,6 +369,11 @@ class DocPanel extends React.Component {
     openDocPerform(id) {
         this.setState({doclist:[], openVisible:false})
         DocStore.loadDoc(id);
+    }
+    deleteDoc(id) {
+        DocStore.deleteDoc(id, function(err,status) {
+            console.log("result is",err,status);
+        });
     }
     newDoc() {
         DocStore.setDoc(DocStore.newDoc());
@@ -465,6 +472,7 @@ class DocPanel extends React.Component {
                 docs={this.state.doclist}
                 onSelectDoc={this.openDocPerform.bind(this)}
                 onCanceled={this.openDocCanceled.bind(this)}
+                onDeleteDoc={this.deleteDoc.bind(this)}
             />
 
         </div>)
