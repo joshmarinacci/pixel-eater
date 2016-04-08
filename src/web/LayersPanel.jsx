@@ -51,7 +51,8 @@ class LayerItem extends React.Component {
 
 export default class LayersPanel extends React.Component {
     addLayer() {
-        this.props.model.appendLayer();
+        var layer = this.props.model.appendLayer();
+        this.props.model.setSelectedLayer(layer);
     }
     render() {
         var model = this.props.model;
