@@ -391,30 +391,26 @@ class DocPanel extends React.Component {
                 <LayersPanel model={model}/>
             </div>
 
-            <Dialog visible={this.state.loginVisible}>
-                <header>Login</header>
-                <LoginPanel
-                    onCompleted={this.onLoginCompleted.bind(this)}
-                    onCanceled={this.onLoginCanceled.bind(this)}
-                    switchToRegister={this.switchToRegister.bind(this)}
-                />
-            </Dialog>
-            <Dialog visible={this.state.registerVisible}>
-                <header>Register</header>
-                <RegistrationPanel
-                    onCompleted={this.onRegistrationCompleted.bind(this)}
-                    onCanceled={this.onRegistrationCanceled.bind(this)}
-                    switchToRegister={this.switchToLogin.bind(this)}
-                />
-            </Dialog>
-            <Dialog visible={this.state.openVisible}>
-                <header>Open</header>
-                <OpenDocPanel
-                    docs={this.state.doclist}
-                    onSelectDoc={this.openDocPerform.bind(this)}
-                />
-                <footer><button onClick={this.openDocCanceled.bind(this)}>cancel</button></footer>
-            </Dialog>
+            <LoginPanel
+                visible={this.state.loginVisible}
+                onCompleted={this.onLoginCompleted.bind(this)}
+                onCanceled={this.onLoginCanceled.bind(this)}
+                switchToRegister={this.switchToRegister.bind(this)}
+            />
+            <RegistrationPanel
+                visible={this.state.registerVisible}
+                onCompleted={this.onRegistrationCompleted.bind(this)}
+                onCanceled={this.onRegistrationCanceled.bind(this)}
+                switchToRegister={this.switchToLogin.bind(this)}
+            />
+
+            <OpenDocPanel
+                visible={this.state.openVisible}
+                docs={this.state.doclist}
+                onSelectDoc={this.openDocPerform.bind(this)}
+                onCanceled={this.openDocCanceled.bind(this)}
+            />
+
         </div>)
     }
 }
