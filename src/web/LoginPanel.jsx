@@ -16,8 +16,12 @@ export default class LoginPanel extends React.Component {
             username: this.refs.username.value,
             password: this.refs.password.value
         };
-        UserStore.login(data, function(user){
-            self.props.onCompleted(user);
+        UserStore.login(data, function(err,user){
+            if(err) {
+                self.setState({errorText: err.message});
+            } else {
+                self.props.onCompleted(user);
+            }
         });
     }
     render() {
