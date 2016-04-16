@@ -13,8 +13,10 @@ import UserStore from "./UserStore";
 import LoginPanel from "./LoginPanel.jsx"
 import RegistrationPanel from "./RegistrationPanel.jsx";
 import OpenDocPanel from "./OpenDocPanel.jsx";
+import NewDocPanel from "./NewDocPanel.jsx";
 import SharePanel from "./SharePanel.jsx";
 import Config from "./Config"
+import BitmapModel from "./BitmapModel"
 
 
 var REQUIRE_AUTH = true;
@@ -311,6 +313,7 @@ class DocPanel extends React.Component {
         this.state.registerVisible = false;
         this.state.openVisible = false;
         this.state.shareVisible = false;
+        this.state.newVisible = true;
 
         UserStore.checkLoggedIn((user) => this.setState({user:user}));
         this.model_listener = this.props.doc.model.changed((mod)=> this.setState({model:mod}));
@@ -364,6 +367,13 @@ class DocPanel extends React.Component {
     openDoc() {
         DocStore.loadDocList((docs)=>this.setState({doclist:docs, openVisible:true}));
     }
+    openDocCanceled() {
+        this.setState({openVisible:false})
+    }
+    openDocPerform(id) {
+        this.setState({doclist:[], openVisible:false})
+        DocStore.loadDoc(id);
+    }
 
     openShare() {
         this.setState({shareVisible:true});
@@ -372,22 +382,26 @@ class DocPanel extends React.Component {
         this.setState({shareVisible:false});
     }
 
-    openDocCanceled() {
-        this.setState({openVisible:false})
-    }
-    openDocPerform(id) {
-        this.setState({doclist:[], openVisible:false})
-        DocStore.loadDoc(id);
-    }
     deleteDoc(id) {
         DocStore.deleteDoc(id, function(err,status) {
             console.log("result is",err,status);
         });
     }
+
     newDoc() {
-        DocStore.setDoc(DocStore.newDoc());
-        this.setState({ doc: DocStore.getDoc()});
+        this.setState({newVisible:true});
     }
+    newDocCanceled() {
+        this.setState({newVisible:false});
+    }
+    newDocPerformed(settings) {
+        this.setState({newVisible:false});
+        var doc = DocStore.newDoc();
+        doc.model = new BitmapModel(settings.w,settings.h);
+        DocStore.setDoc(doc);
+        this.setState({ doc: doc});
+    }
+
     onLoginCompleted(user) {
         this.setState({user:user, loginVisible:false});
     }
@@ -483,6 +497,12 @@ class DocPanel extends React.Component {
                 onSelectDoc={this.openDocPerform.bind(this)}
                 onCanceled={this.openDocCanceled.bind(this)}
                 onDeleteDoc={this.deleteDoc.bind(this)}
+            />
+
+            <NewDocPanel
+                visible={this.state.newVisible}
+                onCancel={this.newDocCanceled.bind(this)}
+                onOkay={this.newDocPerformed.bind(this)}
             />
 
             <SharePanel
