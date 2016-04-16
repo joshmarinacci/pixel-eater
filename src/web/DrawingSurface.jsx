@@ -56,11 +56,12 @@ export default class DrawingSurface extends React.Component {
         c.save();
         c.globalAlpha = layer.opacity;
         let sc = this.state.scale;
-        for(let y=0; y<16; y++) {
-            for (let x = 0; x < 16; x++) {
-                var val = this.props.model.getPixelFromLayer(x,y,layer);
+        var model = this.props.model;
+        for(let y=0; y<model.getHeight(); y++) {
+            for (let x = 0; x < model.getWidth(); x++) {
+                var val = model.getPixelFromLayer(x,y,layer);
                 if(val == -1) continue;
-                c.fillStyle = this.props.model.lookupCanvasColor(val);
+                c.fillStyle = model.lookupCanvasColor(val);
                 c.fillRect(x * sc, y * sc, sc, sc);
             }
         }
@@ -75,7 +76,7 @@ export default class DrawingSurface extends React.Component {
         c.save();
         c.translate(0.5+this.state.xoff,0.5+this.state.yoff);
         c.beginPath();
-        for (let i = 0; i <= this.props.model.getWidth(); i++) {
+        for (let i = 0; i <= this.props.model.getHeight(); i++) {
             c.moveTo(0, i * sc);
             c.lineTo(width, i * sc);
         }
@@ -95,7 +96,10 @@ export default class DrawingSurface extends React.Component {
         setTimeout(this.drawCanvas.bind(this),0);
     }
 
-    shouldComponentUpdate() {
+    shouldComponentUpdate(nextProps, nextState) {
+        if(this.props.model !== nextProps.model) {
+            return true;
+        }
         return false;
     }
 
@@ -143,7 +147,7 @@ export default class DrawingSurface extends React.Component {
 
     render() {
         return <div className="grow scroll">
-            <canvas ref="canvas" width={16*25+1} height={16*25+1}
+            <canvas ref="canvas" width={this.props.model.getWidth()*25+1} height={this.props.model.getHeight()*25+1}
                     onMouseUp={this.mouseUp.bind(this)}
                     onMouseDown={this.mouseDown.bind(this)}
                     onMouseMove={this.mouseMove.bind(this)}

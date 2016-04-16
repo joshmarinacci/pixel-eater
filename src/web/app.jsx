@@ -313,7 +313,7 @@ class DocPanel extends React.Component {
         this.state.registerVisible = false;
         this.state.openVisible = false;
         this.state.shareVisible = false;
-        this.state.newVisible = true;
+        this.state.newVisible = false;
 
         UserStore.checkLoggedIn((user) => this.setState({user:user}));
         this.model_listener = this.props.doc.model.changed((mod)=> this.setState({model:mod}));
