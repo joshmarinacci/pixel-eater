@@ -177,10 +177,16 @@ input {
     list-style: none;
     background-color: transparent;
     padding: 0.25em 0.5em;
+    white-space: nowrap;
 }
 .dropdown-list li:hover {
     background-color: blue;
     color: white;
+}
+
+.dropdown-list li.disabled {
+    background-color: #fff;
+    color: #888;
 }
 
 

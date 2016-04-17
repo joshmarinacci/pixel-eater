@@ -14,9 +14,10 @@ import LoginPanel from "./LoginPanel.jsx"
 import RegistrationPanel from "./RegistrationPanel.jsx";
 import OpenDocPanel from "./OpenDocPanel.jsx";
 import NewDocPanel from "./NewDocPanel.jsx";
-import SharePanel from "./SharePanel.jsx";
+import SharePanel from "./SharePanel.jsx"
 import Config from "./Config"
 import BitmapModel from "./BitmapModel"
+import Dropdown from "./Dropdown.jsx"
 
 
 var REQUIRE_AUTH = true;
@@ -191,6 +192,45 @@ class ColorWellButton extends React.Component {
     }
 }
 
+class DropdownButton extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            open:false
+        }
+    }
+
+    open() {
+        this.setState({open:true})
+    }
+    toggle() {
+        this.setState({open:!this.state.open})
+    }
+
+    close() {
+        this.setState({open:false})
+    }
+
+
+    render() {
+        return <div className="dropdown-container">
+            <Button tooltip="Export / Share" onClick={this.toggle.bind(this)}><i className="fa fa-share"/></Button>
+            {this.renderDropdown()}
+        </div>
+    }
+
+    renderDropdown() {
+        if(this.state.open) {
+            return <ul className="dropdown-list">
+                {this.props.children}
+                </ul>
+        } else {
+            return ""
+        }
+    }
+}
+
 class PencilTool {
     constructor(app) {
         this.app = app;
@@ -342,6 +382,7 @@ class DocPanel extends React.Component {
         this.setState({ selected_tool: this.state.eraser_tool});
     }
     exportPNG() {
+        this.refs.sharePopup.close();
         this.saveDoc(function() {
             document.location.href = Config.url("/preview/")
                 + DocStore.getDoc().id
@@ -457,15 +498,20 @@ class DocPanel extends React.Component {
                 <ToggleButton onToggle={this.toggleGrid.bind(this)} selected={this.state.drawGrid} tooltip="Show/Hide Grid"><i className="fa fa-th"/></ToggleButton>
                 <ToggleButton onToggle={this.togglePreview.bind(this)} selected={this.state.drawPreview} tooltip="Show/Hide Preview"><i className="fa fa-image"/></ToggleButton>
                 <label/>
-                <Button onClick={this.exportPNG.bind(this)} tooltip="Export as PNG"><i className="fa fa-download"/></Button>
                 <Button onClick={this.newDoc.bind(this)}    disabled={loggedOut} tooltip="New Image"><i className="fa fa-file-o"/></Button>
                 <Button onClick={this.saveDoc.bind(this)}   disabled={loggedOut} tooltip="Save Image"><i className="fa fa-save"/></Button>
                 <Button onClick={this.openDoc.bind(this)}   disabled={loggedOut} tooltip="Open Image"><i className="fa fa-folder-open"/></Button>
-                <Button onClick={this.openShare.bind(this)}   disabled={loggedOut} tooltip="Get Sharing Link"><i className="fa fa-share"/></Button>
             </div>
             <div className="vbox grow">
-                <div className="panel top">
+                <div className="panel hbox top">
                     <input type="text" ref="doc_title" value={this.props.doc.title} onChange={this.titleEdited.bind(this)}/>
+                    <label className="grow"></label>
+                    <DropdownButton icon="share" ref="sharePopup">
+                        <li className="disabled">Tweet</li>
+                        <li onClick={this.exportPNG.bind(this)}>Export as PNG</li>
+                        <li className="disabled">Export as JSON</li>
+                        <li onClick={this.openShare.bind(this)}>Get Sharing Link</li>
+                    </DropdownButton>
                 </div>
                 <DrawingSurface tool={this.state.selected_tool} model={model} drawGrid={this.state.drawGrid}/>
                 <div className="panel bottom">
