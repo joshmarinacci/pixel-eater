@@ -1,4 +1,7 @@
 import React from "react";
+import DropdownButton from "./DropdownButton.jsx"
+import ColorPicker from "./ColorPicker.jsx"
+import PopupState from "./PopupState.jsx";
 
 class LayerItem extends React.Component {
     constructor(props) {
@@ -75,10 +78,14 @@ export default class LayersPanel extends React.Component {
         var layer = this.props.model.appendLayer();
         this.props.model.setSelectedLayer(layer);
     }
+    selectBGColor(color) {
+        PopupState.done();
+        this.props.model.setBackgroundColor(color);
+    }
     render() {
         var model = this.props.model;
         var layers = model.getLayers().map((l,i) => <LayerItem key={i} model={this.props.model} layer={l}/>);
-        return <div className="vbox scroll">
+        return <div className="vbox">
             <ul className="grow" id="layers-panel" style={{width:'10em'}}>{layers}</ul>
             <div className="hbox">
                 <button onClick={this.addLayer.bind(this)}><i className="fa fa-plus"/></button>
@@ -86,6 +93,10 @@ export default class LayersPanel extends React.Component {
                 <button><i className="fa fa-arrow-down"/></button>
                 <label></label>
                 <button><i className="fa fa-trash"/></button>
+                <label></label>
+                <DropdownButton icon="picture-o" direction="upper-left" tooltip="Background color">
+                    <ColorPicker model={model} onSelectColor={this.selectBGColor.bind(this)}/>
+                </DropdownButton>
             </div>
         </div>
     }

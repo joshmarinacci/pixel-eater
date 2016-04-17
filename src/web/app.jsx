@@ -18,53 +18,16 @@ import SharePanel from "./SharePanel.jsx"
 import Config from "./Config"
 import BitmapModel from "./BitmapModel"
 import Dropdown from "./Dropdown.jsx"
+import DropdownButton from "./DropdownButton.jsx"
+import Button from "./Button.jsx";
+import ColorPicker from "./ColorPicker.jsx";
+import PopupState from "./PopupState.jsx";
 
 
 var REQUIRE_AUTH = true;
 
 
 
-var PopupState = {
-    cbs:[],
-    done: function() {
-        this.cbs.forEach(cb => cb());
-    },
-    listen: function(cb) {
-        this.cbs.push(cb);
-        return cb;
-    },
-    unlisten: function(cb) {
-        var n = this.cbs.indexOf(cb);
-        this.cbs.splice(n,1);
-    }
-};
-
-class ColorPicker extends React.Component {
-    selectColor(c,i,e) {
-        e.stopPropagation();
-        PopupState.done();
-        this.props.onSelectColor(i);
-    }
-    renderColorWell(c,i) {
-        return <div key={i}
-                    style={{border:'0px solid black', backgroundColor:c, width:32,height:32, display:'inline-block', margin:0, padding:0}}
-                    onClick={this.selectColor.bind(this,c,i)}
-        ></div>
-    }
-    render() {
-        var wells = this.props.model.getPalette().map((c,i) => this.renderColorWell(c,i));
-        return <div
-            style={{
-                    margin:0,
-                    padding:0,
-                    display:'flex',
-                    flexDirection:'row',
-                    flexWrap:'wrap',
-                    width:32*16
-            }}
-        >{wells}</div>
-    }
-}
 
 class PopupButton extends React.Component {
     clicked() {
@@ -115,52 +78,6 @@ class PopupContainer extends React.Component {
     }
 }
 
-class Button extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            hoverVisible:false
-        }
-    }
-    mouseOver() {
-        this.timeout = setTimeout(this.onHover.bind(this),1000);
-    }
-    mouseOut() {
-        clearTimeout(this.timeout);
-        this.setState({hoverVisible:false});
-    }
-    onHover() {
-        this.setState({hoverVisible:true});
-    }
-    renderHover() {
-        var hover = "";
-        if(this.state.hoverVisible) {
-            hover = <p className="tooltip">{this.props.tooltip}</p>
-        }
-        return hover;
-    }
-    onClick() {
-        if(this.props.onClick) {
-            this.props.onClick();
-        } else {
-            console.log("no click defined");
-        }
-    }
-    generateStyle() {
-        return "tooltip-button";
-    }
-    render() {
-        var hover = this.renderHover();
-        var cls = this.generateStyle();
-        return <button className={cls}
-                       onMouseOver={this.mouseOver.bind(this)}
-                       onMouseOut={this.mouseOut.bind(this)}
-                       onClick={this.onClick.bind(this)}
-            {...this.props}
-        >{this.props.children}{hover}</button>
-    }
-}
-
 class ToggleButton extends Button {
     onClick() {
         if(this.props.onToggle) {
@@ -192,44 +109,6 @@ class ColorWellButton extends React.Component {
     }
 }
 
-class DropdownButton extends React.Component {
-
-    constructor(props) {
-        super(props);
-        this.state = {
-            open:false
-        }
-    }
-
-    open() {
-        this.setState({open:true})
-    }
-    toggle() {
-        this.setState({open:!this.state.open})
-    }
-
-    close() {
-        this.setState({open:false})
-    }
-
-
-    render() {
-        return <div className="dropdown-container">
-            <Button tooltip="Export / Share" onClick={this.toggle.bind(this)}><i className="fa fa-share"/></Button>
-            {this.renderDropdown()}
-        </div>
-    }
-
-    renderDropdown() {
-        if(this.state.open) {
-            return <ul className="dropdown-list">
-                {this.props.children}
-                </ul>
-        } else {
-            return ""
-        }
-    }
-}
 
 class PencilTool {
     constructor(app) {

@@ -172,6 +172,10 @@ export default class BitmapModel {
     getBackgroundColor() {
         return this.bgcolor;
     }
+    setBackgroundColor(val) {
+        this.bgcolor = val;
+        this.fireUpdate();
+    }
 
     //events
     fireUpdate() {
