@@ -22,6 +22,7 @@ import DropdownButton from "./DropdownButton.jsx"
 import Button from "./Button.jsx";
 import ColorPicker from "./ColorPicker.jsx";
 import PopupState from "./PopupState.jsx";
+import RecentColors from "./RecentColors.jsx";
 
 
 var REQUIRE_AUTH = true;
@@ -233,6 +234,7 @@ class DocPanel extends React.Component {
         this.state.openVisible = false;
         this.state.shareVisible = false;
         this.state.newVisible = false;
+        this.state.recentColors = [];
 
         UserStore.checkLoggedIn((user) => this.setState({user:user}));
         this.model_listener = this.props.doc.model.changed((mod)=> this.setState({model:mod}));
@@ -276,6 +278,16 @@ class DocPanel extends React.Component {
     }
     setPixel(pt,new_color) {
         this.props.doc.model.setPixel(pt,new_color);
+        this.appendRecentColor(new_color);
+    }
+    appendRecentColor(color) {
+        var n = this.state.recentColors.indexOf(color);
+        if(n < 0) {
+            this.state.recentColors.push(color);
+            this.setState({
+                recentColors:this.state.recentColors
+            })
+        }
     }
     execUndo() {
         this.props.doc.model.execUndo();
@@ -393,6 +405,7 @@ class DocPanel extends React.Component {
                     </DropdownButton>
                 </div>
                 <DrawingSurface tool={this.state.selected_tool} model={model} drawGrid={this.state.drawGrid}/>
+                <RecentColors colors={this.state.recentColors} model={model} onSelectColor={this.selectColor.bind(this)}/>
                 <div className="panel bottom">
                     <button onClick={this.loginLogout.bind(this)}>{this.state.user?"logout":"login"}</button>
                     <label>{this.state.user?this.state.user.username:'not logged in'}</label>

@@ -48,6 +48,7 @@ button.selected:hover {
 
 button.color-well {
     border: 2px solid #444;
+    background-image: inherit;
 }
 
 button:disabled {
@@ -206,4 +207,12 @@ input {
 
 input.digits5 {
     width: 5em;
+}
+
+.swatch {
+    display: inline-block;
+    border: 1px solid black;
+    border-width: 1px 1px 1px 0px;
+    min-width: 32px;
+    min-height: 32px;
 }
