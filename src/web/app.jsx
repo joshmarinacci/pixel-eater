@@ -153,6 +153,24 @@ class EraserTool {
     mouseUp() {}
 }
 
+class MoveTool {
+    constructor(app) {
+        this.app = app;
+    }
+    mouseDown(surf,pt) {
+        this.prev = pt;
+    }
+    mouseDrag(surf,pt) {
+        var diff = {
+            x: pt.x - this.prev.x,
+            y: pt.y - this.prev.y
+        };
+        this.app.shiftLayers(diff);
+        this.prev = pt;
+    }
+    mouseUp() {}
+}
+
 class PreviewPanel extends React.Component {
     componentDidMount() {
         this.drawCanvas();
@@ -226,6 +244,7 @@ class DocPanel extends React.Component {
         this.state.pencil_tool = new PencilTool(this);
         this.state.eyedropper_tool = new EyedropperTool(this);
         this.state.eraser_tool = new EraserTool(this);
+        this.state.move_tool = new MoveTool(this);
         this.state.selected_tool = this.state.pencil_tool;
         this.state.user = null;
         this.state.doclist = [];
@@ -262,6 +281,9 @@ class DocPanel extends React.Component {
     selectEraser() {
         this.setState({ selected_tool: this.state.eraser_tool});
     }
+    selectMove() {
+        this.setState({ selected_tool: this.state.move_tool});
+    }
     exportPNG() {
         this.refs.sharePopup.close();
         this.saveDoc(function() {
@@ -279,6 +301,9 @@ class DocPanel extends React.Component {
     setPixel(pt,new_color) {
         this.props.doc.model.setPixel(pt,new_color);
         this.appendRecentColor(new_color);
+    }
+    shiftLayers(pt) {
+        this.props.doc.model.shiftLayers(pt);
     }
     appendRecentColor(color) {
         var n = this.state.recentColors.indexOf(color);
@@ -383,6 +408,7 @@ class DocPanel extends React.Component {
                 <ToggleButton onToggle={this.selectPencil.bind(this)} selected={this.state.selected_tool === this.state.pencil_tool} tooltip="Pencil"><i className="fa fa-pencil"></i></ToggleButton>
                 <ToggleButton onToggle={this.selectEyedropper.bind(this)} selected={this.state.selected_tool === this.state.eyedropper_tool} tooltip="Eyedropper"><i className="fa fa-eyedropper"></i></ToggleButton>
                 <ToggleButton onToggle={this.selectEraser.bind(this)} selected={this.state.selected_tool === this.state.eraser_tool} tooltip="Eraser"><i className="fa fa-eraser"></i></ToggleButton>
+                <ToggleButton onToggle={this.selectMove.bind(this)} selected={this.state.selected_tool === this.state.move_tool} tooltip="Move Layer(s)"><i className="fa fa-arrows"></i></ToggleButton>
                 <label/>
                 <Button onClick={this.execUndo.bind(this)} disabled={!model.isUndoAvailable()} tooltip="Undo"><i className="fa fa-undo"/></Button>
                 <Button onClick={this.execRedo.bind(this)} disabled={!model.isRedoAvailable()} tooltip="Redo"><i className="fa fa-repeat"/></Button>

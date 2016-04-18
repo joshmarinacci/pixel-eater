@@ -161,6 +161,29 @@ export default class BitmapModel {
             () => this.setData(pt, new_color)
         );
     }
+    shiftLayers(pt) {
+        this.layers.forEach((l) => this.shiftLayer(l,pt));
+        this.fireUpdate();
+    }
+    shiftLayer(layer, off) {
+        var data2 = [];
+        this.fillData(data2,this.pw*this.ph,-1);
+        for(var j=0; j<this.ph; j++) {
+            for(var i=0; i<this.pw; i++) {
+                var j2 = j-off.y;
+                var i2 = i-off.x;
+                if(j2 >= this.ph) j2-=this.ph;
+                if(j2 < 0) j2+=this.ph;
+                if(i2 >= this.pw) i2-=this.pw;
+                if(i2 < 0) i2+=this.pw;
+
+                var index1 = i+j*this.pw;
+                var index2 = i2 + j2*this.pw;
+                data2[index1] = layer.data[index2];
+            }
+        }
+        layer.data = data2;
+    }
 
     //structure
     getWidth() {
