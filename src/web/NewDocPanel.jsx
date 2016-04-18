@@ -15,7 +15,9 @@ export default class NewDocPanel extends React.Component {
                 toString:function() {
                     return this.w + " x " + this.h;
                 }
-            }
+            },
+            w:16,
+            h:16,
         };
 
         this.sizes = [
@@ -37,15 +39,26 @@ export default class NewDocPanel extends React.Component {
     }
 
     selectPreset(preset) {
-        console.log('the preset is',preset);
         this.setState({
-            selectedSize:preset
+            selectedSize:preset,
+            w:preset.w,
+            h:preset.h
         })
     }
 
     performOkay() {
-        console.log("the preset is", this.state.selectedSize);
-        this.props.onOkay(this.state.selectedSize);
+        this.props.onOkay({
+            w:parseInt(this.state.w),
+            h:parseInt(this.state.h)
+        });
+    }
+    widthChanged() {
+        var nv = this.refs.width.value;
+        this.setState({ w:nv })
+    }
+    heightChanged() {
+        var nv = this.refs.height.value;
+        this.setState({ h:nv })
     }
 
     render() {
@@ -59,8 +72,9 @@ export default class NewDocPanel extends React.Component {
                 </div>
                 <div className="hbox">
                     <label>Width</label>
-                    <input className="digits5" type="number" value={this.state.selectedSize.w}/> <label className="stick-left">px</label>
-                    <label>Height</label> <input className="digits5" type="number" value={this.state.selectedSize.h}/> <label className="stick-left">px</label>
+                    <input ref='width' className="digits5" type="number" value={this.state.w} onChange={this.widthChanged.bind(this)}/> <label className="stick-left">px</label>
+                    <label>Height</label>
+                    <input ref='height' className="digits5" type="number" value={this.state.h} onChange={this.heightChanged.bind(this)}/> <label className="stick-left">px</label>
                     <DropdownButton list={this.sizes} onSelect={this.selectPreset.bind(this)}/>
                 </div>
             </div>
