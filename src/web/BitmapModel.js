@@ -141,12 +141,14 @@ export default class BitmapModel {
     }
     setData(point, val) {
         var layer = this.getCurrentLayer();
+        if(!layer) return;
         var n = point.x + point.y*this.pw;
         layer.data[n] = val;
         this.fireUpdate();
     }
     getData(point) {
         var layer = this.getCurrentLayer();
+        if(!layer) return null;
         return layer.data[point.x+point.y*this.pw];
     }
     getPixel(x,y) {

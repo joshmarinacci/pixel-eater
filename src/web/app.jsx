@@ -299,7 +299,11 @@ class DocPanel extends React.Component {
         });
     }
     setPixel(pt,new_color) {
-        this.props.doc.model.setPixel(pt,new_color);
+        var model = this.props.doc.model;
+        var layer = model.getCurrentLayer();
+        if(!layer) return;
+        if(!model.isLayerVisible(layer)) return;
+        model.setPixel(pt,new_color);
         this.appendRecentColor(new_color);
     }
     shiftLayers(pt) {
