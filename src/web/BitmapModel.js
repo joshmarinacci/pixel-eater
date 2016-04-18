@@ -264,6 +264,15 @@ export default class BitmapModel {
         layer.title = value;
         this.fireUpdate();
     }
+    getLayerIndex(layer) {
+        return this.layers.indexOf(layer);
+    }
+    moveLayerTo(layer,index) {
+        var old = this.getLayerIndex(layer);
+        this.layers.splice(old,1);
+        this.layers.splice(index,0,layer);
+        this.fireUpdate();
+    }
     deleteLayer(layer) {
         if(this.layers.length <= 1) return; //don't delete last layer
         var n = this.layers.indexOf(layer);

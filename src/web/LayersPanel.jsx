@@ -87,6 +87,18 @@ export default class LayersPanel extends React.Component {
         var sel = this.props.model.getCurrentLayer();
         this.props.model.deleteLayer(sel)
     }
+    moveLayerUp() {
+        var cur = this.props.model.getCurrentLayer();
+        var n = this.props.model.getLayerIndex(cur);
+        if(n > 0) this.props.model.moveLayerTo(cur,n-1);
+        this.props.model.setSelectedLayer(cur);
+    }
+    moveLayerDown() {
+        var cur = this.props.model.getCurrentLayer();
+        var n = this.props.model.getLayerIndex(cur);
+        if(n+1 < this.props.model.layers.length) this.props.model.moveLayerTo(cur,n+1);
+        this.props.model.setSelectedLayer(cur);
+    }
     selectBGColor(color) {
         PopupState.done();
         this.props.model.setBackgroundColor(color);
@@ -98,8 +110,8 @@ export default class LayersPanel extends React.Component {
             <ul className="grow" id="layers-panel" style={{width:'10em'}}>{layers}</ul>
             <div className="hbox">
                 <button onClick={this.addLayer.bind(this)}><i className="fa fa-plus"/></button>
-                <button><i className="fa fa-arrow-up"/></button>
-                <button><i className="fa fa-arrow-down"/></button>
+                <button onClick={this.moveLayerUp.bind(this)}><i className="fa fa-arrow-up"/></button>
+                <button onClick={this.moveLayerDown.bind(this)}><i className="fa fa-arrow-down"/></button>
                 <label></label>
                 <button onClick={this.deleteLayer.bind(this)}><i className="fa fa-trash"/></button>
                 <label></label>
