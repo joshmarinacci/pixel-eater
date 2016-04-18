@@ -264,6 +264,14 @@ export default class BitmapModel {
         layer.title = value;
         this.fireUpdate();
     }
+    deleteLayer(layer) {
+        if(this.layers.length <= 1) return; //don't delete last layer
+        var n = this.layers.indexOf(layer);
+        if(n >= 0) {
+            this.layers.splice(n,1);
+        }
+        this.fireUpdate();
+    }
 
 
     // palette
