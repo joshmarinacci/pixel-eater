@@ -141,17 +141,17 @@ export default class BitmapModel {
     }
     setData(point, val) {
         var layer = this.getCurrentLayer();
-        var n = point.x + point.y*16;
+        var n = point.x + point.y*this.pw;
         layer.data[n] = val;
         this.fireUpdate();
     }
     getData(point) {
         var layer = this.getCurrentLayer();
-        return layer.data[point.x+point.y*16];
+        return layer.data[point.x+point.y*this.pw];
     }
     getPixel(x,y) {
         var layer = this.getCurrentLayer();
-        return layer.data[x+y*16];
+        return layer.data[x+y*this.pw];
     }
     setPixel(pt, new_color){
         var old_color = this.getData(pt);
@@ -171,6 +171,10 @@ export default class BitmapModel {
     }
     getBackgroundColor() {
         return this.bgcolor;
+    }
+    setBackgroundColor(val) {
+        this.bgcolor = val;
+        this.fireUpdate();
     }
 
     //events
@@ -217,7 +221,7 @@ export default class BitmapModel {
         layer.visible = val;
     }
     getPixelFromLayer(x,y,layer) {
-        return layer.data[x+y*16];
+        return layer.data[x+y*this.pw];
     }
     setSelectedLayer(layer) {
         this.selectedLayerIndex = this.layers.indexOf(layer);

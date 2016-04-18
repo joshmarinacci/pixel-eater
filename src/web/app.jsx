@@ -13,55 +13,22 @@ import UserStore from "./UserStore";
 import LoginPanel from "./LoginPanel.jsx"
 import RegistrationPanel from "./RegistrationPanel.jsx";
 import OpenDocPanel from "./OpenDocPanel.jsx";
-import SharePanel from "./SharePanel.jsx";
+import NewDocPanel from "./NewDocPanel.jsx";
+import SharePanel from "./SharePanel.jsx"
 import Config from "./Config"
+import BitmapModel from "./BitmapModel"
+import Dropdown from "./Dropdown.jsx"
+import DropdownButton from "./DropdownButton.jsx"
+import Button from "./Button.jsx";
+import ColorPicker from "./ColorPicker.jsx";
+import PopupState from "./PopupState.jsx";
+import RecentColors from "./RecentColors.jsx";
 
 
 var REQUIRE_AUTH = true;
 
 
 
-var PopupState = {
-    cbs:[],
-    done: function() {
-        this.cbs.forEach(cb => cb());
-    },
-    listen: function(cb) {
-        this.cbs.push(cb);
-        return cb;
-    },
-    unlisten: function(cb) {
-        var n = this.cbs.indexOf(cb);
-        this.cbs.splice(n,1);
-    }
-};
-
-class ColorPicker extends React.Component {
-    selectColor(c,i,e) {
-        e.stopPropagation();
-        PopupState.done();
-        this.props.onSelectColor(i);
-    }
-    renderColorWell(c,i) {
-        return <div key={i}
-                    style={{border:'0px solid black', backgroundColor:c, width:32,height:32, display:'inline-block', margin:0, padding:0}}
-                    onClick={this.selectColor.bind(this,c,i)}
-        ></div>
-    }
-    render() {
-        var wells = this.props.model.getPalette().map((c,i) => this.renderColorWell(c,i));
-        return <div
-            style={{
-                    margin:0,
-                    padding:0,
-                    display:'flex',
-                    flexDirection:'row',
-                    flexWrap:'wrap',
-                    width:32*16
-            }}
-        >{wells}</div>
-    }
-}
 
 class PopupButton extends React.Component {
     clicked() {
@@ -112,52 +79,6 @@ class PopupContainer extends React.Component {
     }
 }
 
-class Button extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            hoverVisible:false
-        }
-    }
-    mouseOver() {
-        this.timeout = setTimeout(this.onHover.bind(this),1000);
-    }
-    mouseOut() {
-        clearTimeout(this.timeout);
-        this.setState({hoverVisible:false});
-    }
-    onHover() {
-        this.setState({hoverVisible:true});
-    }
-    renderHover() {
-        var hover = "";
-        if(this.state.hoverVisible) {
-            hover = <p className="tooltip">{this.props.tooltip}</p>
-        }
-        return hover;
-    }
-    onClick() {
-        if(this.props.onClick) {
-            this.props.onClick();
-        } else {
-            console.log("no click defined");
-        }
-    }
-    generateStyle() {
-        return "tooltip-button";
-    }
-    render() {
-        var hover = this.renderHover();
-        var cls = this.generateStyle();
-        return <button className={cls}
-                       onMouseOver={this.mouseOver.bind(this)}
-                       onMouseOut={this.mouseOut.bind(this)}
-                       onClick={this.onClick.bind(this)}
-            {...this.props}
-        >{this.props.children}{hover}</button>
-    }
-}
-
 class ToggleButton extends Button {
     onClick() {
         if(this.props.onToggle) {
@@ -188,6 +109,7 @@ class ColorWellButton extends React.Component {
         </button>);
     }
 }
+
 
 class PencilTool {
     constructor(app) {
@@ -311,6 +233,8 @@ class DocPanel extends React.Component {
         this.state.registerVisible = false;
         this.state.openVisible = false;
         this.state.shareVisible = false;
+        this.state.newVisible = false;
+        this.state.recentColors = [];
 
         UserStore.checkLoggedIn((user) => this.setState({user:user}));
         this.model_listener = this.props.doc.model.changed((mod)=> this.setState({model:mod}));
@@ -339,6 +263,7 @@ class DocPanel extends React.Component {
         this.setState({ selected_tool: this.state.eraser_tool});
     }
     exportPNG() {
+        this.refs.sharePopup.close();
         this.saveDoc(function() {
             document.location.href = Config.url("/preview/")
                 + DocStore.getDoc().id
@@ -353,6 +278,16 @@ class DocPanel extends React.Component {
     }
     setPixel(pt,new_color) {
         this.props.doc.model.setPixel(pt,new_color);
+        this.appendRecentColor(new_color);
+    }
+    appendRecentColor(color) {
+        var n = this.state.recentColors.indexOf(color);
+        if(n < 0) {
+            this.state.recentColors.push(color);
+            this.setState({
+                recentColors:this.state.recentColors
+            })
+        }
     }
     execUndo() {
         this.props.doc.model.execUndo();
@@ -364,6 +299,13 @@ class DocPanel extends React.Component {
     openDoc() {
         DocStore.loadDocList((docs)=>this.setState({doclist:docs, openVisible:true}));
     }
+    openDocCanceled() {
+        this.setState({openVisible:false})
+    }
+    openDocPerform(id) {
+        this.setState({doclist:[], openVisible:false})
+        DocStore.loadDoc(id);
+    }
 
     openShare() {
         this.setState({shareVisible:true});
@@ -372,22 +314,26 @@ class DocPanel extends React.Component {
         this.setState({shareVisible:false});
     }
 
-    openDocCanceled() {
-        this.setState({openVisible:false})
-    }
-    openDocPerform(id) {
-        this.setState({doclist:[], openVisible:false})
-        DocStore.loadDoc(id);
-    }
     deleteDoc(id) {
         DocStore.deleteDoc(id, function(err,status) {
             console.log("result is",err,status);
         });
     }
+
     newDoc() {
-        DocStore.setDoc(DocStore.newDoc());
-        this.setState({ doc: DocStore.getDoc()});
+        this.setState({newVisible:true});
     }
+    newDocCanceled() {
+        this.setState({newVisible:false});
+    }
+    newDocPerformed(settings) {
+        this.setState({newVisible:false});
+        var doc = DocStore.newDoc();
+        doc.model = new BitmapModel(settings.w,settings.h);
+        DocStore.setDoc(doc);
+        this.setState({ doc: doc});
+    }
+
     onLoginCompleted(user) {
         this.setState({user:user, loginVisible:false});
     }
@@ -443,17 +389,23 @@ class DocPanel extends React.Component {
                 <ToggleButton onToggle={this.toggleGrid.bind(this)} selected={this.state.drawGrid} tooltip="Show/Hide Grid"><i className="fa fa-th"/></ToggleButton>
                 <ToggleButton onToggle={this.togglePreview.bind(this)} selected={this.state.drawPreview} tooltip="Show/Hide Preview"><i className="fa fa-image"/></ToggleButton>
                 <label/>
-                <Button onClick={this.exportPNG.bind(this)} tooltip="Export as PNG"><i className="fa fa-download"/></Button>
                 <Button onClick={this.newDoc.bind(this)}    disabled={loggedOut} tooltip="New Image"><i className="fa fa-file-o"/></Button>
                 <Button onClick={this.saveDoc.bind(this)}   disabled={loggedOut} tooltip="Save Image"><i className="fa fa-save"/></Button>
                 <Button onClick={this.openDoc.bind(this)}   disabled={loggedOut} tooltip="Open Image"><i className="fa fa-folder-open"/></Button>
-                <Button onClick={this.openShare.bind(this)}   disabled={loggedOut} tooltip="Get Sharing Link"><i className="fa fa-share"/></Button>
             </div>
             <div className="vbox grow">
-                <div className="panel top">
+                <div className="panel hbox top">
                     <input type="text" ref="doc_title" value={this.props.doc.title} onChange={this.titleEdited.bind(this)}/>
+                    <label className="grow"></label>
+                    <DropdownButton icon="share" ref="sharePopup">
+                        <li className="disabled">Tweet</li>
+                        <li onClick={this.exportPNG.bind(this)}>Export as PNG</li>
+                        <li className="disabled">Export as JSON</li>
+                        <li onClick={this.openShare.bind(this)}>Get Sharing Link</li>
+                    </DropdownButton>
                 </div>
                 <DrawingSurface tool={this.state.selected_tool} model={model} drawGrid={this.state.drawGrid}/>
+                <RecentColors colors={this.state.recentColors} model={model} onSelectColor={this.selectColor.bind(this)}/>
                 <div className="panel bottom">
                     <button onClick={this.loginLogout.bind(this)}>{this.state.user?"logout":"login"}</button>
                     <label>{this.state.user?this.state.user.username:'not logged in'}</label>
@@ -483,6 +435,12 @@ class DocPanel extends React.Component {
                 onSelectDoc={this.openDocPerform.bind(this)}
                 onCanceled={this.openDocCanceled.bind(this)}
                 onDeleteDoc={this.deleteDoc.bind(this)}
+            />
+
+            <NewDocPanel
+                visible={this.state.newVisible}
+                onCancel={this.newDocCanceled.bind(this)}
+                onOkay={this.newDocPerformed.bind(this)}
             />
 
             <SharePanel
