@@ -40,10 +40,15 @@ class LayerItem extends React.Component {
         this.props.model.setLayerTitle(this.props.layer,this.refs.title.value);
         this.setState({editingName:false})
     }
+    keyUp(e) {
+        if(e.key == 'Enter') {
+            this.saveEditedName();
+        }
+    }
     renderName(editing) {
         if(editing) {
             return <div className="hbox">
-                <input ref="title" type="text" defaultValue={this.props.layer.title}/>
+                <input ref="title" type="text" defaultValue={this.props.layer.title} onKeyUp={this.keyUp.bind(this)} />
                 <button onClick={this.saveEditedName.bind(this)}>set</button>
             </div>;
         } else {
