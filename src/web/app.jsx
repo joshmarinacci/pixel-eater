@@ -220,7 +220,7 @@ class DocPanel extends React.Component {
         super(props);
         this.state = {
             drawGrid:true,
-            drawPreview:true,
+            drawPreview:false,
             selectedColor:1
         };
         this.state.pencil_tool = new PencilTool(this);
