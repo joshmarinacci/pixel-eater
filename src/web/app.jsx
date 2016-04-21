@@ -291,7 +291,7 @@ class DocPanel extends React.Component {
         this.saveDoc(function() {
             document.location.href = Config.url("/preview/")
                 + DocStore.getDoc().id
-                + "?download=true";
+                + "?download=true&"+Math.floor(Math.random()*100000);
         });
     }
     saveDoc(cb) {
