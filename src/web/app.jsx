@@ -197,15 +197,17 @@ class PreviewPanel extends React.Component {
         c.fillRect(0,0,w*s,w*s);
         c.strokeStyle = 'black';
         c.strokeRect(0+0.5,0.5,w*s,w*s);
-        this.props.model.getReverseLayers().map((layer) => this.drawLayer(c, layer,s));
+        this.props.model.getReverseLayers().map((layer) => this.drawLayer(c, layer,s, this.props.model));
         c.restore();
     }
-    drawLayer(c,layer,sc) {
+    drawLayer(c,layer,sc, model) {
         if(!layer.visible) return;
         c.save();
         c.globalAlpha = layer.opacity;
-        for(let y=0; y<16; y++) {
-            for (let x = 0; x < 16; x++) {
+        var w = model.getWidth();
+        var h = model.getHeight();
+        for(let y=0; y<h; y++) {
+            for (let x = 0; x < w; x++) {
                 var val = this.props.model.getPixelFromLayer(x,y,layer);
                 if(val == -1) continue;
                 c.fillStyle = this.props.model.lookupCanvasColor(val);

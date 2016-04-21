@@ -7,7 +7,7 @@ class LayerItem extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            opacity:this.props.layer.opacity,
+            opacity:Math.floor(this.props.layer.opacity*100),
             editingName:false
         };
     }
@@ -27,8 +27,8 @@ class LayerItem extends React.Component {
     blurredOpacity() {
         var opacity = parseFloat(this.refs.opacity.value);
         if(opacity < 0) opacity = 0;
-        if(opacity > 1.0) opacity = 1.0;
-        this.props.model.setLayerOpacity(this.props.layer,opacity);
+        if(opacity > 100) opacity = 10;
+        this.props.model.setLayerOpacity(this.props.layer,opacity/100.0);
         this.setState({opacity:opacity+""});
     }
     doubleClick(e) {
@@ -70,6 +70,8 @@ class LayerItem extends React.Component {
             <input ref="opacity"
                    className="opacity"
                    type="number"
+                   min="0"
+                   max="100"
                    value={this.state.opacity}
                    onChange={this.changedOpacity.bind(this)}
                    onBlur={this.blurredOpacity.bind(this)}/>

@@ -8,7 +8,7 @@ var PngRender = require('../../src/server/PngRenderer');
 var PI = require('pureimage');
 
 
-var filename = path.join(__dirname,"test_doc_1.json");
+var filename = path.join(__dirname,"test_doc_2.json");
 if(fs.existsSync(filename)) {
     var model = JSON.parse(fs.readFileSync(filename).toString()).model;
     var img = PngRender.renderBitmap(model, 4);
