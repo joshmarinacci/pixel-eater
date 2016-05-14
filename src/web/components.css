@@ -119,21 +119,24 @@ input {
     border-width: 0px 0px 1px 0px;
 }
 
-#layers-panel li {
+#layers-panel .layer {
     border: 1px solid gray;
     padding: 0.5em 1em;
     background-color: #eee;
     background-image: linear-gradient(to bottom, #E6E6E6, #CCCCCC);filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#E6E6E6, endColorstr=#CCCCCC);
     border-width: 0px 0px 1px 0px;
 }
-#layers-panel li.selected {
+#layers-panel .layer.selected {
     color: #eee;
     background-color: #2288ff;
     padding: 0.5em 1em;
     background-image: linear-gradient(to bottom, #1ab0ec, #1a92c2);filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#1ab0ec, endColorstr=#1a92c2);
 }
 
-#layers-panel li .opacity {
+#layers-panel .active .layer {
+    border-width: 1px;
+}
+#layers-panel .layer .opacity {
     max-width: 3em;
 }
 
@@ -220,31 +223,8 @@ input.digits5 {
 
 
 .draglist {
-    border: 1px solid green;
     position: relative;
-    width: 50%;
-}
-.draglist button {
-    border: 1px solid grey;
-    border-radius: 0;
-    background: none;
-    background-color: lightgrey;
-    cursor: move;
-}
-
-.draglist .item {
-    border: 1px solid black;
-    background-color: white;
-}
-.draglist .item button:active {
-    color: black;
-}
-
-.draglist .item-container {
-    border: 1px solid red;
-}
-.draglist .item-container.active {
-    border: 1px solid green;
+    padding:0;
 }
 
 .draglist .item-container.active {
@@ -255,7 +235,6 @@ input.digits5 {
 }
 
 .draglist .droptarget {
-    border: 1px solid black;
-    background-color: lightgrey;
+    background-color: darkgray;
 }
 

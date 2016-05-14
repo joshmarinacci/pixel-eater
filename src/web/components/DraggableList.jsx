@@ -12,6 +12,7 @@ export default class DraggableList extends React.Component {
     }
 
     mousedown(item,i,e) {
+        e.preventDefault();
         this._cb_handleMouseUp = this._handleMouseUp.bind(this);
         window.addEventListener('mouseup', this._cb_handleMouseUp);
         //window.addEventListener('touchend', this._handleMouseUp);
@@ -68,9 +69,21 @@ export default class DraggableList extends React.Component {
     }
 
     renderDropTarget() {
-        return <div ref="drop-target" className="droptarget" key="drop-target"
+        return <li ref="drop-target" className="droptarget" key="drop-target"
                     style={{ height: this.state.activeHeight+"px" }}
-        >  </div>;
+        >  </li>;
+    }
+    renderItem(item,index,mouseCallback) {
+        if(this.props.itemTemplate) {
+            return React.createElement(this.props.itemTemplate,{
+                item:item,
+                startDrag:mouseCallback
+            });
+        }
+        if(this.props.templateFunction) {
+            return this.props.templateFunction(item,index,mouseCallback)
+        }
+        return <div className="item"><button onMouseDown={mouseCallback}>=</button>{item.toString()}</div>
     }
     renderItems(items) {
         this.reactItems = [];
@@ -92,24 +105,17 @@ export default class DraggableList extends React.Component {
                 style.top = (this.state.offy-this.state.activeHeight)+"px";
             }
 
-            var ch = null;
-            if(this.props.itemTemplate) {
-                ch = React.createElement(this.props.itemTemplate,{
-                    item:item,
-                    startDrag:this.mousedown.bind(this,item,i)
-                });
-            } else {
-                ch = <div className="item"><button onMouseDown={this.mousedown.bind(this,item,i)}>=</button>{item.toString()}</div>
-            }
+            var ch = this.renderItem(item,i,this.mousedown.bind(this,item,i));
             //generate the item
-            this.reactItems.push(<div className={clss}  style={style} ref={"item"+i} key={i}>{ch}</div>);
+            this.reactItems.push(<li className={clss}  style={style} ref={"item"+i} key={i}>{ch}</li>);
         }
         if(!didDrop && this.state.pressed) this.reactItems.push(this.renderDropTarget());
         return this.reactItems;
     }
 
     render() {
-        return <div className="draglist">{this.renderItems(this.props.data)}</div>
+        var clss = 'draglist ' + (this.props.className?this.props.className:"");
+        return <ul  {...this.props} className={clss}>{this.renderItems(this.props.data)}</ul>
     }
 }
 

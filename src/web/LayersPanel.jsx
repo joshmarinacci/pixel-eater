@@ -2,6 +2,7 @@ import React from "react";
 import DropdownButton from "./DropdownButton.jsx"
 import ColorPicker from "./ColorPicker.jsx"
 import PopupState from "./PopupState.jsx";
+import DraggableList from "./components/DraggableList.jsx"
 
 class LayerItem extends React.Component {
     constructor(props) {
@@ -57,7 +58,7 @@ class LayerItem extends React.Component {
         }
     }
     render() {
-        var cls = "hbox ";
+        var cls = "layer hbox ";
         if(this.props.model.getCurrentLayer() == this.props.layer) cls += "selected ";
         var clsname = "fa ";
         if(this.props.model.isLayerVisible(this.props.layer)) {
@@ -65,7 +66,8 @@ class LayerItem extends React.Component {
         } else {
             clsname += " fa-eye-slash"
         }
-        return <li className={cls} onClick={this.selectItem.bind(this)}>
+        return <div className={cls} onClick={this.selectItem.bind(this)}>
+            <button><i className="fa fa-bars" onMouseDown={this.props.onMouseDown}/></button>
             {this.renderName(this.state.editingName)}
             <input ref="opacity"
                    className="opacity"
@@ -76,7 +78,7 @@ class LayerItem extends React.Component {
                    onChange={this.changedOpacity.bind(this)}
                    onBlur={this.blurredOpacity.bind(this)}/>
             <button onClick={this.toggleVisibility.bind(this)}><i className={clsname}/></button>
-        </li>
+        </div>
     }
 }
 
@@ -105,11 +107,20 @@ export default class LayersPanel extends React.Component {
         PopupState.done();
         this.props.model.setBackgroundColor(color);
     }
+    itemDropped(remove,insert,item) {
+        this.props.model.moveLayerTo(item,insert);
+    }
+    makeLayerItem(l,i,cb) {
+        return <LayerItem model={this.props.model} layer={l} onMouseDown={cb}/>
+    }
     render() {
         var model = this.props.model;
-        var layers = model.getLayers().map((l,i) => <LayerItem key={i} model={this.props.model} layer={l}/>);
         return <div className="vbox">
-            <ul className="grow" id="layers-panel" style={{width:'10em'}}>{layers}</ul>
+            <DraggableList className="grow" id='layers-panel' style={{width:'10em'}}
+                           data={model.getLayers()}
+                           templateFunction={this.makeLayerItem.bind(this)}
+                           onDropItem={this.itemDropped.bind(this)}
+            />
             <div className="hbox">
                 <button onClick={this.addLayer.bind(this)}><i className="fa fa-plus"/></button>
                 <button onClick={this.moveLayerUp.bind(this)}><i className="fa fa-arrow-up"/></button>
