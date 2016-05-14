@@ -216,3 +216,35 @@ input.digits5 {
     min-width: 32px;
     min-height: 32px;
 }
+
+
+
+.draglist {
+    border: 1px solid green;
+    position: relative;
+}
+.draglist button {
+    border: 1px solid red;
+    border-radius: 0;
+    background: none;
+    background-color: lightgrey;
+    cursor: move;
+}
+
+.draglist .item {
+    border: 1px solid black;
+}
+.draglist .item button:active {
+    color: black;
+}
+
+.draglist .item.active {
+    border: 1px solid red;
+    position: absolute;
+    background-color: blue;
+}
+
+.draglist .droptarget {
+    border: 1px solid black;
+    background-color: lightgrey;
+}
