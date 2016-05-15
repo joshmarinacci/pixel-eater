@@ -16,6 +16,12 @@ module.exports = {
         title:'Pixel Eater',
         //template: 'src/web/index.html', //set this to use a template html file
     })],
+    // fixes double react imports when doing dev mode
+    resolve: {
+        alias: {
+            react: path.resolve('./node_modules/react'),
+        }
+    },
     module: {
         loaders: [
             {

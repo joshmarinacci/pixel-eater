@@ -2,7 +2,7 @@ import React from "react";
 import DropdownButton from "./DropdownButton.jsx"
 import ColorPicker from "./ColorPicker.jsx"
 import PopupState from "./PopupState.jsx";
-import DraggableList from "./components/DraggableList.jsx"
+import {DraggableList} from "josh-react-common";
 
 class LayerItem extends React.Component {
     constructor(props) {
