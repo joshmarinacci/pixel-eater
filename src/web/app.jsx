@@ -23,92 +23,10 @@ import Button from "./Button.jsx";
 import ColorPicker from "./ColorPicker.jsx";
 import PopupState from "./PopupState.jsx";
 import RecentColors from "./RecentColors.jsx";
-
+import ToggleButton from "./controls/ToggleButton.jsx"
+import ColorWellButton from "./controls/ColorWellButton.jsx";
 
 var REQUIRE_AUTH = true;
-
-
-
-
-class PopupButton extends React.Component {
-    clicked() {
-        this.refs.popup.open();
-    }
-    render() {
-        return <button style={{ position: 'relative' }} onClick={this.clicked.bind(this)}>
-            {this.props.caption}
-            <PopupContainer ref="popup">{this.props.children}</PopupContainer>
-        </button>
-    }
-}
-
-class PopupContainer extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            open:false
-        }
-    }
-    componentDidMount() {
-        var self = this;
-        this.listener = PopupState.listen(function(){
-            self.setState({open:false});
-        })
-    }
-    componentWillUnmount() {
-        PopupButton.unlisten(this.listener);
-    }
-    open() {
-        this.setState({
-            open:true
-        })
-    }
-    render() {
-        return <div style={{
-                    position: 'absolute',
-                    left:'100%',
-                    top:0,
-                    border: "1px solid red",
-                    backgroundColor:'white',
-                    padding:'1em',
-                    borderRadius:'0.5em',
-                    display:this.state.open?'block':'none'
-                    }}
-        >{this.props.children}
-            </div>
-    }
-}
-
-class ToggleButton extends Button {
-    onClick() {
-        if(this.props.onToggle) {
-            this.props.onToggle();
-        } else {
-            super.onClick();
-        }
-    }
-    generateStyle() {
-        var cls = super.generateStyle();
-        if(this.props.selected === true)  cls += " selected";
-        return cls;
-    }
-}
-
-class ColorWellButton extends React.Component {
-    clicked() {
-        this.refs.popup.open();
-    }
-    render() {
-        return (<button className="color-well "
-                       style={{
-                       backgroundColor:this.props.model.lookupCanvasColor(this.props.selectedColor),
-                       position:'relative'
-                        }}
-                        onClick={this.clicked.bind(this)}
-        ><i className="fa fa-fw"></i><PopupContainer ref="popup">{this.props.children}</PopupContainer>
-        </button>);
-    }
-}
 
 
 class PencilTool {
@@ -241,7 +159,8 @@ class DocPanel extends React.Component {
         this.state = {
             drawGrid:true,
             drawPreview:false,
-            selectedColor:1
+            selectedColor:1,
+            scale: 16
         };
         this.state.pencil_tool = new PencilTool(this);
         this.state.eyedropper_tool = new EyedropperTool(this);
@@ -403,6 +322,12 @@ class DocPanel extends React.Component {
             registerVisible:false
         })
     }
+    zoomIn() {
+        this.setState({scale: this.state.scale<<1});
+    }
+    zoomOut() {
+        this.setState({scale: this.state.scale>>1});
+    }
     render() {
         var loggedOut = UserStore.getUser()==null;
         var model = this.props.doc.model;
@@ -429,6 +354,8 @@ class DocPanel extends React.Component {
                 <div className="panel hbox top">
                     <input type="text" ref="doc_title" value={this.props.doc.title} onChange={this.titleEdited.bind(this)}/>
                     <label className="grow"></label>
+                    <Button onClick={this.zoomIn.bind(this)}>+</Button>
+                    <Button onClick={this.zoomOut.bind(this)}>-</Button>
                     <DropdownButton icon="share" ref="sharePopup">
                         <li className="disabled">Tweet</li>
                         <li onClick={this.exportPNG.bind(this)}>Export as PNG</li>
@@ -436,7 +363,7 @@ class DocPanel extends React.Component {
                         <li onClick={this.openShare.bind(this)}>Get Sharing Link</li>
                     </DropdownButton>
                 </div>
-                <DrawingSurface tool={this.state.selected_tool} model={model} drawGrid={this.state.drawGrid}/>
+                <DrawingSurface tool={this.state.selected_tool} model={model} drawGrid={this.state.drawGrid} scale={this.state.scale}/>
                 <RecentColors colors={this.state.recentColors} model={model} onSelectColor={this.selectColor.bind(this)}/>
                 <div className="panel bottom">
                     <button onClick={this.loginLogout.bind(this)}>{this.state.user?"logout":"login"}</button>
