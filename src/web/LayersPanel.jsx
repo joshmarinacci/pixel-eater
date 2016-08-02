@@ -2,7 +2,7 @@ import React from "react";
 import DropdownButton from "./DropdownButton.jsx"
 import ColorPicker from "./ColorPicker.jsx"
 import PopupState from "./PopupState.jsx";
-import {DraggableList} from "josh-react-common";
+import DraggableList from "./DraggableList.jsx";
 
 class LayerItem extends React.Component {
     constructor(props) {
@@ -109,6 +109,7 @@ export default class LayersPanel extends React.Component {
     }
     itemDropped(remove,insert,item) {
         this.props.model.moveLayerTo(item,insert);
+        this.props.model.setSelectedLayer(item);
     }
     makeLayerItem(l,i,cb) {
         return <LayerItem model={this.props.model} layer={l} onMouseDown={cb}/>
