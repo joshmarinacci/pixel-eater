@@ -139,8 +139,7 @@ export default class BitmapModel {
             array[i] = val;
         }
     }
-    setData(point, val) {
-        var layer = this.getCurrentLayer();
+    setData(point, val, layer) {
         if(!layer) return;
         var n = point.x + point.y*this.pw;
         layer.data[n] = val;
@@ -157,10 +156,11 @@ export default class BitmapModel {
     }
     setPixel(pt, new_color){
         var old_color = this.getData(pt);
-        this.setData(pt,new_color);
+        var layer = this.getCurrentLayer();
+        this.setData(pt,new_color,layer);
         this.appendCommand(
-            () => this.setData(pt, old_color),
-            () => this.setData(pt, new_color)
+            () => this.setData(pt, old_color,layer),
+            () => this.setData(pt, new_color,layer)
         );
     }
     shiftLayers(pt) {
