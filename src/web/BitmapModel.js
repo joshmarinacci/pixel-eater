@@ -164,8 +164,17 @@ export default class BitmapModel {
         );
     }
     shiftLayers(pt) {
-        this.layers.forEach((l) => this.shiftLayer(l,pt));
-        this.fireUpdate();
+        let redo = () => {
+            this.layers.forEach((l) => this.shiftLayer(l,pt));
+            this.fireUpdate();
+        };
+        let undo = () => {
+            console.log("pt = ", pt);
+            this.layers.forEach((l) => this.shiftLayer(l,{x:-pt.x, y:-pt.y}));
+            this.fireUpdate();
+        };
+        redo();
+        this.appendCommand(undo,redo);
     }
     shiftLayer(layer, off) {
         var data2 = [];
