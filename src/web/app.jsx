@@ -25,6 +25,7 @@ import PopupState from "./PopupState.jsx";
 import RecentColors from "./RecentColors.jsx";
 import ToggleButton from "./controls/ToggleButton.jsx"
 import ColorWellButton from "./controls/ColorWellButton.jsx";
+import PreviewPanel from "./PreviewPanel.jsx"
 
 var REQUIRE_AUTH = true;
 
@@ -89,57 +90,6 @@ class MoveTool {
     mouseUp() {}
 }
 
-class PreviewPanel extends React.Component {
-    componentDidMount() {
-        this.drawCanvas();
-    }
-    componentWillReceiveProps(props) {
-        setTimeout(this.drawCanvas.bind(this),0);
-    }
-    shouldComponentUpdate() {
-        return false;
-    }
-    drawCanvas() {
-        let c = this.refs.canvas.getContext('2d');
-        var w = this.props.model.getWidth();
-        this.drawScaled(c,0,w*0,w,1);
-        this.drawScaled(c,0,w*1,w,2);
-        this.drawScaled(c,0,w*3,w,4);
-        this.drawScaled(c,0,w*7,w,8);
-        this.drawScaled(c,0,w*15,w,16);
-    }
-    drawScaled(c,ox,oy,w,s) {
-        c.save();
-        c.translate(ox,oy);
-        c.fillStyle = 'white';
-        c.fillRect(0,0,w*s,w*s);
-        c.strokeStyle = 'black';
-        c.strokeRect(0+0.5,0.5,w*s,w*s);
-        this.props.model.getReverseLayers().map((layer) => this.drawLayer(c, layer,s, this.props.model));
-        c.restore();
-    }
-    drawLayer(c,layer,sc, model) {
-        if(!layer.visible) return;
-        c.save();
-        c.globalAlpha = layer.opacity;
-        var w = model.getWidth();
-        var h = model.getHeight();
-        for(let y=0; y<h; y++) {
-            for (let x = 0; x < w; x++) {
-                var val = this.props.model.getPixelFromLayer(x,y,layer);
-                if(val == -1) continue;
-                c.fillStyle = this.props.model.lookupCanvasColor(val);
-                c.fillRect(x * sc, y * sc, sc, sc);
-            }
-        }
-        c.restore();
-    }
-    render() {
-        return <div className="grow scroll">
-            <canvas ref="canvas" width={16*16+1} height={16*31+1}/>
-        </div>
-    }
-}
 
 class App extends React.Component {
     constructor(props) {
