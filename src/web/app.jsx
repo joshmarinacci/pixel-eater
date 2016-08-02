@@ -56,7 +56,9 @@ class EyedropperTool {
     mouseDrag(surf,pt) {
         this.app.selectColor(DocStore.getDoc().model.getData(pt));
     }
-    mouseUp() {}
+    mouseUp() {
+        this.app.selectPencil();
+    }
 }
 
 class EraserTool {
