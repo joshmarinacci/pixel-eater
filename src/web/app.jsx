@@ -160,7 +160,8 @@ class DocPanel extends React.Component {
             drawGrid:true,
             drawPreview:false,
             selectedColor:1,
-            scale: 16
+            scale: 16,
+            dirty:false
         };
         this.state.pencil_tool = new PencilTool(this);
         this.state.eyedropper_tool = new EyedropperTool(this);
@@ -177,7 +178,7 @@ class DocPanel extends React.Component {
         this.state.recentColors = [];
 
         UserStore.checkLoggedIn((user) => this.setState({user:user}));
-        this.model_listener = this.props.doc.model.changed((mod)=> this.setState({model:mod}));
+        this.model_listener = this.props.doc.model.changed((mod)=> this.setState({model:mod, dirty:true}));
     }
 
     componentWillReceiveProps(nextProps) {
@@ -217,6 +218,7 @@ class DocPanel extends React.Component {
         DocStore.save(DocStore.getDoc(), (res) => {
             DocStore.getDoc().id=res.id;
             if(typeof cb == 'function') cb();
+            this.setState({dirty:false});
         });
     }
     setPixel(pt,new_color) {
@@ -365,9 +367,11 @@ class DocPanel extends React.Component {
                 </div>
                 <DrawingSurface tool={this.state.selected_tool} model={model} drawGrid={this.state.drawGrid} scale={this.state.scale}/>
                 <RecentColors colors={this.state.recentColors} model={model} onSelectColor={this.selectColor.bind(this)}/>
-                <div className="panel bottom">
+                <div className="panel hbox bottom">
                     <button onClick={this.loginLogout.bind(this)}>{this.state.user?"logout":"login"}</button>
                     <label>{this.state.user?this.state.user.username:'not logged in'}</label>
+                    <label className="grow"></label>
+                    <label><i>{this.state.dirty?"unsaved changes":""}</i></label>
                 </div>
             </div>
             {this.state.drawPreview?<div className="vbox panel right"><PreviewPanel model={model}/></div>:""}
