@@ -100,3 +100,7 @@
 .hbox .right {
     flex-direction: row-reverse;
 }
+
+.form {
+    border: 5px solid green;
+}

@@ -26,6 +26,7 @@ import RecentColors from "./RecentColors.jsx";
 import ToggleButton from "./controls/ToggleButton.jsx"
 import ColorWellButton from "./controls/ColorWellButton.jsx";
 import PreviewPanel from "./PreviewPanel.jsx"
+import ResizePanel from "./ResizePanel.jsx";
 
 var REQUIRE_AUTH = true;
 
@@ -238,6 +239,10 @@ class DocPanel extends React.Component {
         this.setState({ doc: doc});
     }
 
+    resizeDoc() {
+        this.refs.resizePanel.show();
+    }
+
     onLoginCompleted(user) {
         this.setState({user:user, loginVisible:false});
     }
@@ -303,6 +308,7 @@ class DocPanel extends React.Component {
                 <Button onClick={this.newDoc.bind(this)}    disabled={loggedOut} tooltip="New Image"><i className="fa fa-file-o"/></Button>
                 <Button onClick={this.saveDoc.bind(this)}   disabled={loggedOut} tooltip="Save Image"><i className="fa fa-save"/></Button>
                 <Button onClick={this.openDoc.bind(this)}   disabled={loggedOut} tooltip="Open Image"><i className="fa fa-folder-open"/></Button>
+                <Button onClick={this.resizeDoc.bind(this)} tooltip="Resize Doc">resize</Button>
             </div>
             <div className="vbox grow">
                 <div className="panel hbox top">
@@ -363,6 +369,8 @@ class DocPanel extends React.Component {
                 onCanceled={this.openShareCanceled.bind(this)}
                 id={DocStore.getDoc().id}
             />
+
+            <ResizePanel ref="resizePanel" model={model}/>
 
         </div>)
     }

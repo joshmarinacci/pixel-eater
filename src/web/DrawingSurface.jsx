@@ -23,6 +23,8 @@ export default class DrawingSurface extends React.Component {
             down:false,
             xoff:0,
             yoff:0,
+            width:props.model.getWidth(),
+            height:props.model.getHeight()
         };
 
         var self = this;
@@ -92,12 +94,18 @@ export default class DrawingSurface extends React.Component {
     }
 
     componentWillReceiveProps(props) {
+        this.setState({
+            width:props.model.getWidth(),
+            height:props.model.getHeight()
+        });
         setTimeout(this.drawCanvas.bind(this),0);
     }
 
     shouldComponentUpdate(nextProps, nextState) {
         if(this.props.scale != nextProps.scale) return true;
         if(this.props.model !== nextProps.model) return true;
+        if(this.state.width != nextProps.model.getWidth()) return true;
+        if(this.state.height != nextProps.model.getHeight()) return true;
         return false;
     }
 
