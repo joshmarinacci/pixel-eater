@@ -45,6 +45,10 @@ class PencilTool {
     contextMenu(surf,pt) {
         this.app.selectColor(DocStore.getDoc().model.getData(pt));
     }
+    getOptionsPanel() {
+        return <label>none</label>
+    }
+
 }
 
 class EyedropperTool {
@@ -60,6 +64,9 @@ class EyedropperTool {
     mouseUp() {
         this.app.selectPencil();
     }
+    getOptionsPanel() {
+        return <label>none</label>
+    }
 }
 
 class EraserTool {
@@ -73,6 +80,9 @@ class EraserTool {
         this.app.setPixel(pt, -1);
     }
     mouseUp() {}
+    getOptionsPanel() {
+        return <label>none</label>
+    }
 }
 
 class MoveTool {
@@ -87,10 +97,25 @@ class MoveTool {
             x: pt.x - this.prev.x,
             y: pt.y - this.prev.y
         };
-        this.app.shiftLayers(diff);
+        if(this.app.state.shiftLayerOnly) {
+            this.app.getModel().shiftSelectedLayer(diff);
+        } else {
+            this.app.getModel().shiftLayers(diff);
+        }
         this.prev = pt;
     }
+    toggleLayerButton() {
+        this.app.setState({ shiftLayerOnly:!this.app.state.shiftLayerOnly});
+    }
     mouseUp() {}
+    getOptionsPanel() {
+        return <div className="group">
+            <ToggleButton
+                onToggle={this.toggleLayerButton.bind(this)}
+                selected={this.app.state.shiftLayerOnly}
+            >only selected layer</ToggleButton>
+        </div>
+    }
 }
 
 
@@ -116,6 +141,7 @@ class DocPanel extends React.Component {
             scale: 16,
             dirty:false
         };
+        this.state.shiftLayerOnly = false;
         this.state.pencil_tool = new PencilTool(this);
         this.state.eyedropper_tool = new EyedropperTool(this);
         this.state.eraser_tool = new EraserTool(this);
@@ -132,6 +158,10 @@ class DocPanel extends React.Component {
 
         UserStore.checkLoggedIn((user) => this.setState({user:user}));
         this.model_listener = this.props.doc.model.changed((mod)=> this.setState({model:mod, dirty:true}));
+    }
+
+    getModel() {
+        return this.props.doc.model;
     }
 
     componentWillReceiveProps(nextProps) {
@@ -322,6 +352,10 @@ class DocPanel extends React.Component {
                         <li className="disabled">Export as JSON</li>
                         <li onClick={this.openShare.bind(this)}>Get Sharing Link</li>
                     </DropdownButton>
+                </div>
+                <div className="panel hbox top">
+                    <label>options</label>
+                    {this.state.selected_tool.getOptionsPanel()}
                 </div>
                 <DrawingSurface tool={this.state.selected_tool} model={model} drawGrid={this.state.drawGrid} scale={this.state.scale}/>
                 <RecentColors colors={this.state.recentColors} model={model} onSelectColor={this.selectColor.bind(this)}/>

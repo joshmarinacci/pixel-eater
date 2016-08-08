@@ -169,8 +169,20 @@ export default class BitmapModel {
             this.fireUpdate();
         };
         let undo = () => {
-            console.log("pt = ", pt);
             this.layers.forEach((l) => this.shiftLayer(l,{x:-pt.x, y:-pt.y}));
+            this.fireUpdate();
+        };
+        redo();
+        this.appendCommand(undo,redo);
+    }
+    shiftSelectedLayer(pt) {
+        var layer = this.getCurrentLayer();
+        let redo = () => {
+            this.shiftLayer(layer,pt);
+            this.fireUpdate();
+        };
+        let undo = () => {
+            this.shiftLayer(layer,{x:-pt.x, y:-pt.y});
             this.fireUpdate();
         };
         redo();
