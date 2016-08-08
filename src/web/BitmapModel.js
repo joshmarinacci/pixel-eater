@@ -316,8 +316,9 @@ export default class BitmapModel {
     }
     appendLayer() {
         var layer = this._makeLayer();
-        this.layers.push(layer);
-        this.fireUpdate();
+        var newLayers = this.layers.slice();
+        newLayers.push(layer);
+        this.setLayers(newLayers);
         return layer;
     }
     setLayerOpacity(layer,value) {
@@ -332,18 +333,33 @@ export default class BitmapModel {
         return this.layers.indexOf(layer);
     }
     moveLayerTo(layer,index) {
+        var layers = this.layers.slice();
         var old = this.getLayerIndex(layer);
-        this.layers.splice(old,1);
-        this.layers.splice(index,0,layer);
-        this.fireUpdate();
+        layers.splice(old,1);
+        layers.splice(index,0,layer);
+        this.setLayers(layers);
+    }
+    setLayers(newLayers) {
+        var oldLayers = this.layers;
+        let redo = () => {
+            this.layers = newLayers;
+            this.fireUpdate();
+        };
+        let undo = () => {
+            this.layers = oldLayers;
+            this.fireUpdate();
+        };
+        redo();
+        this.appendCommand(undo,redo);
     }
     deleteLayer(layer) {
         if(this.layers.length <= 1) return; //don't delete last layer
         var n = this.layers.indexOf(layer);
         if(n >= 0) {
-            this.layers.splice(n,1);
+            var newLayers = this.layers.slice();
+            newLayers.splice(n,1);
+            this.setLayers(newLayers);
         }
-        this.fireUpdate();
     }
 
 

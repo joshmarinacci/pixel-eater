@@ -126,7 +126,6 @@ export default class LayersPanel extends React.Component {
     itemDropped(remove,insert,item) {
         this.props.model.moveLayerTo(item,insert);
         this.props.model.setSelectedLayer(item);
-        console.log("layers now ", this.props.model.layers.map((l)=> l.title+' '+l.opacity).join(","));
     }
     makeLayerItem(l,i,cb) {
         return <LayerItem model={this.props.model} layer={l} onMouseDown={cb}/>
