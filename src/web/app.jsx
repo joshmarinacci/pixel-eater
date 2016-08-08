@@ -27,6 +27,7 @@ import ToggleButton from "./controls/ToggleButton.jsx"
 import ColorWellButton from "./controls/ColorWellButton.jsx";
 import PreviewPanel from "./PreviewPanel.jsx"
 import ResizePanel from "./ResizePanel.jsx";
+import {KEYBOARD} from "./u";
 
 var REQUIRE_AUTH = true;
 
@@ -98,12 +99,15 @@ class MoveTool {
             x: pt.x - this.prev.x,
             y: pt.y - this.prev.y
         };
+        this.shift(diff);
+        this.prev = pt;
+    }
+    shift(diff){
         if(this.app.state.shiftLayerOnly) {
             this.app.getModel().shiftSelectedLayer(diff);
         } else {
             this.app.getModel().shiftLayers(diff);
         }
-        this.prev = pt;
     }
     toggleLayerButton() {
         this.app.setState({ shiftLayerOnly:!this.app.state.shiftLayerOnly});
@@ -116,6 +120,25 @@ class MoveTool {
                 selected={this.app.state.shiftLayerOnly}
             >only selected layer</ToggleButton>
         </div>
+    }
+    keyDown(e) {
+        if(e.keyCode == KEYBOARD.ARROW_RIGHT) {
+            this.shift({x:1,y:0});
+            return true;
+        }
+        if(e.keyCode == KEYBOARD.ARROW_LEFT) {
+            this.shift({x:-1,y:0});
+            return true;
+        }
+        if(e.keyCode == KEYBOARD.ARROW_UP) {
+            this.shift({x:0,y:-1});
+            return true;
+        }
+        if(e.keyCode == KEYBOARD.ARROW_DOWN) {
+            this.shift({x:0,y:1});
+            return true;
+        }
+        return false;
     }
 }
 
@@ -318,6 +341,20 @@ class DocPanel extends React.Component {
     zoomOut() {
         this.setState({scale: this.state.scale>>1});
     }
+    canvasKeyDown(e) {
+        if(e.keyCode == KEYBOARD.E) {
+            this.selectEraser();
+        }
+        if(e.keyCode == KEYBOARD.P) {
+            this.selectPencil();
+        }
+        if(e.keyCode == KEYBOARD.I) {
+            this.selectEyedropper();
+        }
+        if(e.keyCode == KEYBOARD.V) {
+            this.selectMove();
+        }
+    }
     render() {
         var loggedOut = UserStore.getUser()==null;
         var model = this.props.doc.model;
@@ -358,7 +395,11 @@ class DocPanel extends React.Component {
                     <label>options</label>
                     {this.state.selected_tool.getOptionsPanel()}
                 </div>
-                <DrawingSurface tool={this.state.selected_tool} model={model} drawGrid={this.state.drawGrid} scale={this.state.scale}/>
+                <DrawingSurface
+                    tabIndex="1"
+                    tool={this.state.selected_tool} model={model} drawGrid={this.state.drawGrid} scale={this.state.scale}
+                    onKeyDown={this.canvasKeyDown.bind(this)}
+                />
                 <RecentColors colors={this.state.recentColors} model={model} onSelectColor={this.selectColor.bind(this)}/>
                 <div className="panel hbox bottom">
                     <button onClick={this.loginLogout.bind(this)}>{this.state.user?"logout":"login"}</button>

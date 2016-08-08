@@ -143,6 +143,14 @@ export default class DrawingSurface extends React.Component {
         this.props.tool.mouseUp(this);
     }
 
+    keyDown(e) {
+        if(this.props.tool.keyDown) {
+            var ret = this.props.tool.keyDown(e);
+            if(ret === true) return;
+        }
+        this.props.onKeyDown(e);
+    }
+
     contextMenu(e) {
         e.preventDefault();
         e.stopPropagation();
@@ -153,11 +161,15 @@ export default class DrawingSurface extends React.Component {
 
     render() {
         return <div className="grow scroll">
-            <canvas ref="canvas" width={this.props.model.getWidth()*this.props.scale+1} height={this.props.model.getHeight()*this.props.scale+1}
+            <canvas ref="canvas"
+                    tabIndex="1"
+                    width={this.props.model.getWidth()*this.props.scale+1}
+                    height={this.props.model.getHeight()*this.props.scale+1}
                     onMouseUp={this.mouseUp.bind(this)}
                     onMouseDown={this.mouseDown.bind(this)}
                     onMouseMove={this.mouseMove.bind(this)}
                     onContextMenu={this.contextMenu.bind(this)}
+                    onKeyDown={this.keyDown.bind(this)}
             />
         </div>
     }

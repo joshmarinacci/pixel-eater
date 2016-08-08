@@ -145,7 +145,7 @@ export default class LayersPanel extends React.Component {
                 <label></label>
                 <button onClick={this.deleteLayer.bind(this)}><i className="fa fa-trash"/></button>
                 <label></label>
-                <DropdownButton icon="picture-o" direction="upper-left" tooltip="Background color">
+                <DropdownButton icon="gear" direction="upper-left" tooltip="Background color">
                     <ColorPicker model={model} onSelectColor={this.selectBGColor.bind(this)}/>
                 </DropdownButton>
             </div>
