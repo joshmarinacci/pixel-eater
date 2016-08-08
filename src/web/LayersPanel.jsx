@@ -9,8 +9,14 @@ class LayerItem extends React.Component {
         super(props);
         this.state = {
             opacity:Math.floor(this.props.layer.opacity*100),
-            editingName:false
+            editingName:false,
+            invalid:false
         };
+    }
+    componentWillReceiveProps(props) {
+        this.setState({
+            opacity:Math.floor(this.props.layer.opacity*100)
+        });
     }
     selectItem(e) {
         e.preventDefault();
@@ -23,14 +29,23 @@ class LayerItem extends React.Component {
     }
     changedOpacity() {
         var opacity = this.refs.opacity.value;
-        this.setState({opacity:opacity});
+        this.setBack(opacity);
+        this.setState({opacity:opacity+""});
     }
     blurredOpacity() {
-        var opacity = parseFloat(this.refs.opacity.value);
+        this.setBack(this.refs.opacity.value);
+    }
+    setBack(sop) {
+        var opacity = parseFloat(sop);
+        if(Number.isNaN(opacity)) {
+            this.setState({invalid:true});
+            return;
+        }
         if(opacity < 0) opacity = 0;
         if(opacity > 100) opacity = 10;
         this.props.model.setLayerOpacity(this.props.layer,opacity/100.0);
         this.setState({opacity:opacity+""});
+        this.setState({invalid:false});
     }
     doubleClick(e) {
         e.stopPropagation();
@@ -75,6 +90,7 @@ class LayerItem extends React.Component {
                    min="0"
                    max="100"
                    value={this.state.opacity}
+                   className={this.state.invalid?"invalid":""}
                    onChange={this.changedOpacity.bind(this)}
                    onBlur={this.blurredOpacity.bind(this)}/>
             <button onClick={this.toggleVisibility.bind(this)}><i className={clsname}/></button>
@@ -110,6 +126,7 @@ export default class LayersPanel extends React.Component {
     itemDropped(remove,insert,item) {
         this.props.model.moveLayerTo(item,insert);
         this.props.model.setSelectedLayer(item);
+        console.log("layers now ", this.props.model.layers.map((l)=> l.title+' '+l.opacity).join(","));
     }
     makeLayerItem(l,i,cb) {
         return <LayerItem model={this.props.model} layer={l} onMouseDown={cb}/>

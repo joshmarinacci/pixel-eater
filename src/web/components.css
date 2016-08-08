@@ -238,3 +238,10 @@ input.digits5 {
     background-color: darkgray;
 }
 
+
+
+input.invalid {
+    border-color: #a2101f;
+    border-width: 3px;
+    background-color: #ffacb3;
+}
