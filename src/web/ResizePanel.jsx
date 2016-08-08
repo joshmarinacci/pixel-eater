@@ -47,9 +47,9 @@ export default class NewDocPanel extends Component {
     }
     render() {
         return <Dialog visible={this.state.visible}>
-            <header>Resize</header>
+            <header>Resize Canvas Dimensions</header>
 
-            <div className="body vbox form">
+            <div className="vbox form">
                 <div className="hbox">
                     <label>Width</label>
                     <input ref='width' type="text" size="6" value={this.state.width} onChange={this.changedWidth.bind(this)}/>
@@ -60,11 +60,9 @@ export default class NewDocPanel extends Component {
                 </div>
             </div>
 
-            <footer>
-                <div className="hbox right">
-                    <button onClick={this.okay.bind(this)}>okay</button>
-                    <button onClick={this.cancel.bind(this)}>cancel</button>
-                </div>
+            <footer className="children-right">
+                <button onClick={this.okay.bind(this)}>okay</button>
+                <button onClick={this.cancel.bind(this)}>cancel</button>
             </footer>
         </Dialog>
     }

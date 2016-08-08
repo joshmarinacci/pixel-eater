@@ -1,6 +1,9 @@
 require('./flexbox.css');
 require('./components.css');
 require('../../node_modules/font-awesome/css/font-awesome.css')
+require('appy-style/src/layout.css');
+require('appy-style/src/dialog.css');
+require('appy-style/src/look.css');
 
 import React from "react";
 import ReactDOM from "react-dom";
