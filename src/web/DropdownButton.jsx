@@ -13,9 +13,8 @@ export default class DropdownButton extends React.Component {
 
 
     componentDidMount() {
-        var self = this;
-        this.listener = PopupState.listen(function(){
-            self.setState({open:false});
+        this.listener = PopupState.listen((src)=>{
+            if(src !== this) this.setState({open:false});
         })
     }
     componentWillUnmount() {
@@ -24,10 +23,11 @@ export default class DropdownButton extends React.Component {
 
 
     open() {
-        this.setState({open:true})
+        this.setState({open:true});
     }
     toggle() {
-        this.setState({open:!this.state.open})
+        this.setState({open:!this.state.open});
+        PopupState.open(this);
     }
 
     close() {

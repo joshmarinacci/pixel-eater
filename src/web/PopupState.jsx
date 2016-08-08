@@ -3,6 +3,9 @@ export default {
     done: function() {
         this.cbs.forEach(cb => cb());
     },
+    open: function(src) {
+        this.cbs.forEach(cb => cb(src));
+    },
     listen: function(cb) {
         this.cbs.push(cb);
         return cb;

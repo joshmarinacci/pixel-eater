@@ -9,28 +9,24 @@ export default class PopupContainer extends React.Component {
         }
     }
     componentDidMount() {
-        var self = this;
-        this.listener = PopupState.listen(function(){
-            self.setState({open:false});
+        this.listener = PopupState.listen((src)=>{
+            if(src !== this) this.setState({open:false});
         })
     }
     componentWillUnmount() {
         PopupButton.unlisten(this.listener);
     }
     open() {
-        this.setState({
-            open:true
-        })
+        this.setState({open:true});
+        PopupState.open(this);
     }
     render() {
         return <div style={{
                     position: 'absolute',
-                    left:'100%',
+                    left:'120%',
                     top:0,
                     border: "1px solid red",
                     backgroundColor:'white',
-                    padding:'1em',
-                    borderRadius:'0.5em',
                     display:this.state.open?'block':'none'
                     }}
         >{this.props.children}

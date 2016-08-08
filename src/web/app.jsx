@@ -51,6 +51,7 @@ class PencilTool {
 
 }
 
+
 class EyedropperTool {
     constructor(app) {
         this.app = app;
@@ -190,7 +191,7 @@ class DocPanel extends React.Component {
         this.setState({ selected_tool: this.state.move_tool});
     }
     exportPNG() {
-        this.refs.sharePopup.close();
+        PopupState.done();
         this.saveDoc(function() {
             document.location.href = Config.url("/preview/")
                 + DocStore.getDoc().id
@@ -344,9 +345,9 @@ class DocPanel extends React.Component {
                 <div className="panel hbox top">
                     <input type="text" ref="doc_title" value={this.props.doc.title} onChange={this.titleEdited.bind(this)}/>
                     <label className="grow"></label>
-                    <Button onClick={this.zoomIn.bind(this)}>+</Button>
-                    <Button onClick={this.zoomOut.bind(this)}>-</Button>
-                    <DropdownButton icon="share" ref="sharePopup">
+                    <Button onClick={this.zoomIn.bind(this)}><i className="fa fa-plus"/></Button>
+                    <Button onClick={this.zoomOut.bind(this)}><i className="fa fa-minus"/></Button>
+                    <DropdownButton icon="share">
                         <li className="disabled">Tweet</li>
                         <li onClick={this.exportPNG.bind(this)}>Export as PNG</li>
                         <li className="disabled">Export as JSON</li>
@@ -405,7 +406,6 @@ class DocPanel extends React.Component {
             />
 
             <ResizePanel ref="resizePanel" model={model}/>
-
         </div>)
     }
 }
