@@ -347,7 +347,7 @@ class DocPanel extends React.Component {
                     <label className="grow"></label>
                     <Button onClick={this.zoomIn.bind(this)}><i className="fa fa-plus"/></Button>
                     <Button onClick={this.zoomOut.bind(this)}><i className="fa fa-minus"/></Button>
-                    <DropdownButton icon="share">
+                    <DropdownButton icon="share" direction="left">
                         <li className="disabled">Tweet</li>
                         <li onClick={this.exportPNG.bind(this)}>Export as PNG</li>
                         <li className="disabled">Export as JSON</li>
