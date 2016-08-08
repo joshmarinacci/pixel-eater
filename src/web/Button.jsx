@@ -8,6 +8,7 @@ export default class Button extends React.Component {
         }
     }
     mouseOver() {
+        if(!this.props.tooltip) return;
         this.timeout = setTimeout(this.onHover.bind(this),1000);
     }
     mouseOut() {
