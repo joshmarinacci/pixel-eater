@@ -23,7 +23,8 @@ export default class DrawingSurface extends React.Component {
             down:false,
             xoff:0,
             yoff:0,
-            scale:25
+            width:props.model.getWidth(),
+            height:props.model.getHeight()
         };
 
         var self = this;
@@ -43,7 +44,7 @@ export default class DrawingSurface extends React.Component {
     }
 
     drawBackground(c) {
-        var sc = this.state.scale;
+        var sc = this.props.scale;
         var width = this.props.model.getWidth() * sc;
         var height = this.props.model.getHeight() * sc;
         var bg = this.props.model.getBackgroundColor();
@@ -55,7 +56,7 @@ export default class DrawingSurface extends React.Component {
         if(!layer.visible) return;
         c.save();
         c.globalAlpha = layer.opacity;
-        let sc = this.state.scale;
+        let sc = this.props.scale;
         var model = this.props.model;
         for(let y=0; y<model.getHeight(); y++) {
             for (let x = 0; x < model.getWidth(); x++) {
@@ -70,7 +71,7 @@ export default class DrawingSurface extends React.Component {
 
     drawGrid(c) {
         c.strokeStyle = 'black';
-        var sc = this.state.scale;
+        var sc = this.props.scale;
         var width = this.props.model.getWidth() * sc;
         var height = this.props.model.getHeight() * sc;
         c.save();
@@ -93,13 +94,18 @@ export default class DrawingSurface extends React.Component {
     }
 
     componentWillReceiveProps(props) {
+        this.setState({
+            width:props.model.getWidth(),
+            height:props.model.getHeight()
+        });
         setTimeout(this.drawCanvas.bind(this),0);
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        if(this.props.model !== nextProps.model) {
-            return true;
-        }
+        if(this.props.scale != nextProps.scale) return true;
+        if(this.props.model !== nextProps.model) return true;
+        if(this.state.width != nextProps.model.getWidth()) return true;
+        if(this.state.height != nextProps.model.getHeight()) return true;
         return false;
     }
 
@@ -128,13 +134,21 @@ export default class DrawingSurface extends React.Component {
 
     mouseToModel(mousePoint) {
         return Point.makePoint(
-            Math.floor((mousePoint.x-this.state.xoff)/this.state.scale),
-            Math.floor((mousePoint.y-this.state.yoff)/this.state.scale));
+            Math.floor((mousePoint.x-this.state.xoff)/this.props.scale),
+            Math.floor((mousePoint.y-this.state.yoff)/this.props.scale));
     }
 
     mouseUp() {
         this.setState({down:false});
         this.props.tool.mouseUp(this);
+    }
+
+    keyDown(e) {
+        if(this.props.tool.keyDown) {
+            var ret = this.props.tool.keyDown(e);
+            if(ret === true) return;
+        }
+        this.props.onKeyDown(e);
     }
 
     contextMenu(e) {
@@ -147,11 +161,15 @@ export default class DrawingSurface extends React.Component {
 
     render() {
         return <div className="grow scroll">
-            <canvas ref="canvas" width={this.props.model.getWidth()*25+1} height={this.props.model.getHeight()*25+1}
+            <canvas ref="canvas"
+                    tabIndex="1"
+                    width={this.props.model.getWidth()*this.props.scale+1}
+                    height={this.props.model.getHeight()*this.props.scale+1}
                     onMouseUp={this.mouseUp.bind(this)}
                     onMouseDown={this.mouseDown.bind(this)}
                     onMouseMove={this.mouseMove.bind(this)}
                     onContextMenu={this.contextMenu.bind(this)}
+                    onKeyDown={this.keyDown.bind(this)}
             />
         </div>
     }

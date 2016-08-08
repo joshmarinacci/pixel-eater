@@ -7,9 +7,8 @@ export default class Dialog extends React.Component {
     }
     render() {
         if(!this.props.visible) return <div></div>;
-        return <div className="dialog narrow" style={{visibility:this.props.visible?'visible':'hidden'}}>
-            <div className="scrim"></div>
-            <div className="content">
+        return <div className="scrim">
+            <div className="dialog">
                 {this.renderChildren()}
             </div>
         </div>

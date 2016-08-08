@@ -134,13 +134,12 @@ export default class BitmapModel {
     }
 
     // data access
-    fillData(array, len, val) {
+    _fillData(array, len, val) {
         for(let i=0; i<len; i++) {
             array[i] = val;
         }
     }
-    setData(point, val) {
-        var layer = this.getCurrentLayer();
+    setData(point, val, layer) {
         if(!layer) return;
         var n = point.x + point.y*this.pw;
         layer.data[n] = val;
@@ -157,19 +156,41 @@ export default class BitmapModel {
     }
     setPixel(pt, new_color){
         var old_color = this.getData(pt);
-        this.setData(pt,new_color);
+        var layer = this.getCurrentLayer();
+        this.setData(pt,new_color,layer);
         this.appendCommand(
-            () => this.setData(pt, old_color),
-            () => this.setData(pt, new_color)
+            () => this.setData(pt, old_color,layer),
+            () => this.setData(pt, new_color,layer)
         );
     }
     shiftLayers(pt) {
-        this.layers.forEach((l) => this.shiftLayer(l,pt));
-        this.fireUpdate();
+        let redo = () => {
+            this.layers.forEach((l) => this.shiftLayer(l,pt));
+            this.fireUpdate();
+        };
+        let undo = () => {
+            this.layers.forEach((l) => this.shiftLayer(l,{x:-pt.x, y:-pt.y}));
+            this.fireUpdate();
+        };
+        redo();
+        this.appendCommand(undo,redo);
+    }
+    shiftSelectedLayer(pt) {
+        var layer = this.getCurrentLayer();
+        let redo = () => {
+            this.shiftLayer(layer,pt);
+            this.fireUpdate();
+        };
+        let undo = () => {
+            this.shiftLayer(layer,{x:-pt.x, y:-pt.y});
+            this.fireUpdate();
+        };
+        redo();
+        this.appendCommand(undo,redo);
     }
     shiftLayer(layer, off) {
         var data2 = [];
-        this.fillData(data2,this.pw*this.ph,-1);
+        this._fillData(data2,this.pw*this.ph,-1);
         for(var j=0; j<this.ph; j++) {
             for(var i=0; i<this.pw; i++) {
                 var j2 = j-off.y;
@@ -201,6 +222,47 @@ export default class BitmapModel {
         this.bgcolor = val;
         this.fireUpdate();
     }
+    resize(width,height) {
+        console.log('resizing from', this.pw, this.ph, ' to ', width, height);
+        var oldLayers = this.layers;
+        var oldWidth = this.pw;
+        var oldHeight = this.ph;
+
+        let redo = () => {
+            //TODO: should this be moved outside the redo function?
+            this.layers = oldLayers.map((layer) => this._makeResizedLayer(layer,oldWidth,oldHeight,width,height));
+            this.pw = width;
+            this.ph = height;
+            this.fireUpdate();
+        };
+        let undo = () => {
+            this.layers = oldLayers;
+            this.pw = oldWidth;
+            this.ph = oldHeight;
+            this.fireUpdate();
+        };
+        redo();
+        this.appendCommand(undo,redo);
+    }
+    _makeResizedLayer(layer, ow, oh, nw, nh) {
+        var data = [];
+        this._fillData(data, nw * nh, -1);
+        var nlayer = {
+            data:    data,
+            visible: layer.visible,
+            opacity: layer.opacity,
+            title:   layer.title
+        };
+        this._copyData(layer,0,0,ow,oh, nlayer,0,0,nw,nh);
+        return nlayer;
+    }
+    _copyData(src, sx,sy,sw,sh, dst, dx,dy,dw,dh ) {
+        for(let i=sx; i<sx+sw; i++) {
+            for(let j=sy; j<sy+sh; j++) {
+                dst.data[(j+dy)*dw+(i+dx)]= src.data[(j+sy)*sw+(i+sx)];
+            }
+        }
+    }
 
     //events
     fireUpdate() {
@@ -228,7 +290,7 @@ export default class BitmapModel {
     }
     _makeLayer() {
         var data = [];
-        this.fillData(data, this.pw * this.ph, -1);
+        this._fillData(data, this.pw * this.ph, -1);
         return {
             data: data,
             visible:true,
@@ -254,8 +316,9 @@ export default class BitmapModel {
     }
     appendLayer() {
         var layer = this._makeLayer();
-        this.layers.push(layer);
-        this.fireUpdate();
+        var newLayers = this.layers.slice();
+        newLayers.push(layer);
+        this.setLayers(newLayers);
         return layer;
     }
     setLayerOpacity(layer,value) {
@@ -270,18 +333,33 @@ export default class BitmapModel {
         return this.layers.indexOf(layer);
     }
     moveLayerTo(layer,index) {
+        var layers = this.layers.slice();
         var old = this.getLayerIndex(layer);
-        this.layers.splice(old,1);
-        this.layers.splice(index,0,layer);
-        this.fireUpdate();
+        layers.splice(old,1);
+        layers.splice(index,0,layer);
+        this.setLayers(layers);
+    }
+    setLayers(newLayers) {
+        var oldLayers = this.layers;
+        let redo = () => {
+            this.layers = newLayers;
+            this.fireUpdate();
+        };
+        let undo = () => {
+            this.layers = oldLayers;
+            this.fireUpdate();
+        };
+        redo();
+        this.appendCommand(undo,redo);
     }
     deleteLayer(layer) {
         if(this.layers.length <= 1) return; //don't delete last layer
         var n = this.layers.indexOf(layer);
         if(n >= 0) {
-            this.layers.splice(n,1);
+            var newLayers = this.layers.slice();
+            newLayers.splice(n,1);
+            this.setLayers(newLayers);
         }
-        this.fireUpdate();
     }
 
 

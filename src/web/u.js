@@ -20,6 +20,17 @@ export function GET_JSON(path, cb) {
     req.send();
 }
 
+export var KEYBOARD = {
+    E:69,
+    I:73,
+    P:80,
+    V:86,
+    ARROW_LEFT:37,
+    ARROW_UP:38,
+    ARROW_RIGHT:39,
+    ARROW_DOWN:40
+};
+
 export function POST_JSON(path, payload, cb) {
     console.log("POSTING",path);
     var req = new XMLHttpRequest();

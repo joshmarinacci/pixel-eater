@@ -2,14 +2,21 @@ import React from "react";
 import DropdownButton from "./DropdownButton.jsx"
 import ColorPicker from "./ColorPicker.jsx"
 import PopupState from "./PopupState.jsx";
+import DraggableList from "./DraggableList.jsx";
 
 class LayerItem extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             opacity:Math.floor(this.props.layer.opacity*100),
-            editingName:false
+            editingName:false,
+            invalid:false
         };
+    }
+    componentWillReceiveProps(props) {
+        this.setState({
+            opacity:Math.floor(this.props.layer.opacity*100)
+        });
     }
     selectItem(e) {
         e.preventDefault();
@@ -22,14 +29,23 @@ class LayerItem extends React.Component {
     }
     changedOpacity() {
         var opacity = this.refs.opacity.value;
-        this.setState({opacity:opacity});
+        this.setBack(opacity);
+        this.setState({opacity:opacity+""});
     }
     blurredOpacity() {
-        var opacity = parseFloat(this.refs.opacity.value);
+        this.setBack(this.refs.opacity.value);
+    }
+    setBack(sop) {
+        var opacity = parseFloat(sop);
+        if(Number.isNaN(opacity)) {
+            this.setState({invalid:true});
+            return;
+        }
         if(opacity < 0) opacity = 0;
         if(opacity > 100) opacity = 10;
         this.props.model.setLayerOpacity(this.props.layer,opacity/100.0);
         this.setState({opacity:opacity+""});
+        this.setState({invalid:false});
     }
     doubleClick(e) {
         e.stopPropagation();
@@ -57,7 +73,7 @@ class LayerItem extends React.Component {
         }
     }
     render() {
-        var cls = "hbox ";
+        var cls = "layer hbox ";
         if(this.props.model.getCurrentLayer() == this.props.layer) cls += "selected ";
         var clsname = "fa ";
         if(this.props.model.isLayerVisible(this.props.layer)) {
@@ -65,7 +81,8 @@ class LayerItem extends React.Component {
         } else {
             clsname += " fa-eye-slash"
         }
-        return <li className={cls} onClick={this.selectItem.bind(this)}>
+        return <div className={cls} onClick={this.selectItem.bind(this)}>
+            <button><i className="fa fa-bars" onMouseDown={this.props.onMouseDown}/></button>
             {this.renderName(this.state.editingName)}
             <input ref="opacity"
                    className="opacity"
@@ -73,10 +90,11 @@ class LayerItem extends React.Component {
                    min="0"
                    max="100"
                    value={this.state.opacity}
+                   className={this.state.invalid?"invalid":""}
                    onChange={this.changedOpacity.bind(this)}
                    onBlur={this.blurredOpacity.bind(this)}/>
             <button onClick={this.toggleVisibility.bind(this)}><i className={clsname}/></button>
-        </li>
+        </div>
     }
 }
 
@@ -105,11 +123,21 @@ export default class LayersPanel extends React.Component {
         PopupState.done();
         this.props.model.setBackgroundColor(color);
     }
+    itemDropped(remove,insert,item) {
+        this.props.model.moveLayerTo(item,insert);
+        this.props.model.setSelectedLayer(item);
+    }
+    makeLayerItem(l,i,cb) {
+        return <LayerItem model={this.props.model} layer={l} onMouseDown={cb}/>
+    }
     render() {
         var model = this.props.model;
-        var layers = model.getLayers().map((l,i) => <LayerItem key={i} model={this.props.model} layer={l}/>);
         return <div className="vbox">
-            <ul className="grow" id="layers-panel" style={{width:'10em'}}>{layers}</ul>
+            <DraggableList className="grow" id='layers-panel' style={{width:'10em'}}
+                           data={model.getLayers()}
+                           templateFunction={this.makeLayerItem.bind(this)}
+                           onDropItem={this.itemDropped.bind(this)}
+            />
             <div className="hbox">
                 <button onClick={this.addLayer.bind(this)}><i className="fa fa-plus"/></button>
                 <button onClick={this.moveLayerUp.bind(this)}><i className="fa fa-arrow-up"/></button>
@@ -117,7 +145,7 @@ export default class LayersPanel extends React.Component {
                 <label></label>
                 <button onClick={this.deleteLayer.bind(this)}><i className="fa fa-trash"/></button>
                 <label></label>
-                <DropdownButton icon="picture-o" direction="upper-left" tooltip="Background color">
+                <DropdownButton icon="gear" direction="upper-left" tooltip="Background color">
                     <ColorPicker model={model} onSelectColor={this.selectBGColor.bind(this)}/>
                 </DropdownButton>
             </div>

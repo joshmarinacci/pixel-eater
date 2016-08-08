@@ -1,6 +1,9 @@
 require('./flexbox.css');
 require('./components.css');
 require('../../node_modules/font-awesome/css/font-awesome.css')
+require('appy-style/src/layout.css');
+require('appy-style/src/dialog.css');
+require('appy-style/src/look.css');
 
 import React from "react";
 import ReactDOM from "react-dom";
@@ -23,92 +26,13 @@ import Button from "./Button.jsx";
 import ColorPicker from "./ColorPicker.jsx";
 import PopupState from "./PopupState.jsx";
 import RecentColors from "./RecentColors.jsx";
-
+import ToggleButton from "./controls/ToggleButton.jsx"
+import ColorWellButton from "./controls/ColorWellButton.jsx";
+import PreviewPanel from "./PreviewPanel.jsx"
+import ResizePanel from "./ResizePanel.jsx";
+import {KEYBOARD} from "./u";
 
 var REQUIRE_AUTH = true;
-
-
-
-
-class PopupButton extends React.Component {
-    clicked() {
-        this.refs.popup.open();
-    }
-    render() {
-        return <button style={{ position: 'relative' }} onClick={this.clicked.bind(this)}>
-            {this.props.caption}
-            <PopupContainer ref="popup">{this.props.children}</PopupContainer>
-        </button>
-    }
-}
-
-class PopupContainer extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            open:false
-        }
-    }
-    componentDidMount() {
-        var self = this;
-        this.listener = PopupState.listen(function(){
-            self.setState({open:false});
-        })
-    }
-    componentWillUnmount() {
-        PopupButton.unlisten(this.listener);
-    }
-    open() {
-        this.setState({
-            open:true
-        })
-    }
-    render() {
-        return <div style={{
-                    position: 'absolute',
-                    left:'100%',
-                    top:0,
-                    border: "1px solid red",
-                    backgroundColor:'white',
-                    padding:'1em',
-                    borderRadius:'0.5em',
-                    display:this.state.open?'block':'none'
-                    }}
-        >{this.props.children}
-            </div>
-    }
-}
-
-class ToggleButton extends Button {
-    onClick() {
-        if(this.props.onToggle) {
-            this.props.onToggle();
-        } else {
-            super.onClick();
-        }
-    }
-    generateStyle() {
-        var cls = super.generateStyle();
-        if(this.props.selected === true)  cls += " selected";
-        return cls;
-    }
-}
-
-class ColorWellButton extends React.Component {
-    clicked() {
-        this.refs.popup.open();
-    }
-    render() {
-        return (<button className="color-well "
-                       style={{
-                       backgroundColor:this.props.model.lookupCanvasColor(this.props.selectedColor),
-                       position:'relative'
-                        }}
-                        onClick={this.clicked.bind(this)}
-        ><i className="fa fa-fw"></i><PopupContainer ref="popup">{this.props.children}</PopupContainer>
-        </button>);
-    }
-}
 
 
 class PencilTool {
@@ -125,7 +49,12 @@ class PencilTool {
     contextMenu(surf,pt) {
         this.app.selectColor(DocStore.getDoc().model.getData(pt));
     }
+    getOptionsPanel() {
+        return <label>none</label>
+    }
+
 }
+
 
 class EyedropperTool {
     constructor(app) {
@@ -137,7 +66,12 @@ class EyedropperTool {
     mouseDrag(surf,pt) {
         this.app.selectColor(DocStore.getDoc().model.getData(pt));
     }
-    mouseUp() {}
+    mouseUp() {
+        this.app.selectPencil();
+    }
+    getOptionsPanel() {
+        return <label>none</label>
+    }
 }
 
 class EraserTool {
@@ -151,6 +85,9 @@ class EraserTool {
         this.app.setPixel(pt, -1);
     }
     mouseUp() {}
+    getOptionsPanel() {
+        return <label>none</label>
+    }
 }
 
 class MoveTool {
@@ -165,63 +102,49 @@ class MoveTool {
             x: pt.x - this.prev.x,
             y: pt.y - this.prev.y
         };
-        this.app.shiftLayers(diff);
+        this.shift(diff);
         this.prev = pt;
     }
-    mouseUp() {}
-}
-
-class PreviewPanel extends React.Component {
-    componentDidMount() {
-        this.drawCanvas();
-    }
-    componentWillReceiveProps(props) {
-        setTimeout(this.drawCanvas.bind(this),0);
-    }
-    shouldComponentUpdate() {
-        return false;
-    }
-    drawCanvas() {
-        let c = this.refs.canvas.getContext('2d');
-        var w = this.props.model.getWidth();
-        this.drawScaled(c,0,w*0,w,1);
-        this.drawScaled(c,0,w*1,w,2);
-        this.drawScaled(c,0,w*3,w,4);
-        this.drawScaled(c,0,w*7,w,8);
-        this.drawScaled(c,0,w*15,w,16);
-    }
-    drawScaled(c,ox,oy,w,s) {
-        c.save();
-        c.translate(ox,oy);
-        c.fillStyle = 'white';
-        c.fillRect(0,0,w*s,w*s);
-        c.strokeStyle = 'black';
-        c.strokeRect(0+0.5,0.5,w*s,w*s);
-        this.props.model.getReverseLayers().map((layer) => this.drawLayer(c, layer,s, this.props.model));
-        c.restore();
-    }
-    drawLayer(c,layer,sc, model) {
-        if(!layer.visible) return;
-        c.save();
-        c.globalAlpha = layer.opacity;
-        var w = model.getWidth();
-        var h = model.getHeight();
-        for(let y=0; y<h; y++) {
-            for (let x = 0; x < w; x++) {
-                var val = this.props.model.getPixelFromLayer(x,y,layer);
-                if(val == -1) continue;
-                c.fillStyle = this.props.model.lookupCanvasColor(val);
-                c.fillRect(x * sc, y * sc, sc, sc);
-            }
+    shift(diff){
+        if(this.app.state.shiftLayerOnly) {
+            this.app.getModel().shiftSelectedLayer(diff);
+        } else {
+            this.app.getModel().shiftLayers(diff);
         }
-        c.restore();
     }
-    render() {
-        return <div className="grow scroll">
-            <canvas ref="canvas" width={16*16+1} height={16*31+1}/>
+    toggleLayerButton() {
+        this.app.setState({ shiftLayerOnly:!this.app.state.shiftLayerOnly});
+    }
+    mouseUp() {}
+    getOptionsPanel() {
+        return <div className="group">
+            <ToggleButton
+                onToggle={this.toggleLayerButton.bind(this)}
+                selected={this.app.state.shiftLayerOnly}
+            >only selected layer</ToggleButton>
         </div>
     }
+    keyDown(e) {
+        if(e.keyCode == KEYBOARD.ARROW_RIGHT) {
+            this.shift({x:1,y:0});
+            return true;
+        }
+        if(e.keyCode == KEYBOARD.ARROW_LEFT) {
+            this.shift({x:-1,y:0});
+            return true;
+        }
+        if(e.keyCode == KEYBOARD.ARROW_UP) {
+            this.shift({x:0,y:-1});
+            return true;
+        }
+        if(e.keyCode == KEYBOARD.ARROW_DOWN) {
+            this.shift({x:0,y:1});
+            return true;
+        }
+        return false;
+    }
 }
+
 
 class App extends React.Component {
     constructor(props) {
@@ -241,8 +164,11 @@ class DocPanel extends React.Component {
         this.state = {
             drawGrid:true,
             drawPreview:false,
-            selectedColor:1
+            selectedColor:1,
+            scale: 16,
+            dirty:false
         };
+        this.state.shiftLayerOnly = false;
         this.state.pencil_tool = new PencilTool(this);
         this.state.eyedropper_tool = new EyedropperTool(this);
         this.state.eraser_tool = new EraserTool(this);
@@ -258,7 +184,11 @@ class DocPanel extends React.Component {
         this.state.recentColors = [];
 
         UserStore.checkLoggedIn((user) => this.setState({user:user}));
-        this.model_listener = this.props.doc.model.changed((mod)=> this.setState({model:mod}));
+        this.model_listener = this.props.doc.model.changed((mod)=> this.setState({model:mod, dirty:true}));
+    }
+
+    getModel() {
+        return this.props.doc.model;
     }
 
     componentWillReceiveProps(nextProps) {
@@ -287,7 +217,7 @@ class DocPanel extends React.Component {
         this.setState({ selected_tool: this.state.move_tool});
     }
     exportPNG() {
-        this.refs.sharePopup.close();
+        PopupState.done();
         this.saveDoc(function() {
             document.location.href = Config.url("/preview/")
                 + DocStore.getDoc().id
@@ -298,6 +228,7 @@ class DocPanel extends React.Component {
         DocStore.save(DocStore.getDoc(), (res) => {
             DocStore.getDoc().id=res.id;
             if(typeof cb == 'function') cb();
+            this.setState({dirty:false});
         });
     }
     setPixel(pt,new_color) {
@@ -365,6 +296,10 @@ class DocPanel extends React.Component {
         this.setState({ doc: doc});
     }
 
+    resizeDoc() {
+        this.refs.resizePanel.show();
+    }
+
     onLoginCompleted(user) {
         this.setState({user:user, loginVisible:false});
     }
@@ -403,6 +338,26 @@ class DocPanel extends React.Component {
             registerVisible:false
         })
     }
+    zoomIn() {
+        this.setState({scale: this.state.scale<<1});
+    }
+    zoomOut() {
+        this.setState({scale: this.state.scale>>1});
+    }
+    canvasKeyDown(e) {
+        if(e.keyCode == KEYBOARD.E) {
+            this.selectEraser();
+        }
+        if(e.keyCode == KEYBOARD.P) {
+            this.selectPencil();
+        }
+        if(e.keyCode == KEYBOARD.I) {
+            this.selectEyedropper();
+        }
+        if(e.keyCode == KEYBOARD.V) {
+            this.selectMove();
+        }
+    }
     render() {
         var loggedOut = UserStore.getUser()==null;
         var model = this.props.doc.model;
@@ -424,23 +379,36 @@ class DocPanel extends React.Component {
                 <Button onClick={this.newDoc.bind(this)}    disabled={loggedOut} tooltip="New Image"><i className="fa fa-file-o"/></Button>
                 <Button onClick={this.saveDoc.bind(this)}   disabled={loggedOut} tooltip="Save Image"><i className="fa fa-save"/></Button>
                 <Button onClick={this.openDoc.bind(this)}   disabled={loggedOut} tooltip="Open Image"><i className="fa fa-folder-open"/></Button>
+                <Button onClick={this.resizeDoc.bind(this)} tooltip="Resize Doc">resize</Button>
             </div>
             <div className="vbox grow">
                 <div className="panel hbox top">
                     <input type="text" ref="doc_title" value={this.props.doc.title} onChange={this.titleEdited.bind(this)}/>
                     <label className="grow"></label>
-                    <DropdownButton icon="share" ref="sharePopup">
+                    <Button onClick={this.zoomIn.bind(this)}><i className="fa fa-plus"/></Button>
+                    <Button onClick={this.zoomOut.bind(this)}><i className="fa fa-minus"/></Button>
+                    <DropdownButton icon="share" direction="left">
                         <li className="disabled">Tweet</li>
                         <li onClick={this.exportPNG.bind(this)}>Export as PNG</li>
                         <li className="disabled">Export as JSON</li>
                         <li onClick={this.openShare.bind(this)}>Get Sharing Link</li>
                     </DropdownButton>
                 </div>
-                <DrawingSurface tool={this.state.selected_tool} model={model} drawGrid={this.state.drawGrid}/>
+                <div className="panel hbox top">
+                    <label>options</label>
+                    {this.state.selected_tool.getOptionsPanel()}
+                </div>
+                <DrawingSurface
+                    tabIndex="1"
+                    tool={this.state.selected_tool} model={model} drawGrid={this.state.drawGrid} scale={this.state.scale}
+                    onKeyDown={this.canvasKeyDown.bind(this)}
+                />
                 <RecentColors colors={this.state.recentColors} model={model} onSelectColor={this.selectColor.bind(this)}/>
-                <div className="panel bottom">
+                <div className="panel hbox bottom">
                     <button onClick={this.loginLogout.bind(this)}>{this.state.user?"logout":"login"}</button>
                     <label>{this.state.user?this.state.user.username:'not logged in'}</label>
+                    <label className="grow"></label>
+                    <label><i>{this.state.dirty?"unsaved changes":""}</i></label>
                 </div>
             </div>
             {this.state.drawPreview?<div className="vbox panel right"><PreviewPanel model={model}/></div>:""}
@@ -481,6 +449,7 @@ class DocPanel extends React.Component {
                 id={DocStore.getDoc().id}
             />
 
+            <ResizePanel ref="resizePanel" model={model}/>
         </div>)
     }
 }
