@@ -119,10 +119,6 @@ export default class LayersPanel extends React.Component {
         if(n+1 < this.props.model.layers.length) this.props.model.moveLayerTo(cur,n+1);
         this.props.model.setSelectedLayer(cur);
     }
-    selectBGColor(color) {
-        PopupState.done();
-        this.props.model.setBackgroundColor(color);
-    }
     itemDropped(remove,insert,item) {
         this.props.model.moveLayerTo(item,insert);
         this.props.model.setSelectedLayer(item);
@@ -145,9 +141,6 @@ export default class LayersPanel extends React.Component {
                 <label></label>
                 <button onClick={this.deleteLayer.bind(this)}><i className="fa fa-trash"/></button>
                 <label></label>
-                <DropdownButton icon="gear" direction="upper-left" tooltip="Background color">
-                    <ColorPicker model={model} onSelectColor={this.selectBGColor.bind(this)}/>
-                </DropdownButton>
             </div>
         </div>
     }

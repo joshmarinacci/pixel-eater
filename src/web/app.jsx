@@ -357,6 +357,10 @@ class DocPanel extends React.Component {
             this.selectMove();
         }
     }
+    selectBGColor(color) {
+        PopupState.done();
+        this.props.doc.model.setBackgroundColor(color);
+    }
     render() {
         var loggedOut = UserStore.getUser()==null;
         var model = this.props.doc.model;
@@ -373,7 +377,7 @@ class DocPanel extends React.Component {
                 <Button onClick={this.execUndo.bind(this)} disabled={!model.isUndoAvailable()} tooltip="Undo"><i className="fa fa-undo"/></Button>
                 <Button onClick={this.execRedo.bind(this)} disabled={!model.isRedoAvailable()} tooltip="Redo"><i className="fa fa-repeat"/></Button>
                 <ToggleButton onToggle={this.toggleGrid.bind(this)} selected={this.state.drawGrid} tooltip="Show/Hide Grid"><i className="fa fa-th"/></ToggleButton>
-                <ToggleButton onToggle={this.togglePreview.bind(this)} selected={this.state.drawPreview} tooltip="Show/Hide Preview"><i className="fa fa-image"/></ToggleButton>
+                <ToggleButton onToggle={this.togglePreview.bind(this)} selected={this.state.drawPreview} tooltip="Show/Hide Preview">Preview</ToggleButton>
                 <label/>
                 <Button onClick={this.newDoc.bind(this)}    disabled={loggedOut} tooltip="New Image"><i className="fa fa-file-o"/></Button>
                 <Button onClick={this.saveDoc.bind(this)}   disabled={loggedOut} tooltip="Save Image"><i className="fa fa-save"/></Button>
@@ -382,6 +386,9 @@ class DocPanel extends React.Component {
             </div>
             <div className="vbox grow">
                 <div className="panel hbox top">
+                    <DropdownButton icon="gear" tooltip="Background color">
+                        <ColorPicker model={this.props.doc.model} onSelectColor={this.selectBGColor.bind(this)}/>
+                    </DropdownButton>
                     <input type="text" ref="doc_title" value={this.props.doc.title} onChange={this.titleEdited.bind(this)}/>
                     <label className="grow"></label>
                     <Button onClick={this.zoomIn.bind(this)}><i className="fa fa-plus"/></Button>
@@ -394,7 +401,7 @@ class DocPanel extends React.Component {
                     </DropdownButton>
                 </div>
                 <div className="panel hbox top">
-                    <label>options</label>
+                    <label><b>options</b></label>
                     {this.state.selected_tool.getOptionsPanel()}
                 </div>
                 <DrawingSurface
