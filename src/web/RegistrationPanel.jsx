@@ -24,7 +24,7 @@ export default class RegistrationPanel extends React.Component {
     render() {
         return <Dialog visible={this.props.visible}>
             <header>Register</header>
-            <div className="body">
+            <div className="vbox form">
                 <div className="hbox">
                     <label>email</label><input type="text" ref="email"/><br/>
                 </div>
@@ -35,11 +35,9 @@ export default class RegistrationPanel extends React.Component {
                     <label className="error">{this.state.errorText}</label>
                 </div>
             </div>
-            <footer>
-                <div className="hbox right">
-                    <button onClick={this.props.onCanceled}>Cancel</button>
-                    <button className="primary" onClick={this.tryRegister.bind(this)}>Login</button>
-                </div>
+            <footer className="children-right">
+                <button onClick={this.props.onCanceled}>Cancel</button>
+                <button className="primary" onClick={this.tryRegister.bind(this)}>Login</button>
             </footer>
         </Dialog>
     }

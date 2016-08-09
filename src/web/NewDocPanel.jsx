@@ -64,25 +64,26 @@ export default class NewDocPanel extends React.Component {
     render() {
         return <Dialog visible={this.props.visible}>
             <header>New Doc</header>
-            <div className="body" style={{height:'200px'}}>
+            <div className="vbox form">
                 <div className="hbox">
                     <label>Name</label> <input type="text" value="some name"/>
                 </div>
                 <div className="hbox">
+                    <label></label>
+                    <DropdownButton list={this.sizes} onSelect={this.selectPreset.bind(this)}/>
                 </div>
                 <div className="hbox">
                     <label>Width</label>
                     <input ref='width' className="digits5" type="number" value={this.state.w} onChange={this.widthChanged.bind(this)}/> <label className="stick-left">px</label>
+                </div>
+                <div className="hbox">
                     <label>Height</label>
                     <input ref='height' className="digits5" type="number" value={this.state.h} onChange={this.heightChanged.bind(this)}/> <label className="stick-left">px</label>
-                    <DropdownButton list={this.sizes} onSelect={this.selectPreset.bind(this)}/>
                 </div>
             </div>
-            <footer>
-                <div className="hbox right">
-                    <button onClick={this.performOkay.bind(this)}>okay</button>
-                    <button onClick={this.props.onCancel}>cancel</button>
-                </div>
+            <footer className="children-right">
+                <button onClick={this.performOkay.bind(this)}>okay</button>
+                <button onClick={this.props.onCancel}>cancel</button>
             </footer>
         </Dialog>
     }

@@ -190,4 +190,8 @@ label {
     margin: 0.25em;
 }
 
+.form > .hbox {
+    align-items: center;
+}
+
 

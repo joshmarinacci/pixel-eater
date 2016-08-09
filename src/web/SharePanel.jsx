@@ -15,13 +15,13 @@ export default class SharePanel extends React.Component {
     render() {
         return <Dialog visible={this.props.visible}>
             <header>Share</header>
-            <div className="body hbox">
+            <div className="vbox form">
+            <div className="hbox">
                 <input className="grow" type="text" defaultValue={this.generateURL()}/>
             </div>
-            <footer>
-                <div className="hbox right">
-                    <button onClick={this.props.onCanceled}>cancel</button>
-                </div>
+            </div>
+            <footer className="children-right">
+                <button onClick={this.props.onCanceled}>cancel</button>
             </footer>
         </Dialog>
     }

@@ -27,24 +27,24 @@ export default class LoginPanel extends React.Component {
     render() {
         return <Dialog visible={this.props.visible}>
             <header>Login</header>
-            <div className="body">
+            <div className="vbox form">
                 <div className="hbox">
-                    <label>username</label><input type="text" ref="username"/><br/>
+                    <label>username</label>
+                    <input type="text" ref="username"/><br/>
                 </div>
                 <div className="hbox">
-                    <label>password</label><input type="password" ref="password"/><br/>
+                    <label>password</label>
+                    <input type="password" ref="password"/><br/>
                 </div>
                 <div className="hbox">
                     <label className="error">{this.state.errorText}</label>
                 </div>
             </div>
-            <footer>
-                <div className="hbox right">
-                    <button onClick={this.props.onCanceled}>Cancel</button>
-                    <button className="primary" onClick={this.tryLogin.bind(this)}>Login</button>
-                    <label> </label>
-                    <button className="primary" onClick={this.props.switchToRegister}>Register!</button>
-                </div>
+            <footer className="children-right">
+                <button className="primary" onClick={this.props.switchToRegister}>Register!</button>
+                <label className="grow"></label>
+                <button onClick={this.props.onCanceled}>Cancel</button>
+                <button className="primary" onClick={this.tryLogin.bind(this)}>Login</button>
             </footer>
         </Dialog>
     }
