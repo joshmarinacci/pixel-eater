@@ -138,9 +138,8 @@ export default class LayersPanel extends React.Component {
                 <button onClick={this.addLayer.bind(this)}><i className="fa fa-plus"/></button>
                 <button onClick={this.moveLayerUp.bind(this)}><i className="fa fa-arrow-up"/></button>
                 <button onClick={this.moveLayerDown.bind(this)}><i className="fa fa-arrow-down"/></button>
-                <label></label>
+                <label className="grow"></label>
                 <button onClick={this.deleteLayer.bind(this)}><i className="fa fa-trash"/></button>
-                <label></label>
             </div>
         </div>
     }
