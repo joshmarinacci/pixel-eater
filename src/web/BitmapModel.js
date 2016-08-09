@@ -113,12 +113,14 @@ export default class BitmapModel {
             width:this.pw,
             height:this.ph,
             layers: this.layers,
+            bgcolor:this.bgcolor,
             palette:this.palette
         }
     }
     static fromJSON(json) {
         var model = new BitmapModel(json.width,json.height);
         model.layers = json.layers;
+        if(json.bgcolor) model.bgcolor = json.bgcolor;
         return model;
     }
     static fromJSONV1(json) {
