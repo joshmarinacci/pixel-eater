@@ -30,13 +30,14 @@ button:disabled {
     border-left-width: 0;
     border-right-width: 0;
     border-top-width: 0;
+    align-items: baseline;
 }
 .panel.bottom {
     border-left-width: 0;
     border-right-width: 0;
     border-bottom-width: 0;
+    align-items: baseline;
 }
-
 
 
 .error {
@@ -49,8 +50,6 @@ button:disabled {
     margin: 0;
     padding:0;
     min-width: 20em;
-    border: 1px solid grey;
-    border-width: 0px 0px 1px 0px;
 }
 
 #layers-panel .layer {
@@ -59,6 +58,7 @@ button:disabled {
     background-color: #eee;
     background-image: linear-gradient(to bottom, #E6E6E6, #CCCCCC);filter:progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=#E6E6E6, endColorstr=#CCCCCC);
     border-width: 0px 0px 1px 0px;
+    align-items: baseline;
 }
 #layers-panel .layer.selected {
     color: #eee;
@@ -147,9 +147,6 @@ button:disabled {
     padding-left: 0;
 }
 
-input.digits5 {
-    width: 5em;
-}
 
 .swatch {
     display: inline-block;
@@ -178,9 +175,19 @@ input.digits5 {
 }
 
 
-
+input {
+    border-radius: 0.2em;
+}
+input.digits5 {
+    width: 5em;
+}
 input.invalid {
     border-color: #a2101f;
     border-width: 3px;
     background-color: #ffacb3;
 }
+label {
+    margin: 0.25em;
+}
+
+
