@@ -30,30 +30,9 @@ import ColorWellButton from "./controls/ColorWellButton.jsx";
 import PreviewPanel from "./PreviewPanel.jsx"
 import ResizePanel from "./ResizePanel.jsx";
 import {KEYBOARD} from "./u";
+import { PencilTool, MoveTool } from "./Tools.jsx";
 
 var REQUIRE_AUTH = true;
-
-
-class PencilTool {
-    constructor(app) {
-        this.app = app;
-    }
-    mouseDown(surf, pt) {
-        this.mouseDrag(surf,pt);
-    }
-    mouseDrag(surf,pt) {
-        this.app.setPixel(pt,this.app.state.selectedColor);
-    }
-    mouseUp(surf){}
-    contextMenu(surf,pt) {
-        this.app.selectColor(DocStore.getDoc().model.getData(pt));
-    }
-    getOptionsPanel() {
-        return <label>none</label>
-    }
-
-}
-
 
 class EyedropperTool {
     constructor(app) {
@@ -89,60 +68,6 @@ class EraserTool {
     }
 }
 
-class MoveTool {
-    constructor(app) {
-        this.app = app;
-    }
-    mouseDown(surf,pt) {
-        this.prev = pt;
-    }
-    mouseDrag(surf,pt) {
-        var diff = {
-            x: pt.x - this.prev.x,
-            y: pt.y - this.prev.y
-        };
-        this.shift(diff);
-        this.prev = pt;
-    }
-    shift(diff){
-        if(this.app.state.shiftLayerOnly) {
-            this.app.getModel().shiftSelectedLayer(diff);
-        } else {
-            this.app.getModel().shiftLayers(diff);
-        }
-    }
-    toggleLayerButton() {
-        this.app.setState({ shiftLayerOnly:!this.app.state.shiftLayerOnly});
-    }
-    mouseUp() {}
-    getOptionsPanel() {
-        return <div className="group">
-            <ToggleButton
-                onToggle={this.toggleLayerButton.bind(this)}
-                selected={this.app.state.shiftLayerOnly}
-            >only selected layer</ToggleButton>
-        </div>
-    }
-    keyDown(e) {
-        if(e.keyCode == KEYBOARD.ARROW_RIGHT) {
-            this.shift({x:1,y:0});
-            return true;
-        }
-        if(e.keyCode == KEYBOARD.ARROW_LEFT) {
-            this.shift({x:-1,y:0});
-            return true;
-        }
-        if(e.keyCode == KEYBOARD.ARROW_UP) {
-            this.shift({x:0,y:-1});
-            return true;
-        }
-        if(e.keyCode == KEYBOARD.ARROW_DOWN) {
-            this.shift({x:0,y:1});
-            return true;
-        }
-        return false;
-    }
-}
 
 
 class App extends React.Component {
@@ -236,6 +161,14 @@ class DocPanel extends React.Component {
         if(!layer) return;
         if(!model.isLayerVisible(layer)) return;
         model.setPixel(pt,new_color);
+        this.appendRecentColor(new_color);
+    }
+    drawStamp(pt, stamp, new_color) {
+        var model = this.props.doc.model;
+        var layer = model.getCurrentLayer();
+        if(!layer) return;
+        if(!model.isLayerVisible(layer)) return;
+        model.drawStamp(pt,stamp);
         this.appendRecentColor(new_color);
     }
     shiftLayers(pt) {

@@ -165,6 +165,9 @@ export default class BitmapModel {
             () => this.setData(pt, new_color,layer)
         );
     }
+    drawStamp(pt, stamp) {
+        console.log("doing nothing");
+    }
     shiftLayers(pt) {
         let redo = () => {
             this.layers.forEach((l) => this.shiftLayer(l,pt));
