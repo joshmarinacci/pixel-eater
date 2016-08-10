@@ -1,9 +1,8 @@
-require('./flexbox.css');
-require('./components.css');
-require('../../node_modules/font-awesome/css/font-awesome.css')
+require('font-awesome/css/font-awesome.css');
 require('appy-style/src/layout.css');
 require('appy-style/src/dialog.css');
 require('appy-style/src/look.css');
+require('./components.css');
 
 import React from "react";
 import ReactDOM from "react-dom";
@@ -31,30 +30,9 @@ import ColorWellButton from "./controls/ColorWellButton.jsx";
 import PreviewPanel from "./PreviewPanel.jsx"
 import ResizePanel from "./ResizePanel.jsx";
 import {KEYBOARD} from "./u";
+import { PencilTool, MoveTool } from "./Tools.jsx";
 
 var REQUIRE_AUTH = true;
-
-
-class PencilTool {
-    constructor(app) {
-        this.app = app;
-    }
-    mouseDown(surf, pt) {
-        this.mouseDrag(surf,pt);
-    }
-    mouseDrag(surf,pt) {
-        this.app.setPixel(pt,this.app.state.selectedColor);
-    }
-    mouseUp(surf){}
-    contextMenu(surf,pt) {
-        this.app.selectColor(DocStore.getDoc().model.getData(pt));
-    }
-    getOptionsPanel() {
-        return <label>none</label>
-    }
-
-}
-
 
 class EyedropperTool {
     constructor(app) {
@@ -90,60 +68,6 @@ class EraserTool {
     }
 }
 
-class MoveTool {
-    constructor(app) {
-        this.app = app;
-    }
-    mouseDown(surf,pt) {
-        this.prev = pt;
-    }
-    mouseDrag(surf,pt) {
-        var diff = {
-            x: pt.x - this.prev.x,
-            y: pt.y - this.prev.y
-        };
-        this.shift(diff);
-        this.prev = pt;
-    }
-    shift(diff){
-        if(this.app.state.shiftLayerOnly) {
-            this.app.getModel().shiftSelectedLayer(diff);
-        } else {
-            this.app.getModel().shiftLayers(diff);
-        }
-    }
-    toggleLayerButton() {
-        this.app.setState({ shiftLayerOnly:!this.app.state.shiftLayerOnly});
-    }
-    mouseUp() {}
-    getOptionsPanel() {
-        return <div className="group">
-            <ToggleButton
-                onToggle={this.toggleLayerButton.bind(this)}
-                selected={this.app.state.shiftLayerOnly}
-            >only selected layer</ToggleButton>
-        </div>
-    }
-    keyDown(e) {
-        if(e.keyCode == KEYBOARD.ARROW_RIGHT) {
-            this.shift({x:1,y:0});
-            return true;
-        }
-        if(e.keyCode == KEYBOARD.ARROW_LEFT) {
-            this.shift({x:-1,y:0});
-            return true;
-        }
-        if(e.keyCode == KEYBOARD.ARROW_UP) {
-            this.shift({x:0,y:-1});
-            return true;
-        }
-        if(e.keyCode == KEYBOARD.ARROW_DOWN) {
-            this.shift({x:0,y:1});
-            return true;
-        }
-        return false;
-    }
-}
 
 
 class App extends React.Component {
@@ -237,6 +161,14 @@ class DocPanel extends React.Component {
         if(!layer) return;
         if(!model.isLayerVisible(layer)) return;
         model.setPixel(pt,new_color);
+        this.appendRecentColor(new_color);
+    }
+    drawStamp(pt, stamp, new_color) {
+        var model = this.props.doc.model;
+        var layer = model.getCurrentLayer();
+        if(!layer) return;
+        if(!model.isLayerVisible(layer)) return;
+        model.drawStamp(pt,stamp);
         this.appendRecentColor(new_color);
     }
     shiftLayers(pt) {
@@ -358,6 +290,10 @@ class DocPanel extends React.Component {
             this.selectMove();
         }
     }
+    selectBGColor(color) {
+        PopupState.done();
+        this.props.doc.model.setBackgroundColor(color);
+    }
     render() {
         var loggedOut = UserStore.getUser()==null;
         var model = this.props.doc.model;
@@ -374,7 +310,7 @@ class DocPanel extends React.Component {
                 <Button onClick={this.execUndo.bind(this)} disabled={!model.isUndoAvailable()} tooltip="Undo"><i className="fa fa-undo"/></Button>
                 <Button onClick={this.execRedo.bind(this)} disabled={!model.isRedoAvailable()} tooltip="Redo"><i className="fa fa-repeat"/></Button>
                 <ToggleButton onToggle={this.toggleGrid.bind(this)} selected={this.state.drawGrid} tooltip="Show/Hide Grid"><i className="fa fa-th"/></ToggleButton>
-                <ToggleButton onToggle={this.togglePreview.bind(this)} selected={this.state.drawPreview} tooltip="Show/Hide Preview"><i className="fa fa-image"/></ToggleButton>
+                <ToggleButton onToggle={this.togglePreview.bind(this)} selected={this.state.drawPreview} tooltip="Show/Hide Preview">Preview</ToggleButton>
                 <label/>
                 <Button onClick={this.newDoc.bind(this)}    disabled={loggedOut} tooltip="New Image"><i className="fa fa-file-o"/></Button>
                 <Button onClick={this.saveDoc.bind(this)}   disabled={loggedOut} tooltip="Save Image"><i className="fa fa-save"/></Button>
@@ -383,6 +319,9 @@ class DocPanel extends React.Component {
             </div>
             <div className="vbox grow">
                 <div className="panel hbox top">
+                    <DropdownButton icon="gear" tooltip="Background color">
+                        <ColorPicker model={this.props.doc.model} onSelectColor={this.selectBGColor.bind(this)}/>
+                    </DropdownButton>
                     <input type="text" ref="doc_title" value={this.props.doc.title} onChange={this.titleEdited.bind(this)}/>
                     <label className="grow"></label>
                     <Button onClick={this.zoomIn.bind(this)}><i className="fa fa-plus"/></Button>
@@ -395,7 +334,7 @@ class DocPanel extends React.Component {
                     </DropdownButton>
                 </div>
                 <div className="panel hbox top">
-                    <label>options</label>
+                    <label><b>options</b></label>
                     {this.state.selected_tool.getOptionsPanel()}
                 </div>
                 <DrawingSurface

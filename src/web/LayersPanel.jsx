@@ -119,10 +119,6 @@ export default class LayersPanel extends React.Component {
         if(n+1 < this.props.model.layers.length) this.props.model.moveLayerTo(cur,n+1);
         this.props.model.setSelectedLayer(cur);
     }
-    selectBGColor(color) {
-        PopupState.done();
-        this.props.model.setBackgroundColor(color);
-    }
     itemDropped(remove,insert,item) {
         this.props.model.moveLayerTo(item,insert);
         this.props.model.setSelectedLayer(item);
@@ -132,22 +128,18 @@ export default class LayersPanel extends React.Component {
     }
     render() {
         var model = this.props.model;
-        return <div className="vbox">
+        return <div className="vbox grow">
             <DraggableList className="grow" id='layers-panel' style={{width:'10em'}}
                            data={model.getLayers()}
                            templateFunction={this.makeLayerItem.bind(this)}
                            onDropItem={this.itemDropped.bind(this)}
             />
-            <div className="hbox">
+            <div className="hbox panel bottom">
                 <button onClick={this.addLayer.bind(this)}><i className="fa fa-plus"/></button>
                 <button onClick={this.moveLayerUp.bind(this)}><i className="fa fa-arrow-up"/></button>
                 <button onClick={this.moveLayerDown.bind(this)}><i className="fa fa-arrow-down"/></button>
-                <label></label>
+                <label className="grow"></label>
                 <button onClick={this.deleteLayer.bind(this)}><i className="fa fa-trash"/></button>
-                <label></label>
-                <DropdownButton icon="gear" direction="upper-left" tooltip="Background color">
-                    <ColorPicker model={model} onSelectColor={this.selectBGColor.bind(this)}/>
-                </DropdownButton>
             </div>
         </div>
     }
