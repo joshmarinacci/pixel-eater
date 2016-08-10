@@ -166,7 +166,43 @@ export default class BitmapModel {
         );
     }
     drawStamp(pt, stamp) {
-        console.log("doing nothing");
+        var layer = this.getCurrentLayer();
+        var oldStamp = this.stampFromLayer(pt,stamp,layer);
+        let redo = () => {
+            this.stampOnLayer(pt,stamp,layer);
+            this.fireUpdate();
+        };
+        let undo = () => {
+            this.stampOnLayer(pt,oldStamp,layer);
+            this.fireUpdate();
+        };
+        redo();
+        this.appendCommand(undo,redo);
+    }
+    stampFromLayer(pt,stamp,layer) {
+        var data = [];
+        for(var i=0; i<stamp.w; i++) {
+            for(var j=0; j<stamp.h; j++) {
+                var ia = i + j*stamp.w;
+                var ib = (pt.x+i) + (pt.y+j)*this.pw;
+                data[ia] = layer.data[ib];
+                //layer.data[ib] = stamp.data[ia];
+            }
+        }
+        return {
+            w:stamp.w,
+            h:stamp.h,
+            data:data
+        }
+    }
+    stampOnLayer(pt,stamp,layer) {
+        for(var i=0; i<stamp.w; i++) {
+            for(var j=0; j<stamp.h; j++) {
+                var ia = i + j*stamp.w;
+                var ib = (pt.x+i) + (pt.y+j)*this.pw;
+                layer.data[ib] = stamp.data[ia];
+            }
+        }
     }
     shiftLayers(pt) {
         let redo = () => {

@@ -15,14 +15,17 @@ export class PencilTool {
         this.app.drawStamp(pt,this.genStamp(this.size, col), col );
     }
     genStamp(size,col) {
-        return {w:1, h:1, data:[col]};
+        var data = [];
+        for(var i=0; i<size*size; i++) {
+            data[i] = col;
+        }
+        return {w:size, h:size, data:data};
     }
     mouseUp(surf){}
     contextMenu(surf,pt) {
         this.app.selectColor(DocStore.getDoc().model.getData(pt));
     }
     setPencilSize(size) {
-        console.log("new size is",size);
         this.size = size;
     }
     getOptionsPanel() {
