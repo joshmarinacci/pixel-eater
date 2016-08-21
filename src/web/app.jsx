@@ -88,6 +88,7 @@ class DocPanel extends React.Component {
         this.state = {
             drawGrid:true,
             drawPreview:false,
+            showLayers:true,
             selectedColor:1,
             scale: 16,
             dirty:false
@@ -124,6 +125,9 @@ class DocPanel extends React.Component {
     }
     togglePreview() {
         this.setState({ drawPreview: !this.state.drawPreview})
+    }
+    toggleLayers() {
+        this.setState({ showLayers: !this.state.showLayers})
     }
     selectColor(color) {
         this.setState({selectedColor:color});
@@ -316,6 +320,7 @@ class DocPanel extends React.Component {
                 <Button onClick={this.saveDoc.bind(this)}   disabled={loggedOut} tooltip="Save Image"><i className="fa fa-save"/></Button>
                 <Button onClick={this.openDoc.bind(this)}   disabled={loggedOut} tooltip="Open Image"><i className="fa fa-folder-open"/></Button>
                 <Button onClick={this.resizeDoc.bind(this)} tooltip="Resize Doc">resize</Button>
+                <ToggleButton onToggle={this.toggleLayers.bind(this)} selected={this.state.showLayers} tooltip="Show/Hide Layers">Layers</ToggleButton>
             </div>
             <div className="vbox grow">
                 <div className="panel hbox top">
@@ -352,7 +357,7 @@ class DocPanel extends React.Component {
             </div>
             {this.state.drawPreview?<div className="vbox panel right"><PreviewPanel model={model}/></div>:""}
             <div className="vbox panel right">
-                <LayersPanel model={model}/>
+                {this.state.showLayers?<LayersPanel model={model}/>:""}
             </div>
 
             <LoginPanel
