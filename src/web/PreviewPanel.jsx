@@ -13,6 +13,8 @@ export default class PreviewPanel extends React.Component {
     drawCanvas() {
         let c = this.refs.canvas.getContext('2d');
         var w = this.props.model.getWidth();
+        c.fillStyle = 'white';
+        c.fillRect(0,0,this.refs.canvas.width,this.refs.canvas.height);
         this.drawScaled(c,0,w*0,w,1);
         this.drawScaled(c,0,w*1,w,2);
         this.drawScaled(c,0,w*3,w,4);
@@ -22,7 +24,7 @@ export default class PreviewPanel extends React.Component {
     drawScaled(c,ox,oy,w,s) {
         c.save();
         c.translate(ox,oy);
-        c.fillStyle = 'white';
+        c.fillStyle = this.props.model.lookupCanvasColor(this.props.model.getBackgroundColor());
         c.fillRect(0,0,w*s,w*s);
         c.strokeStyle = 'black';
         c.strokeRect(0+0.5,0.5,w*s,w*s);
