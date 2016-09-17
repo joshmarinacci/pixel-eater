@@ -6,6 +6,7 @@ button.color-well {
 
 button:disabled {
     color: gray;
+    background-color: lightgrey;
 }
 
 .panel {

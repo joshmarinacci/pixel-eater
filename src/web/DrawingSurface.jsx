@@ -18,19 +18,22 @@ class Point {
 
 export default class DrawingSurface extends React.Component {
     constructor(props) {
-        super(props)
+        super(props);
         this.state = {
             down:false,
             xoff:0,
             yoff:0,
             width:props.model.getWidth(),
-            height:props.model.getHeight()
+            height:props.model.getHeight(),
+            hoverEffect:null,
+            hoverPoint:null
         };
 
         var self = this;
         this.props.model.changed(function() {
             self.drawCanvas();
         });
+
 
     }
 
@@ -41,6 +44,12 @@ export default class DrawingSurface extends React.Component {
         this.drawBackground(c);
         this.props.model.getReverseLayers().map((layer) => this.drawLayer(c, layer));
         if(this.props.drawGrid === true) this.drawGrid(c);
+        if(this.state.hoverEffect && this.state.hoverPoint) {
+            c.save();
+            c.translate(0.5+this.state.xoff,0.5+this.state.yoff);
+            this.state.hoverEffect(c,this.props.scale,this.state.hoverPoint);
+            c.restore();
+        }
     }
 
     drawBackground(c) {
@@ -98,6 +107,7 @@ export default class DrawingSurface extends React.Component {
             width:props.model.getWidth(),
             height:props.model.getHeight()
         });
+        if(props.tool) this.setState({hoverEffect: props.tool.hoverEffect});
         setTimeout(this.drawCanvas.bind(this),0);
     }
 
@@ -124,8 +134,9 @@ export default class DrawingSurface extends React.Component {
 
     mouseMove(e) {
         e.stopPropagation();
-        if(!this.state.down) return;
         var modelPoint = this.getModelPoint(e);
+        this.setState({hoverPoint:modelPoint});
+        if(!this.state.down) return setTimeout(this.drawCanvas.bind(this),0);
         if(!modelPoint.equals(this.state.prevPoint)) {
             this.props.tool.mouseDrag(this,modelPoint);
             this.setState({prevPoint:modelPoint});

@@ -29,8 +29,9 @@ import ToggleButton from "./controls/ToggleButton.jsx"
 import ColorWellButton from "./controls/ColorWellButton.jsx";
 import PreviewPanel from "./PreviewPanel.jsx"
 import ResizePanel from "./ResizePanel.jsx";
+import AlertPanel from "./AlertPanel.jsx";
 import {KEYBOARD} from "./u";
-import { PencilTool, MoveTool } from "./Tools.jsx";
+import { PencilTool, EraserTool, MoveTool } from "./Tools.jsx";
 
 var REQUIRE_AUTH = true;
 
@@ -52,21 +53,6 @@ class EyedropperTool {
     }
 }
 
-class EraserTool {
-    constructor(app) {
-        this.app = app;
-    }
-    mouseDown(surf,pt) {
-        this.mouseDrag(surf,pt);
-    }
-    mouseDrag(surf,pt) {
-        this.app.setPixel(pt, -1);
-    }
-    mouseUp() {}
-    getOptionsPanel() {
-        return <label>none</label>
-    }
-}
 
 
 
@@ -195,7 +181,21 @@ class DocPanel extends React.Component {
     }
 
     openDoc() {
-        DocStore.loadDocList((docs)=>this.setState({doclist:docs, openVisible:true}));
+        if(this.state.dirty) {
+            this.refs.alert.show({
+                text:'Document not saved!',
+                okayText:'Discard Changes',
+                cancelText:'Cancel',
+                onCancel:()=> this.refs.alert.hide(),
+                onOkay:()=> {
+                    this.refs.alert.hide();
+                    DocStore.loadDocList((docs)=>this.setState({doclist:docs, openVisible:true}));
+                }
+            });
+        } else {
+            DocStore.loadDocList((docs)=>this.setState({doclist:docs, openVisible:true}));
+        }
+
     }
     openDocCanceled() {
         this.setState({openVisible:false})
@@ -203,6 +203,7 @@ class DocPanel extends React.Component {
     openDocPerform(id) {
         this.setState({doclist:[], openVisible:false})
         DocStore.loadDoc(id);
+        this.setState({dirty:false});
     }
 
     openShare() {
@@ -219,7 +220,20 @@ class DocPanel extends React.Component {
     }
 
     newDoc() {
-        this.setState({newVisible:true});
+        if(this.state.dirty) {
+            this.refs.alert.show({
+                text:'Document not saved!',
+                okayText:'Discard Changes',
+                cancelText:'Cancel',
+                onCancel:()=> this.refs.alert.hide(),
+                onOkay:()=> {
+                    this.refs.alert.hide();
+                    this.setState({newVisible: true});
+                }
+            });
+        } else {
+            this.setState({newVisible: true});
+        }
     }
     newDocCanceled() {
         this.setState({newVisible:false});
@@ -228,6 +242,7 @@ class DocPanel extends React.Component {
         this.setState({newVisible:false});
         var doc = DocStore.newDoc();
         doc.model = new BitmapModel(settings.w,settings.h);
+        doc.title = settings.title;
         DocStore.setDoc(doc);
         this.setState({ doc: doc});
     }
@@ -359,6 +374,8 @@ class DocPanel extends React.Component {
             <div className="vbox panel right">
                 {this.state.showLayers?<LayersPanel model={model}/>:""}
             </div>
+
+            <AlertPanel ref="alert"/>
 
             <LoginPanel
                 visible={this.state.loginVisible}

@@ -29,12 +29,16 @@ function fillRect(c,x,y,w,h) {
 
 module.exports = {
     renderBitmap(model,scale) {
-        console.log(model.width, model.height);
+        console.log(model.width, model.height, model.bgcolor);
         var img = PI.make(model.width*scale,model.height*scale);
 
         var c = img.getContext('2d');
         //c.clearRect(0,0,16*scale,16*scale);
+        //draw the background
         c.fillStyle = "#000000";
+        if(typeof model.bgcolor !== 'undefined') {
+            c.fillStyle = lookupColor(model, model.bgcolor);
+        }
         c.fillRect(0,0,model.width*scale,model.height*scale);
         model.layers.map((layer) => drawLayer(c,layer, model, scale));
         return img;
