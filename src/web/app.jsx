@@ -31,7 +31,7 @@ import PreviewPanel from "./PreviewPanel.jsx"
 import ResizePanel from "./ResizePanel.jsx";
 import AlertPanel from "./AlertPanel.jsx";
 import {KEYBOARD} from "./u";
-import { PencilTool, MoveTool } from "./Tools.jsx";
+import { PencilTool, EraserTool, MoveTool } from "./Tools.jsx";
 
 var REQUIRE_AUTH = true;
 
@@ -53,21 +53,6 @@ class EyedropperTool {
     }
 }
 
-class EraserTool {
-    constructor(app) {
-        this.app = app;
-    }
-    mouseDown(surf,pt) {
-        this.mouseDrag(surf,pt);
-    }
-    mouseDrag(surf,pt) {
-        this.app.setPixel(pt, -1);
-    }
-    mouseUp() {}
-    getOptionsPanel() {
-        return <label>none</label>
-    }
-}
 
 
 
