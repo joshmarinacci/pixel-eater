@@ -31,9 +31,9 @@ export class PencilTool {
     }
     getOptionsPanel() {
         return <div className="hbox">
-            <button onClick={this.setPencilSize.bind(this,1)}>1px</button>
-            <button onClick={this.setPencilSize.bind(this,3)}>3px</button>
-            <button onClick={this.setPencilSize.bind(this,5)}>5px</button>
+            <ToggleButton selected={this.size == 1} onToggle={this.setPencilSize.bind(this,1)}>1px</ToggleButton>
+            <ToggleButton selected={this.size == 3} onToggle={this.setPencilSize.bind(this,3)}>3px</ToggleButton>
+            <ToggleButton selected={this.size == 5} onToggle={this.setPencilSize.bind(this,5)}>5px</ToggleButton>
         </div>
     }
 
