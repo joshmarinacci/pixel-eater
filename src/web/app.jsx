@@ -196,7 +196,21 @@ class DocPanel extends React.Component {
     }
 
     openDoc() {
-        DocStore.loadDocList((docs)=>this.setState({doclist:docs, openVisible:true}));
+        if(this.state.dirty) {
+            this.refs.alert.show({
+                text:'Document not saved!',
+                okayText:'Discard Changes',
+                cancelText:'Cancel',
+                onCancel:()=> this.refs.alert.hide(),
+                onOkay:()=> {
+                    this.refs.alert.hide();
+                    DocStore.loadDocList((docs)=>this.setState({doclist:docs, openVisible:true}));
+                }
+            });
+        } else {
+            DocStore.loadDocList((docs)=>this.setState({doclist:docs, openVisible:true}));
+        }
+
     }
     openDocCanceled() {
         this.setState({openVisible:false})
@@ -228,7 +242,7 @@ class DocPanel extends React.Component {
                 cancelText:'Cancel',
                 onCancel:()=> this.refs.alert.hide(),
                 onOkay:()=> {
-                    this.refs.alert.hide(),
+                    this.refs.alert.hide();
                     this.setState({newVisible: true});
                 }
             });
