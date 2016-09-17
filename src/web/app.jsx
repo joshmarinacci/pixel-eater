@@ -29,6 +29,7 @@ import ToggleButton from "./controls/ToggleButton.jsx"
 import ColorWellButton from "./controls/ColorWellButton.jsx";
 import PreviewPanel from "./PreviewPanel.jsx"
 import ResizePanel from "./ResizePanel.jsx";
+import AlertPanel from "./AlertPanel.jsx";
 import {KEYBOARD} from "./u";
 import { PencilTool, MoveTool } from "./Tools.jsx";
 
@@ -203,6 +204,7 @@ class DocPanel extends React.Component {
     openDocPerform(id) {
         this.setState({doclist:[], openVisible:false})
         DocStore.loadDoc(id);
+        this.setState({dirty:false});
     }
 
     openShare() {
@@ -219,7 +221,20 @@ class DocPanel extends React.Component {
     }
 
     newDoc() {
-        this.setState({newVisible:true});
+        if(this.state.dirty) {
+            this.refs.alert.show({
+                text:'Document not saved!',
+                okayText:'Discard Changes',
+                cancelText:'Cancel',
+                onCancel:()=> this.refs.alert.hide(),
+                onOkay:()=> {
+                    this.refs.alert.hide(),
+                    this.setState({newVisible: true});
+                }
+            });
+        } else {
+            this.setState({newVisible: true});
+        }
     }
     newDocCanceled() {
         this.setState({newVisible:false});
@@ -360,6 +375,8 @@ class DocPanel extends React.Component {
             <div className="vbox panel right">
                 {this.state.showLayers?<LayersPanel model={model}/>:""}
             </div>
+
+            <AlertPanel ref="alert"/>
 
             <LoginPanel
                 visible={this.state.loginVisible}
