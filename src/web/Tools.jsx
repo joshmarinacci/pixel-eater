@@ -7,6 +7,13 @@ export class PencilTool {
     constructor(app) {
         this.app = app;
         this.size = 1;
+        this.hoverEffect = (c,scale,pt) => {
+            var sc = scale;
+            c.save();
+            c.strokeStyle = 'orange';
+            c.strokeRect(pt.x*sc, pt.y*sc, sc*this.size,sc*this.size);
+            c.restore();
+        }
     }
     mouseDown(surf, pt) {
         this.mouseDrag(surf,pt);
@@ -36,6 +43,7 @@ export class PencilTool {
             <ToggleButton selected={this.size == 5} onToggle={this.setPencilSize.bind(this,5)}>5px</ToggleButton>
         </div>
     }
+
 
 }
 
