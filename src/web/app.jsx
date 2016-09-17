@@ -228,6 +228,7 @@ class DocPanel extends React.Component {
         this.setState({newVisible:false});
         var doc = DocStore.newDoc();
         doc.model = new BitmapModel(settings.w,settings.h);
+        doc.title = settings.title;
         DocStore.setDoc(doc);
         this.setState({ doc: doc});
     }
