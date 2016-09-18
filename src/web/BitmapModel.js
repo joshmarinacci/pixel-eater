@@ -198,6 +198,10 @@ export default class BitmapModel {
     stampOnLayer(pt,stamp,layer) {
         for(var i=0; i<stamp.w; i++) {
             for(var j=0; j<stamp.h; j++) {
+                if(pt.x+i >= this.pw) continue;
+                if(pt.x+i < 0) continue;
+                if(pt.y+j >= this.ph) continue;
+                if(pt.y+j < 0) continue;
                 var ia = i + j*stamp.w;
                 var ib = (pt.x+i) + (pt.y+j)*this.pw;
                 layer.data[ib] = stamp.data[ia];
