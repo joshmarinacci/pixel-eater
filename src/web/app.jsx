@@ -130,12 +130,14 @@ class DocPanel extends React.Component {
     selectMove() {
         this.setState({ selected_tool: this.state.move_tool});
     }
-    exportPNG() {
+    exportPNG(scale) {
         PopupState.done();
         this.saveDoc(function() {
             document.location.href = Config.url("/preview/")
                 + DocStore.getDoc().id
-                + "?download=true&"+Math.floor(Math.random()*100000);
+                + "?download=true"
+                + "&scale="+scale
+                +"&"+Math.floor(Math.random()*100000);
         });
     }
     saveDoc(cb) {
@@ -348,7 +350,10 @@ class DocPanel extends React.Component {
                     <Button onClick={this.zoomOut.bind(this)}><i className="fa fa-minus"/></Button>
                     <DropdownButton icon="share" direction="left">
                         <li className="disabled">Tweet</li>
-                        <li onClick={this.exportPNG.bind(this)}>Export as PNG</li>
+                        <li onClick={this.exportPNG.bind(this,1)}>Export as PNG 1x</li>
+                        <li onClick={this.exportPNG.bind(this,2)}>Export as PNG 2x</li>
+                        <li onClick={this.exportPNG.bind(this,4)}>Export as PNG 4x</li>
+                        <li onClick={this.exportPNG.bind(this,8)}>Export as PNG 8x</li>
                         <li className="disabled">Export as JSON</li>
                         <li onClick={this.openShare.bind(this)}>Get Sharing Link</li>
                     </DropdownButton>
