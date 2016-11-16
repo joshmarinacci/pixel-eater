@@ -40,7 +40,10 @@ module.exports = {
             c.fillStyle = lookupColor(model, model.bgcolor);
         }
         c.fillRect(0,0,model.width*scale,model.height*scale);
-        model.layers.map((layer) => drawLayer(c,layer, model, scale));
+        var layers = model.layers.slice();
+        layers.reverse();
+        layers = layers.filter((l) => l.visible);
+        layers.map((layer) => drawLayer(c,layer, model, scale));
         return img;
     }
 }
