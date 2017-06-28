@@ -1,5 +1,6 @@
 # pixel-eater
-Eat All The Pixels with this web-based pixel art editor.
+
+Eat All The Pixels with this web-based pixel art editor
 
 There is a server for saving, loading, and rendering images. All drawing is done in the browser.
 The entire UI is in React with custom components.  The UI supports layers and different cursor 
@@ -10,6 +11,7 @@ password. You can download what you've drawn using the 'share' button in the upp
 main drawing area. (it looks like a right turned arrow).
 
 
+# Instructions
 
 start the server with `npm run server`
 
@@ -17,6 +19,10 @@ build with `npm run build`
 
 open the editor with the file `dist/index.html` in your browser
 
+# future work
+
+* make the data model more immutable
+* add keybindings
 
  
  
