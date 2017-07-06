@@ -2,6 +2,7 @@ import React from "react";
 import ToggleButton from "./ToggleButton.jsx"
 import {KEYBOARD} from "./u";
 import DocStore from "./DocStore.js";
+import {HBox} from "appy-comps";
 
 export class PencilTool {
     constructor(app) {
@@ -13,7 +14,11 @@ export class PencilTool {
             c.strokeStyle = 'orange';
             c.strokeRect(pt.x*sc, pt.y*sc, sc*this.size,sc*this.size);
             c.restore();
-        }
+        };
+
+        this.setSize1 = () => this.size = 1;
+        this.setSize3 = () => this.size = 3;
+        this.setSize5 = () => this.size = 5;
     }
     mouseDown(surf, pt) {
         this.mouseDrag(surf,pt);
@@ -33,18 +38,13 @@ export class PencilTool {
     contextMenu(surf,pt) {
         this.app.selectColor(DocStore.getDoc().model.getData(pt));
     }
-    setSize(size) {
-        this.size = size;
-    }
     getOptionsPanel() {
-        return <div className="hbox">
-            <ToggleButton selected={this.size === 1} onToggle={this.setSize.bind(this,1)}>1px</ToggleButton>
-            <ToggleButton selected={this.size === 3} onToggle={this.setSize.bind(this,3)}>3px</ToggleButton>
-            <ToggleButton selected={this.size === 5} onToggle={this.setSize.bind(this,5)}>5px</ToggleButton>
-        </div>
+        return <HBox>
+            <ToggleButton selected={this.size === 1} onToggle={this.setSize1}>1px</ToggleButton>
+            <ToggleButton selected={this.size === 3} onToggle={this.setSize3}>3px</ToggleButton>
+            <ToggleButton selected={this.size === 5} onToggle={this.setSize5}>5px</ToggleButton>
+        </HBox>
     }
-
-
 }
 
 export class EraserTool {
@@ -58,6 +58,9 @@ export class EraserTool {
             c.strokeRect(pt.x*sc, pt.y*sc, sc*this.size,sc*this.size);
             c.restore();
         }
+        this.setSize1 = () => this.size = 1;
+        this.setSize3 = () => this.size = 3;
+        this.setSize5 = () => this.size = 5;
     }
     mouseDown(surf,pt) {
         this.mouseDrag(surf,pt);
@@ -68,9 +71,6 @@ export class EraserTool {
         this.app.drawStamp(pt,this.genStamp(this.size, col), col );
     }
     mouseUp() {}
-    setSize(size) {
-        this.size = size;
-    }
     genStamp(size,col) {
         let data = [];
         for(var i=0; i<size*size; i++) {
@@ -79,11 +79,11 @@ export class EraserTool {
         return {w:size, h:size, data:data};
     }
     getOptionsPanel() {
-        return <div className="hbox">
-            <ToggleButton selected={this.size === 1} onToggle={this.setSize.bind(this,1)}>1px</ToggleButton>
-            <ToggleButton selected={this.size === 3} onToggle={this.setSize.bind(this,3)}>3px</ToggleButton>
-            <ToggleButton selected={this.size === 5} onToggle={this.setSize.bind(this,5)}>5px</ToggleButton>
-        </div>
+        return <HBox>
+            <ToggleButton selected={this.size === 1} onToggle={this.setSize1}>1px</ToggleButton>
+            <ToggleButton selected={this.size === 3} onToggle={this.setSize3}>3px</ToggleButton>
+            <ToggleButton selected={this.size === 5} onToggle={this.setSize5}>5px</ToggleButton>
+        </HBox>
     }
 }
 

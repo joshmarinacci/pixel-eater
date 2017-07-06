@@ -1,63 +1,19 @@
-import React from "react";
-import Button from "./Button.jsx";
-import PopupState from "./PopupState.jsx";
+import React, {Component} from "react";
+import {PopupManager} from "appy-comps";
 
-export default class DropdownButton extends React.Component {
+export default class DropdownButton extends Component {
 
     constructor(props) {
         super(props);
         this.state = {
             open:false
-        }
+        };
+        this.toggle = () => PopupManager.show(this.props.children, this.refs.button);
     }
-
-
-    componentDidMount() {
-        this.listener = PopupState.listen((src)=>{
-            if(src !== this) this.setState({open:false});
-        })
-    }
-    componentWillUnmount() {
-        PopupState.unlisten(this.listener);
-    }
-
-
-    open() {
-        this.setState({open:true});
-    }
-    toggle() {
-        this.setState({open:!this.state.open});
-        PopupState.open(this);
-    }
-
-    close() {
-        this.setState({open:false})
-    }
-
 
     render() {
         var icon = "";
-        if(this.props.icon) {
-            icon = "fa fa-"+this.props.icon;
-        }
-
-        return <div className="dropdown-container">
-            <Button tooltip="Export / Share" onClick={this.toggle.bind(this)}><i className={icon}/></Button>
-            {this.renderDropdown()}
-        </div>
-    }
-
-    renderDropdown() {
-        if(this.state.open) {
-            var direction = "down";
-            if(this.props.direction) {
-                direction = this.props.direction;
-            }
-            return <ul className={"dropdown-list " + direction}>
-                {this.props.children}
-            </ul>
-        } else {
-            return ""
-        }
+        if(this.props.icon) icon = "fa fa-"+this.props.icon;
+        return <button ref='button' tooltip="Export / Share" onClick={this.toggle}><i className={icon}/></button>
     }
 }

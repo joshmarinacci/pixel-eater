@@ -10,14 +10,13 @@ export default class RegistrationPanel extends Component {
         }
     }
     tryRegister(e) {
-        var email = this.refs.email.value;
-        var password = this.refs.password.value;
-        var self = this;
-        UserStore.register(email,password,function(err,user) {
+        let email = this.refs.email.value;
+        let password = this.refs.password.value;
+        UserStore.register(email,password,(err,user) => {
             if(err) {
-                self.setState({errorText: err.message});
+                this.setState({errorText: err.message});
             } else {
-                self.props.onCompleted(user);
+                this.props.onCompleted(user);
             }
         })
     }
