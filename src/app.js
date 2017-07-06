@@ -21,14 +21,12 @@ import OpenDocPanel from "./OpenDocPanel";
 import SharePanel from "./SharePanel";
 import LoginPanel from "./LoginPanel";
 import RegistrationPanel from "./RegistrationPanel";
-import {VBox, HBox, Spacer} from "appy-comps";
+import {VBox, HBox, Spacer, PopupContainer} from "appy-comps";
 import {KEYBOARD} from "./u";
 import { PencilTool, EraserTool, MoveTool } from "./Tools.jsx";
 import "font-awesome/css/font-awesome.css";
 import "./web/components.css";
-// import "appy-style/src/dialog.css";
 import "appy-style/src/look.css";
-// import "appy-style/src/layout.css";
 
 class EyedropperTool {
     constructor(app) {
@@ -312,11 +310,10 @@ class DocPanel extends React.Component {
     render() {
         var loggedOut = UserStore.getUser()===null;
         var model = this.props.doc.model;
+        let cp = <ColorPicker model={model} onSelectColor={this.selectColor.bind(this)}/>;
         return (<HBox fill className="panel">
 			<VBox className="panel left">
-				<ColorWellButton model={model} selectedColor={this.state.selectedColor}>
-					<ColorPicker model={model} onSelectColor={this.selectColor.bind(this)}/>
-				</ColorWellButton>
+				<ColorWellButton model={model} selectedColor={this.state.selectedColor} content={cp}/>
 				<ToggleButton onToggle={this.selectPencil.bind(this)} selected={this.state.selected_tool === this.state.pencil_tool} tooltip="Pencil"><i className="fa fa-pencil"></i></ToggleButton>
 				<ToggleButton onToggle={this.selectEyedropper.bind(this)} selected={this.state.selected_tool === this.state.eyedropper_tool} tooltip="Eyedropper"><i className="fa fa-eyedropper"></i></ToggleButton>
 				<ToggleButton onToggle={this.selectEraser.bind(this)} selected={this.state.selected_tool === this.state.eraser_tool} tooltip="Eraser"><i className="fa fa-eraser"></i></ToggleButton>
@@ -406,6 +403,7 @@ class DocPanel extends React.Component {
                 onCanceled={this.openShareCanceled.bind(this)}
                 id={DocStore.getDoc().id}
             />
+            <PopupContainer/>
         </HBox>)
     }
 }

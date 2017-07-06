@@ -1,19 +1,17 @@
-import React from "react";
+import React, {Component} from "react";
+import {PopupManager} from "appy-comps";
 
-import PopupContainer from "./PopupContainer.jsx"
-
-export default class ColorWellButton extends React.Component {
+export default class ColorWellButton extends Component {
     clicked() {
-        this.refs.popup.open();
+        PopupManager.show(this.props.content,this.refs.button);
     }
     render() {
-        return (<button className="color-well "
+        return (<button ref='button' className="color-well "
                         style={{
                        backgroundColor:this.props.model.lookupCanvasColor(this.props.selectedColor),
                        position:'relative'
                         }}
                         onClick={this.clicked.bind(this)}
-        ><i className="fa fa-fw"></i><PopupContainer ref="popup">{this.props.children}</PopupContainer>
-        </button>);
+        ><i className="fa fa-fw"></i></button>);
     }
 }
