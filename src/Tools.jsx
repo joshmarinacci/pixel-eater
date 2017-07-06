@@ -1,5 +1,5 @@
 import React from "react";
-import ToggleButton from "./controls/ToggleButton.jsx"
+import ToggleButton from "./ToggleButton.jsx"
 import {KEYBOARD} from "./u";
 import DocStore from "./DocStore.js";
 
