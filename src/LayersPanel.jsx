@@ -1,7 +1,4 @@
 import React from "react";
-// import DropdownButton from "./DropdownButton.jsx"
-// import ColorPicker from "./ColorPicker.jsx"
-// import PopupState from "./PopupState.jsx";
 import DraggableList from "./DraggableList.jsx";
 import {VBox, HBox, Spacer} from "appy-comps";
 
@@ -25,11 +22,11 @@ class LayerItem extends React.Component {
         this.props.model.setSelectedLayer(this.props.layer);
     }
     toggleVisibility() {
-        var vis = this.props.model.isLayerVisible(this.props.layer);
+        let vis = this.props.model.isLayerVisible(this.props.layer);
         this.props.model.setLayerVisible(this.props.layer, !vis);
     }
     changedOpacity() {
-        var opacity = this.refs.opacity.value;
+        let opacity = this.refs.opacity.value;
         this.setBack(opacity);
         this.setState({opacity:opacity+""});
     }
@@ -37,7 +34,7 @@ class LayerItem extends React.Component {
         this.setBack(this.refs.opacity.value);
     }
     setBack(sop) {
-        var opacity = parseFloat(sop);
+        let opacity = parseFloat(sop);
         if(Number.isNaN(opacity)) {
             this.setState({invalid:true});
             return;
@@ -74,9 +71,9 @@ class LayerItem extends React.Component {
         }
     }
     render() {
-        var cls = "layer hbox ";
-        if(this.props.model.getCurrentLayer() == this.props.layer) cls += "selected ";
-        var clsname = "fa ";
+        let cls = "layer hbox ";
+        if(this.props.model.getCurrentLayer() === this.props.layer) cls += "selected ";
+        let clsname = "fa ";
         if(this.props.model.isLayerVisible(this.props.layer)) {
             clsname += " fa-eye";
         } else {
@@ -100,22 +97,22 @@ class LayerItem extends React.Component {
 
 export default class LayersPanel extends React.Component {
     addLayer() {
-        var layer = this.props.model.appendLayer();
+        let layer = this.props.model.appendLayer();
         this.props.model.setSelectedLayer(layer);
     }
     deleteLayer() {
-        var sel = this.props.model.getCurrentLayer();
+        let sel = this.props.model.getCurrentLayer();
         this.props.model.deleteLayer(sel)
     }
     moveLayerUp() {
-        var cur = this.props.model.getCurrentLayer();
-        var n = this.props.model.getLayerIndex(cur);
+        let cur = this.props.model.getCurrentLayer();
+        let n = this.props.model.getLayerIndex(cur);
         if(n > 0) this.props.model.moveLayerTo(cur,n-1);
         this.props.model.setSelectedLayer(cur);
     }
     moveLayerDown() {
-        var cur = this.props.model.getCurrentLayer();
-        var n = this.props.model.getLayerIndex(cur);
+        let cur = this.props.model.getCurrentLayer();
+        let n = this.props.model.getLayerIndex(cur);
         if(n+1 < this.props.model.layers.length) this.props.model.moveLayerTo(cur,n+1);
         this.props.model.setSelectedLayer(cur);
     }
@@ -127,7 +124,7 @@ export default class LayersPanel extends React.Component {
         return <LayerItem model={this.props.model} layer={l} onMouseDown={cb}/>
     }
     render() {
-        var model = this.props.model;
+        let model = this.props.model;
         return <VBox grow>
             <DraggableList className="grow" id='layers-panel' style={{width:'10em'}}
                            data={model.getLayers()}

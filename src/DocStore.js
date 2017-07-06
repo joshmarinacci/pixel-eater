@@ -33,14 +33,14 @@ export default {
     },
     loadDoc: function(id,cb) {
         POST_JSON(Config.url("/load"), {id:id}, (res) => {
-            var doc = {
-                id:res.doc.id,
-                title:res.doc.title
+            let doc = {
+                id: res.doc.id,
+                title: res.doc.title
             };
-            if(res.doc.version == '1') {
+            if(res.doc.version === '1') {
                 doc.model = BitmapModel.fromJSONV1(res.doc.model);
             }
-            if(res.doc.version == '2') {
+            if(res.doc.version === '2') {
                 doc.model = BitmapModel.fromJSON(res.doc.model);
             }
             this.setDoc(doc);

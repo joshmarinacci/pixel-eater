@@ -1,4 +1,3 @@
-import React from "react";
 import Button from "./Button.jsx"
 
 export default class ToggleButton extends Button {
@@ -10,7 +9,7 @@ export default class ToggleButton extends Button {
         }
     }
     generateStyle() {
-        var cls = super.generateStyle();
+        let cls = super.generateStyle();
         if(this.props.selected === true)  cls += " selected";
         return cls;
     }

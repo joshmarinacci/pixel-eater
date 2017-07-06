@@ -3,12 +3,12 @@
  */
 
 export function GET_JSON(path, cb) {
-    console.log("GET_JSON fetch:",path)
+    console.log("GET_JSON fetch:",path);
     //throw new Error();
-    var req = new XMLHttpRequest();
+    let req = new XMLHttpRequest();
     req.onreadystatechange = function() {
-        if(req.readyState == 4 && req.status === 200) {
-            var json = JSON.parse(req.responseText);
+        if(req.readyState === 4 && req.status === 200) {
+            let json = JSON.parse(req.responseText);
             //console.log("GET_JSON return:",json);
             cb(json);
         }
@@ -20,35 +20,33 @@ export function GET_JSON(path, cb) {
     req.send();
 }
 
-export var KEYBOARD = {
-    E:69,
-    I:73,
-    P:80,
-    V:86,
-    ARROW_LEFT:37,
-    ARROW_UP:38,
-    ARROW_RIGHT:39,
-    ARROW_DOWN:40
+export const KEYBOARD = {
+    E: 69,
+    I: 73,
+    P: 80,
+    V: 86,
+    ARROW_LEFT: 37,
+    ARROW_UP: 38,
+    ARROW_RIGHT: 39,
+    ARROW_DOWN: 40
 };
 
 export function POST_JSON(path, payload, cb) {
     console.log("POSTING",path);
-    var req = new XMLHttpRequest();
+    let req = new XMLHttpRequest();
 
     req.onreadystatechange = function() {
-        if(req.readyState == 4 && req.status === 200) {
+        if(req.readyState === 4 && req.status === 200) {
             try {
-                var json = JSON.parse(req.responseText);
-                cb(json);
+                cb(JSON.parse(req.responseText));
             } catch (err) {
                 cb(err);
             }
         }
-        if(req.readyState == 4 && req.status == 400) {
+        if(req.readyState === 4 && req.status === 400) {
             console.log("ERROR", req.responseText);
             try {
-                var json = JSON.parse(req.responseText);
-                cb(json);
+                cb(JSON.parse(req.responseText));
             } catch (err) {
                 cb(err);
             }

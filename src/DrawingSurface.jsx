@@ -1,6 +1,4 @@
-
-import React from "react";
-import BitmapModel from "./BitmapModel";
+import React, {Component} from "react";
 
 class Point {
     static makePoint(x,y) {
@@ -9,33 +7,28 @@ class Point {
             y:y,
             equals: function(pt) {
                 if(!pt) return false;
-                if(pt.x == this.x && pt.y == this.y) return true;
-                return false;
+                return pt.x === this.x && pt.y === this.y;
             }
         }
     }
 }
 
-export default class DrawingSurface extends React.Component {
+export default class DrawingSurface extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            down:false,
-            xoff:0,
-            yoff:0,
-            width:props.model.getWidth(),
-            height:props.model.getHeight(),
-            hoverEffect:null,
-            hoverPoint:null
+            down: false,
+            xoff: 0,
+            yoff: 0,
+            width: props.model.getWidth(),
+            height: props.model.getHeight(),
+            hoverEffect: null,
+            hoverPoint: null
         };
 
-        var self = this;
-        this.props.model.changed(function() {
-            self.drawCanvas();
-        });
-
-
+        this.props.model.changed(() => this.drawCanvas());
     }
+
 
 
     drawCanvas() {
@@ -53,10 +46,10 @@ export default class DrawingSurface extends React.Component {
     }
 
     drawBackground(c) {
-        var sc = this.props.scale;
-        var width = this.props.model.getWidth() * sc;
-        var height = this.props.model.getHeight() * sc;
-        var bg = this.props.model.getBackgroundColor();
+        let sc = this.props.scale;
+        let width = this.props.model.getWidth() * sc;
+        let height = this.props.model.getHeight() * sc;
+        let bg = this.props.model.getBackgroundColor();
         c.fillStyle = this.props.model.lookupCanvasColor(bg);
         c.fillRect(this.state.xoff, this.state.yoff, width, height);
     }
@@ -66,11 +59,11 @@ export default class DrawingSurface extends React.Component {
         c.save();
         c.globalAlpha = layer.opacity;
         let sc = this.props.scale;
-        var model = this.props.model;
+        let model = this.props.model;
         for(let y=0; y<model.getHeight(); y++) {
             for (let x = 0; x < model.getWidth(); x++) {
-                var val = model.getPixelFromLayer(x,y,layer);
-                if(val == -1) continue;
+                let val = model.getPixelFromLayer(x, y, layer);
+                if(val === -1) continue;
                 c.fillStyle = model.lookupCanvasColor(val);
                 c.fillRect(x * sc, y * sc, sc, sc);
             }
@@ -80,9 +73,9 @@ export default class DrawingSurface extends React.Component {
 
     drawGrid(c) {
         c.strokeStyle = 'black';
-        var sc = this.props.scale;
-        var width = this.props.model.getWidth() * sc;
-        var height = this.props.model.getHeight() * sc;
+        let sc = this.props.scale;
+        let width = this.props.model.getWidth() * sc;
+        let height = this.props.model.getHeight() * sc;
         c.save();
         c.translate(0.5+this.state.xoff,0.5+this.state.yoff);
         c.beginPath();
@@ -112,20 +105,20 @@ export default class DrawingSurface extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        if(this.props.scale != nextProps.scale) return true;
+        if(this.props.scale !== nextProps.scale) return true;
         if(this.props.model !== nextProps.model) return true;
-        if(this.state.width != nextProps.model.getWidth()) return true;
-        if(this.state.height != nextProps.model.getHeight()) return true;
+        if(this.state.width !== nextProps.model.getWidth()) return true;
+        if(this.state.height !== nextProps.model.getHeight()) return true;
         return false;
     }
 
     getModelPoint(e) {
-        var rect = this.refs.canvas.getBoundingClientRect();
+        let rect = this.refs.canvas.getBoundingClientRect();
         return this.mouseToModel(Point.makePoint(e.clientX-rect.left, e.clientY-rect.top));
     }
 
     mouseDown(e) {
-        if(e.button != 0) return;
+        if(e.button !== 0) return;
         if(e.ctrlKey) return;
         var modelPoint = this.getModelPoint(e);
         this.setState({down:true, prevPoint:modelPoint});
@@ -134,7 +127,7 @@ export default class DrawingSurface extends React.Component {
 
     mouseMove(e) {
         e.stopPropagation();
-        var modelPoint = this.getModelPoint(e);
+        let modelPoint = this.getModelPoint(e);
         this.setState({hoverPoint:modelPoint});
         if(!this.state.down) return setTimeout(this.drawCanvas.bind(this),0);
         if(!modelPoint.equals(this.state.prevPoint)) {

@@ -1,6 +1,6 @@
-import React from "react";
+import React, {Component} from "react";
 
-export default class PreviewPanel extends React.Component {
+export default class PreviewPanel extends Component {
     componentDidMount() {
         this.drawCanvas();
     }
@@ -12,7 +12,7 @@ export default class PreviewPanel extends React.Component {
     }
     drawCanvas() {
         let c = this.refs.canvas.getContext('2d');
-        var w = this.props.model.getWidth();
+        let w = this.props.model.getWidth();
         c.fillStyle = 'white';
         c.fillRect(0,0,this.refs.canvas.width,this.refs.canvas.height);
         this.drawScaled(c,0,w*0,w,1);
@@ -27,7 +27,7 @@ export default class PreviewPanel extends React.Component {
         c.fillStyle = this.props.model.lookupCanvasColor(this.props.model.getBackgroundColor());
         c.fillRect(0,0,w*s,w*s);
         c.strokeStyle = 'black';
-        c.strokeRect(0+0.5,0.5,w*s,w*s);
+        c.strokeRect(0.5,0.5,w*s,w*s);
         this.props.model.getReverseLayers().map((layer) => this.drawLayer(c, layer,s, this.props.model));
         c.restore();
     }
@@ -35,12 +35,12 @@ export default class PreviewPanel extends React.Component {
         if(!layer.visible) return;
         c.save();
         c.globalAlpha = layer.opacity;
-        var w = model.getWidth();
-        var h = model.getHeight();
+        let w = model.getWidth();
+        let h = model.getHeight();
         for(let y=0; y<h; y++) {
             for (let x = 0; x < w; x++) {
-                var val = this.props.model.getPixelFromLayer(x,y,layer);
-                if(val == -1) continue;
+                let val = this.props.model.getPixelFromLayer(x, y, layer);
+                if(val === -1) continue;
                 c.fillStyle = this.props.model.lookupCanvasColor(val);
                 c.fillRect(x * sc, y * sc, sc, sc);
             }

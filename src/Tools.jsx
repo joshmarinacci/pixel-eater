@@ -8,7 +8,7 @@ export class PencilTool {
         this.app = app;
         this.size = 1;
         this.hoverEffect = (c,scale,pt) => {
-            var sc = scale;
+            let sc = scale;
             c.save();
             c.strokeStyle = 'orange';
             c.strokeRect(pt.x*sc, pt.y*sc, sc*this.size,sc*this.size);
@@ -19,12 +19,12 @@ export class PencilTool {
         this.mouseDrag(surf,pt);
     }
     mouseDrag(surf,pt) {
-        var col = this.app.state.selectedColor;
+        let col = this.app.state.selectedColor;
         this.app.drawStamp(pt,this.genStamp(this.size, col), col );
     }
     genStamp(size,col) {
-        var data = [];
-        for(var i=0; i<size*size; i++) {
+        let data = [];
+        for(let i=0; i<size*size; i++) {
             data[i] = col;
         }
         return {w:size, h:size, data:data};
@@ -38,9 +38,9 @@ export class PencilTool {
     }
     getOptionsPanel() {
         return <div className="hbox">
-            <ToggleButton selected={this.size == 1} onToggle={this.setSize.bind(this,1)}>1px</ToggleButton>
-            <ToggleButton selected={this.size == 3} onToggle={this.setSize.bind(this,3)}>3px</ToggleButton>
-            <ToggleButton selected={this.size == 5} onToggle={this.setSize.bind(this,5)}>5px</ToggleButton>
+            <ToggleButton selected={this.size === 1} onToggle={this.setSize.bind(this,1)}>1px</ToggleButton>
+            <ToggleButton selected={this.size === 3} onToggle={this.setSize.bind(this,3)}>3px</ToggleButton>
+            <ToggleButton selected={this.size === 5} onToggle={this.setSize.bind(this,5)}>5px</ToggleButton>
         </div>
     }
 
@@ -52,7 +52,7 @@ export class EraserTool {
         this.app = app;
         this.size = 1;
         this.hoverEffect = (c,scale,pt) => {
-            var sc = scale;
+            let sc = scale;
             c.save();
             c.strokeStyle = 'orange';
             c.strokeRect(pt.x*sc, pt.y*sc, sc*this.size,sc*this.size);
@@ -63,7 +63,7 @@ export class EraserTool {
         this.mouseDrag(surf,pt);
     }
     mouseDrag(surf,pt) {
-        var col = -1;
+        let col = -1;
         //this.app.setPixel(pt, -1);
         this.app.drawStamp(pt,this.genStamp(this.size, col), col );
     }
@@ -72,7 +72,7 @@ export class EraserTool {
         this.size = size;
     }
     genStamp(size,col) {
-        var data = [];
+        let data = [];
         for(var i=0; i<size*size; i++) {
             data[i] = col;
         }
@@ -80,9 +80,9 @@ export class EraserTool {
     }
     getOptionsPanel() {
         return <div className="hbox">
-            <ToggleButton selected={this.size == 1} onToggle={this.setSize.bind(this,1)}>1px</ToggleButton>
-            <ToggleButton selected={this.size == 3} onToggle={this.setSize.bind(this,3)}>3px</ToggleButton>
-            <ToggleButton selected={this.size == 5} onToggle={this.setSize.bind(this,5)}>5px</ToggleButton>
+            <ToggleButton selected={this.size === 1} onToggle={this.setSize.bind(this,1)}>1px</ToggleButton>
+            <ToggleButton selected={this.size === 3} onToggle={this.setSize.bind(this,3)}>3px</ToggleButton>
+            <ToggleButton selected={this.size === 5} onToggle={this.setSize.bind(this,5)}>5px</ToggleButton>
         </div>
     }
 }
@@ -95,7 +95,7 @@ export class MoveTool {
         this.prev = pt;
     }
     mouseDrag(surf,pt) {
-        var diff = {
+        let diff = {
             x: pt.x - this.prev.x,
             y: pt.y - this.prev.y
         };
@@ -122,19 +122,19 @@ export class MoveTool {
         </div>
     }
     keyDown(e) {
-        if(e.keyCode == KEYBOARD.ARROW_RIGHT) {
+        if(e.keyCode === KEYBOARD.ARROW_RIGHT) {
             this.shift({x:1,y:0});
             return true;
         }
-        if(e.keyCode == KEYBOARD.ARROW_LEFT) {
+        if(e.keyCode === KEYBOARD.ARROW_LEFT) {
             this.shift({x:-1,y:0});
             return true;
         }
-        if(e.keyCode == KEYBOARD.ARROW_UP) {
+        if(e.keyCode === KEYBOARD.ARROW_UP) {
             this.shift({x:0,y:-1});
             return true;
         }
-        if(e.keyCode == KEYBOARD.ARROW_DOWN) {
+        if(e.keyCode === KEYBOARD.ARROW_DOWN) {
             this.shift({x:0,y:1});
             return true;
         }
