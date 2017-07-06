@@ -1,5 +1,4 @@
 import React from "react";
-import ReactDOM from "react-dom";
 
 export default class DraggableList extends React.Component {
     constructor(props) {
@@ -34,7 +33,7 @@ export default class DraggableList extends React.Component {
     findItemUnderCursor(y) {
         var found = null;
         this.reactItems.forEach((item,i)=>{
-            if(item.ref == this.state.activeRef) return;
+            if(item.ref === this.state.activeRef) return;
             var dom = this.refs[item.ref];
             var top = dom.getBoundingClientRect().top;
             var bottom = dom.getBoundingClientRect().bottom;
@@ -87,11 +86,11 @@ export default class DraggableList extends React.Component {
     }
     renderItems(items) {
         this.reactItems = [];
-        var didDrop = false;
+        let didDrop = false;
         for(let i=0; i<items.length; i++) {
             let item = items[i];
             //insert drop target holder if needed
-            if(i == this.state.targetIndex && this.state.pressed) {
+            if(i === this.state.targetIndex && this.state.pressed) {
                 this.reactItems.push(this.renderDropTarget());
                 didDrop = true;
             }
@@ -100,12 +99,12 @@ export default class DraggableList extends React.Component {
             let style = {};
 
             //customizations for the active item
-            if(item == this.state.active && this.state.pressed) {
+            if(item === this.state.active && this.state.pressed) {
                 clss += " active";
                 style.top = (this.state.offy-this.state.activeHeight)+"px";
             }
 
-            var ch = this.renderItem(item,i,this.mousedown.bind(this,item,i));
+            const ch = this.renderItem(item, i, this.mousedown.bind(this, item, i));
             //generate the item
             this.reactItems.push(<li className={clss}  style={style} ref={"item"+i} key={i}>{ch}</li>);
         }
@@ -114,7 +113,7 @@ export default class DraggableList extends React.Component {
     }
 
     render() {
-        var clss = 'draglist ' + (this.props.className?this.props.className:"");
+        const clss = 'draglist ' + (this.props.className ? this.props.className : "");
         return <ul  {...this.props} className={clss}>{this.renderItems(this.props.data)}</ul>
     }
 }

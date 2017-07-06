@@ -1,8 +1,9 @@
 import React from "react";
-import DropdownButton from "./DropdownButton.jsx"
-import ColorPicker from "./ColorPicker.jsx"
-import PopupState from "./PopupState.jsx";
+// import DropdownButton from "./DropdownButton.jsx"
+// import ColorPicker from "./ColorPicker.jsx"
+// import PopupState from "./PopupState.jsx";
 import DraggableList from "./DraggableList.jsx";
+import {VBox, HBox, Spacer} from "appy-comps";
 
 class LayerItem extends React.Component {
     constructor(props) {
@@ -57,16 +58,16 @@ class LayerItem extends React.Component {
         this.setState({editingName:false})
     }
     keyUp(e) {
-        if(e.key == 'Enter') {
+        if(e.key === 'Enter') {
             this.saveEditedName();
         }
     }
     renderName(editing) {
         if(editing) {
-            return <div className="hbox">
+            return <HBox>
                 <input ref="title" type="text" defaultValue={this.props.layer.title} onKeyUp={this.keyUp.bind(this)} />
                 <button onClick={this.saveEditedName.bind(this)}>set</button>
-            </div>;
+            </HBox>;
         } else {
             return <label className="grow" style={{ textAlign:'left'}}
                    onDoubleClick={this.doubleClick.bind(this)}>{this.props.layer.title}</label>;
@@ -81,11 +82,10 @@ class LayerItem extends React.Component {
         } else {
             clsname += " fa-eye-slash"
         }
-        return <div className={cls} onClick={this.selectItem.bind(this)}>
+        return <HBox className={cls} onClick={this.selectItem.bind(this)}>
             <button><i className="fa fa-bars" onMouseDown={this.props.onMouseDown}/></button>
             {this.renderName(this.state.editingName)}
             <input ref="opacity"
-                   className="opacity"
                    type="number"
                    min="0"
                    max="100"
@@ -94,7 +94,7 @@ class LayerItem extends React.Component {
                    onChange={this.changedOpacity.bind(this)}
                    onBlur={this.blurredOpacity.bind(this)}/>
             <button onClick={this.toggleVisibility.bind(this)}><i className={clsname}/></button>
-        </div>
+        </HBox>
     }
 }
 
@@ -128,19 +128,19 @@ export default class LayersPanel extends React.Component {
     }
     render() {
         var model = this.props.model;
-        return <div className="vbox grow">
+        return <VBox grow>
             <DraggableList className="grow" id='layers-panel' style={{width:'10em'}}
                            data={model.getLayers()}
                            templateFunction={this.makeLayerItem.bind(this)}
                            onDropItem={this.itemDropped.bind(this)}
             />
-            <div className="hbox panel bottom">
+            <HBox className="panel bottom">
                 <button onClick={this.addLayer.bind(this)}><i className="fa fa-plus"/></button>
                 <button onClick={this.moveLayerUp.bind(this)}><i className="fa fa-arrow-up"/></button>
                 <button onClick={this.moveLayerDown.bind(this)}><i className="fa fa-arrow-down"/></button>
-                <label className="grow"></label>
+                <Spacer/>
                 <button onClick={this.deleteLayer.bind(this)}><i className="fa fa-trash"/></button>
-            </div>
-        </div>
+            </HBox>
+        </VBox>
     }
 }

@@ -20,8 +20,11 @@
   },
   "homepage": "https://github.com/joshmarinacci/pixel-eater#readme",
   "dependencies": {
-    "react-scripts": "^1.0.10",
+    "appy-comps": "0.*.*",
+    "appy-style": "0.0.7",
+    "font-awesome": "^4.7.0",
     "react": "^15.6.1",
-    "react-dom": "^15.6.1"
+    "react-dom": "^15.6.1",
+    "react-scripts": "^1.0.10"
   }
 }
