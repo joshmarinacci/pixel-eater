@@ -24,8 +24,12 @@ input[type=search] {
 
 .grow {
     -webkit-flex: 1;
-    flex: 1; }
+    flex: 1;
+}
 
+.scroll {
+    overflow: scroll;
+}
 
 
 button.color-well {

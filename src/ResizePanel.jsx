@@ -1,8 +1,7 @@
-import React from "react";
-import {Component} from "react";
-import Dialog from "./Dialog.jsx";
+import React, {Component} from "react";
+import {Dialog, VBox, HBox} from "appy-comps";
 
-export default class NewDocPanel extends Component {
+export default class extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -38,27 +37,27 @@ export default class NewDocPanel extends Component {
         });
     }
     changedWidth() {
-        var val = Number.parseInt(this.refs.width.value);
+        let val = Number.parseInt(this.refs.width.value,10);
         this.setState({ width:val });
     }
     changedHeight() {
-        var val = Number.parseInt(this.refs.height.value);
+        let val = Number.parseInt(this.refs.height.value,10);
         this.setState({ height:val });
     }
     render() {
         return <Dialog visible={this.state.visible}>
             <header>Resize Canvas Dimensions</header>
 
-            <div className="vbox form">
-                <div className="hbox">
+            <VBox className="form">
+                <HBox>
                     <label>Width</label>
                     <input ref='width' type="text" size="6" value={this.state.width} onChange={this.changedWidth.bind(this)}/>
-                </div>
-                <div className="hbox">
+                </HBox>
+                <HBox>
                     <label>Height</label>
                     <input ref="height" type="text" size="6" value={this.state.height} onChange={this.changedHeight.bind(this)}/>
-                </div>
-            </div>
+                </HBox>
+            </VBox>
 
             <footer className="children-right">
                 <button onClick={this.okay.bind(this)}>okay</button>

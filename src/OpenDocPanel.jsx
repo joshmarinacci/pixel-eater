@@ -1,8 +1,8 @@
-import React from "react";
-import Dialog from "./Dialog.jsx";
+import React, {Component} from "react";
+import {Dialog, VBox} from "appy-comps";
 import Config from "./Config"
 
-export default class OpenDocPanel extends React.Component {
+export default class OpenDocPanel extends Component {
     loadDoc(id) {
         this.props.onSelectDoc(id);
     }
@@ -10,23 +10,22 @@ export default class OpenDocPanel extends React.Component {
         this.props.onDeleteDoc(id);
     }
     renderDocs(docs) {
-        var self = this;
         return docs.map((doc)=> {
             return <li key={doc.id}>
-                <button onClick={self.loadDoc.bind(self,doc.id)}>{doc.title}</button>
-                <button onClick={self.deleteDoc.bind(self,doc.id)}>delete</button>
-                <img src={this.generatePreviewURL(doc.id)}/>
+                <button onClick={this.loadDoc.bind(this,doc.id)}>{doc.title}</button>
+                <button onClick={this.deleteDoc.bind(this,doc.id)}>delete</button>
+                <img src={this.generatePreviewURL(doc.id)} alt="screenshot"/>
             </li>
         });
     }
     render() {
         return <Dialog visible={this.props.visible}>
             <header>Open</header>
-            <div className="vbox">
+            <VBox>
                 <ul>
                     {this.renderDocs(this.props.docs)}
                 </ul>
-            </div>
+            </VBox>
             <footer className="children-right">
                 <button onClick={this.props.onCanceled}>cancel</button>
             </footer>

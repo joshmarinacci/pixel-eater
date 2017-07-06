@@ -14,8 +14,13 @@ import RecentColors from "./RecentColors.jsx";
 import ToggleButton from "./ToggleButton.jsx"
 import ColorWellButton from "./ColorWellButton.jsx";
 import PreviewPanel from "./PreviewPanel.jsx"
-// import ResizePanel from "./ResizePanel.jsx";
-// import AlertPanel from "./AlertPanel.jsx";
+import ResizePanel from "./ResizePanel.jsx";
+import AlertPanel from "./AlertPanel.jsx";
+import NewDocPanel from "./NewDocPanel";
+import OpenDocPanel from "./OpenDocPanel";
+import SharePanel from "./SharePanel";
+import LoginPanel from "./LoginPanel";
+import RegistrationPanel from "./RegistrationPanel";
 import {VBox, HBox, Spacer} from "appy-comps";
 import {KEYBOARD} from "./u";
 import { PencilTool, EraserTool, MoveTool } from "./Tools.jsx";
@@ -24,7 +29,6 @@ import "./web/components.css";
 // import "appy-style/src/dialog.css";
 import "appy-style/src/look.css";
 // import "appy-style/src/layout.css";
-const REQUIRE_AUTH = true;
 
 class EyedropperTool {
     constructor(app) {
@@ -85,6 +89,17 @@ class DocPanel extends React.Component {
 
         UserStore.checkLoggedIn((user) => this.setState({user:user}));
         this.model_listener = this.props.doc.model.changed((mod)=> this.setState({model:mod, dirty:true}));
+
+
+
+        this.loginLogout  = () => {
+            if(!this.state.user) {
+                this.setState({loginVisible:true});
+            } else {
+                UserStore.logout(() => this.setState({user:null}));
+            }
+        }
+
     }
 
     getModel() {
@@ -258,16 +273,6 @@ class DocPanel extends React.Component {
         DocStore.getDoc().title = this.refs.doc_title.value;
         this.setState({doc:DocStore.getDoc()});
     }
-    loginLogout() {
-        if(!this.state.user) {
-            this.setState({loginVisible:true});
-        } else {
-            var self = this;
-            UserStore.logout(function() {
-                self.setState({user:null});
-            });
-        }
-    }
     switchToRegister() {
         this.setState({
             loginVisible:false,
@@ -287,16 +292,16 @@ class DocPanel extends React.Component {
         this.setState({scale: this.state.scale>>1});
     }
     canvasKeyDown(e) {
-        if(e.keyCode == KEYBOARD.E) {
+        if(e.keyCode === KEYBOARD.E) {
             this.selectEraser();
         }
-        if(e.keyCode == KEYBOARD.P) {
+        if(e.keyCode === KEYBOARD.P) {
             this.selectPencil();
         }
-        if(e.keyCode == KEYBOARD.I) {
+        if(e.keyCode === KEYBOARD.I) {
             this.selectEyedropper();
         }
-        if(e.keyCode == KEYBOARD.V) {
+        if(e.keyCode === KEYBOARD.V) {
             this.selectMove();
         }
     }
@@ -305,7 +310,7 @@ class DocPanel extends React.Component {
         this.props.doc.model.setBackgroundColor(color);
     }
     render() {
-        var loggedOut = UserStore.getUser()==null;
+        var loggedOut = UserStore.getUser()===null;
         var model = this.props.doc.model;
         return (<HBox fill className="panel">
 			<VBox className="panel left">
@@ -358,7 +363,7 @@ class DocPanel extends React.Component {
 				/>
 				<RecentColors colors={this.state.recentColors} model={model} onSelectColor={this.selectColor.bind(this)}/>
 				<HBox className="panel bottom">
-					<button onClick={this.loginLogout.bind(this)}>{this.state.user?"logout":"login"}</button>
+					<button onClick={this.loginLogout}>{this.state.user?"logout":"login"}</button>
 					<label>{this.state.user?this.state.user.username:'not logged in'}</label>
 					<Spacer/>
 					<label><i>{this.state.dirty?"unsaved changes":""}</i></label>
@@ -369,46 +374,38 @@ class DocPanel extends React.Component {
                 {this.state.showLayers?<LayersPanel model={model}/>:""}
 			</VBox>
 
+            <LoginPanel
+                visible={this.state.loginVisible}
+                onCompleted={this.onLoginCompleted.bind(this)}
+                onCanceled={this.onLoginCanceled.bind(this)}
+                switchToRegister={this.switchToRegister.bind(this)}
+            />
+            <ResizePanel ref="resizePanel" model={model}/>
+            <AlertPanel ref="alert"/>
+            <NewDocPanel
+                visible={this.state.newVisible}
+                onCancel={this.newDocCanceled.bind(this)}
+                onOkay={this.newDocPerformed.bind(this)}
+            />
+            <RegistrationPanel
+                visible={this.state.registerVisible}
+                onCompleted={this.onRegistrationCompleted.bind(this)}
+                onCanceled={this.onRegistrationCanceled.bind(this)}
+                switchToRegister={this.switchToLogin.bind(this)}
+            />
+
+            <OpenDocPanel
+                visible={this.state.openVisible}
+                docs={this.state.doclist}
+                onSelectDoc={this.openDocPerform.bind(this)}
+                onCanceled={this.openDocCanceled.bind(this)}
+                onDeleteDoc={this.deleteDoc.bind(this)}
+            />
+            <SharePanel
+                visible={this.state.shareVisible}
+                onCanceled={this.openShareCanceled.bind(this)}
+                id={DocStore.getDoc().id}
+            />
         </HBox>)
     }
 }
-
-/*
-
- <LoginPanel
- visible={this.state.loginVisible}
- onCompleted={this.onLoginCompleted.bind(this)}
- onCanceled={this.onLoginCanceled.bind(this)}
- switchToRegister={this.switchToRegister.bind(this)}
- />
- <RegistrationPanel
- visible={this.state.registerVisible}
- onCompleted={this.onRegistrationCompleted.bind(this)}
- onCanceled={this.onRegistrationCanceled.bind(this)}
- switchToRegister={this.switchToLogin.bind(this)}
- />
-
- <OpenDocPanel
- visible={this.state.openVisible}
- docs={this.state.doclist}
- onSelectDoc={this.openDocPerform.bind(this)}
- onCanceled={this.openDocCanceled.bind(this)}
- onDeleteDoc={this.deleteDoc.bind(this)}
- />
-
- <NewDocPanel
- visible={this.state.newVisible}
- onCancel={this.newDocCanceled.bind(this)}
- onOkay={this.newDocPerformed.bind(this)}
- />
-
- <SharePanel
- visible={this.state.shareVisible}
- onCanceled={this.openShareCanceled.bind(this)}
- id={DocStore.getDoc().id}
- />
-
- <ResizePanel ref="resizePanel" model={model}/>
- <AlertPanel ref="alert"/>
-
- */

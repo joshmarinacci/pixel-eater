@@ -1,7 +1,7 @@
-import React from "react";
-import Dialog from "./Dialog.jsx";
+import React, {Component} from "react";
+import {Dialog, VBox} from "appy-comps";
 
-export default class AlertPanel extends React.Component {
+export default class AlertPanel extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -25,9 +25,9 @@ export default class AlertPanel extends React.Component {
     render() {
         return <Dialog visible={this.state.visible}>
             <header>Alert</header>
-            <div className="grow">
+            <VBox className="grow">
                 {this.state.text}
-            </div>
+            </VBox>
             <footer className="children-right">
                 <button
                     onClick={this.state.onCancel}

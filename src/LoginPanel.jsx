@@ -1,8 +1,9 @@
-import React from "react";
+import React, {Component} from "react";
 import UserStore from "./UserStore";
-import Dialog from "./Dialog.jsx";
+import {Dialog, Spacer} from "appy-comps";
 
-export default class LoginPanel extends React.Component {
+
+export default class LoginPanel extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -11,16 +12,15 @@ export default class LoginPanel extends React.Component {
     }
     tryLogin(e) {
         e.stopPropagation();
-        var self = this;
-        var data = {
+        let data = {
             username: this.refs.username.value,
             password: this.refs.password.value
         };
-        UserStore.login(data, function(err,user){
+        UserStore.login(data, (err,user) => {
             if(err) {
-                self.setState({errorText: err.message});
+                this.setState({errorText: err.message});
             } else {
-                self.props.onCompleted(user);
+                this.props.onCompleted(user);
             }
         });
     }
@@ -42,7 +42,7 @@ export default class LoginPanel extends React.Component {
             </div>
             <footer className="children-right">
                 <button className="primary" onClick={this.props.switchToRegister}>Register!</button>
-                <label className="grow"></label>
+                <Spacer/>
                 <button onClick={this.props.onCanceled}>Cancel</button>
                 <button className="primary" onClick={this.tryLogin.bind(this)}>Login</button>
             </footer>

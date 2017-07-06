@@ -1,10 +1,9 @@
-import React from "react";
-import Dialog from "./Dialog.jsx";
-import Config from "./Config"
+import React, {Component} from "react";
+import {Dialog, VBox, HBox} from "appy-comps";
 import DropdownButton from "./Dropdown.jsx";
 
 
-export default class NewDocPanel extends React.Component {
+export default class extends Component {
 
     constructor(props) {
         super(props);
@@ -49,8 +48,8 @@ export default class NewDocPanel extends React.Component {
 
     performOkay() {
         this.props.onOkay({
-            w:parseInt(this.state.w),
-            h:parseInt(this.state.h),
+            w:parseInt(this.state.w,10),
+            h:parseInt(this.state.h,10),
             title:this.state.title
         });
     }
@@ -67,27 +66,27 @@ export default class NewDocPanel extends React.Component {
     render() {
         return <Dialog visible={this.props.visible}>
             <header>New Doc</header>
-            <div className="vbox form">
-                <div className="hbox">
+            <VBox className="form">
+                <HBox>
                     <label>Name</label>
                     <input ref='title'
                            type="text"
                            value={this.state.title}
                            onChange={this.editTitle.bind(this)}/>
-                </div>
-                <div className="hbox">
+                </HBox>
+                <HBox>
                     <label> </label>
                     <DropdownButton list={this.sizes} onSelect={this.selectPreset.bind(this)}/>
-                </div>
-                <div className="hbox">
+                </HBox>
+                <HBox>
                     <label>Width</label>
                     <input ref='width' className="digits5" type="number" value={this.state.w} onChange={this.widthChanged.bind(this)}/> <label className="stick-left">px</label>
-                </div>
-                <div className="hbox">
+                </HBox>
+                <HBox>
                     <label>Height</label>
                     <input ref='height' className="digits5" type="number" value={this.state.h} onChange={this.heightChanged.bind(this)}/> <label className="stick-left">px</label>
-                </div>
-            </div>
+                </HBox>
+            </VBox>
             <footer className="children-right">
                 <button onClick={this.performOkay.bind(this)}>okay</button>
                 <button onClick={this.props.onCancel}>cancel</button>
