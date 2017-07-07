@@ -113,6 +113,8 @@ class DocPanel extends React.Component {
             }
         }
 
+        this.toggleGrid = (() => this.setState({drawGrid: !this.state.drawGrid}));
+        this.togglePreview = (() => this.setState({ drawPreview: !this.state.drawPreview}));
     }
 
     getModel() {
@@ -123,12 +125,7 @@ class DocPanel extends React.Component {
         this.props.doc.model.unlisten(this.model_listener);
         this.model_listener = nextProps.doc.model.changed((mod)=>this.setState({model:mod}));
     }
-    toggleGrid() {
-        this.setState({ drawGrid: !this.state.drawGrid })
-    }
-    togglePreview() {
-        this.setState({ drawPreview: !this.state.drawPreview})
-    }
+
     toggleLayers() {
         this.setState({ showLayers: !this.state.showLayers})
     }
@@ -308,12 +305,12 @@ class DocPanel extends React.Component {
 			<VBox className="panel left">
 				<ColorWellButton model={model} selectedColor={this.state.selectedColor} content={cp}/>
                 <VToggleGroup list={this.tools} selected={this.state.selected_tool} template={ToggleButtonTemplate} onChange={this.selectTool}/>
-				<label/>
+				<Spacer/>
 				<Button onClick={this.execUndo.bind(this)} disabled={!model.isUndoAvailable()} tooltip="Undo"><i className="fa fa-undo"/></Button>
 				<Button onClick={this.execRedo.bind(this)} disabled={!model.isRedoAvailable()} tooltip="Redo"><i className="fa fa-repeat"/></Button>
-				<ToggleButton onToggle={this.toggleGrid.bind(this)} selected={this.state.drawGrid} tooltip="Show/Hide Grid"><i className="fa fa-th"/></ToggleButton>
-				<ToggleButton onToggle={this.togglePreview.bind(this)} selected={this.state.drawPreview} tooltip="Show/Hide Preview">Preview</ToggleButton>
-				<label/>
+				<ToggleButton onToggle={this.toggleGrid} selected={this.state.drawGrid} tooltip="Show/Hide Grid"><i className="fa fa-th"/></ToggleButton>
+				<ToggleButton onToggle={this.togglePreview} selected={this.state.drawPreview} tooltip="Show/Hide Preview">Preview</ToggleButton>
+				<Spacer/>
 				<Button onClick={this.newDoc.bind(this)}    disabled={loggedOut} tooltip="New Image"><i className="fa fa-file-o"/></Button>
 				<Button onClick={this.saveDoc.bind(this)}   disabled={loggedOut} tooltip="Save Image"><i className="fa fa-save"/></Button>
 				<Button onClick={this.openDoc.bind(this)}   disabled={loggedOut} tooltip="Open Image"><i className="fa fa-folder-open"/></Button>

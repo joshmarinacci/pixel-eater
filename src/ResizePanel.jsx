@@ -9,6 +9,11 @@ export default class extends Component {
             width: props.model.getWidth(),
             height: props.model.getHeight()
         };
+
+        this.show = () => this.setState({visible:true});
+        this.cancel = () => this.setState({visible:false});
+        this.changedWidth = () =>  this.setState({ width:Number.parseInt(this.refs.width.value,10) });
+        this.changedHeight = () => this.setState({ height:Number.parseInt(this.refs.height.value,10) });
     }
     componentWillReceiveProps(nextProps) {
         this.handleProps(nextProps);
@@ -20,48 +25,27 @@ export default class extends Component {
             height: props.model.getHeight()
         });
     }
-    show() {
-        this.setState({
-            visible:true
-        })
-    }
     okay() {
         this.props.model.resize(this.state.width,this.state.height);
-        this.setState({
-            visible:false
-        });
-    }
-    cancel() {
-        this.setState({
-            visible:false
-        });
-    }
-    changedWidth() {
-        let val = Number.parseInt(this.refs.width.value,10);
-        this.setState({ width:val });
-    }
-    changedHeight() {
-        let val = Number.parseInt(this.refs.height.value,10);
-        this.setState({ height:val });
+        this.setState({ visible:false });
     }
     render() {
         return <Dialog visible={this.state.visible}>
             <header>Resize Canvas Dimensions</header>
-
             <VBox className="form">
                 <HBox>
                     <label>Width</label>
-                    <input ref='width' type="text" size="6" value={this.state.width} onChange={this.changedWidth.bind(this)}/>
+                    <input ref='width' type="text" size="6" value={this.state.width} onChange={this.changedWidth}/>
                 </HBox>
                 <HBox>
                     <label>Height</label>
-                    <input ref="height" type="text" size="6" value={this.state.height} onChange={this.changedHeight.bind(this)}/>
+                    <input ref="height" type="text" size="6" value={this.state.height} onChange={this.changedHeight}/>
                 </HBox>
             </VBox>
 
             <footer className="children-right">
-                <button onClick={this.okay.bind(this)}>okay</button>
-                <button onClick={this.cancel.bind(this)}>cancel</button>
+                <button onClick={this.okay}>okay</button>
+                <button onClick={this.cancel}>cancel</button>
             </footer>
         </Dialog>
     }
