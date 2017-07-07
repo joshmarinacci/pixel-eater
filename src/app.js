@@ -5,7 +5,6 @@ import DocStore from "./DocStore.js";
 import UserStore from "./UserStore";
 import Config from "./Config"
 import BitmapModel from "./BitmapModel"
-// import Dropdown from "./Dropdown.jsx"
 import DropdownButton from "./DropdownButton.jsx"
 import Button from "./Button.jsx";
 import ColorPicker from "./ColorPicker.jsx";
@@ -21,30 +20,13 @@ import OpenDocPanel from "./OpenDocPanel";
 import SharePanel from "./SharePanel";
 import LoginPanel from "./LoginPanel";
 import RegistrationPanel from "./RegistrationPanel";
-import {VBox, HBox, Spacer, PopupContainer} from "appy-comps";
+import {VBox, HBox, Spacer, PopupContainer, VToggleGroup} from "appy-comps";
 import {KEYBOARD} from "./u";
-import { PencilTool, EraserTool, MoveTool } from "./Tools.jsx";
+import { PencilTool, EraserTool, MoveTool, EyedropperTool } from "./Tools";
 import "font-awesome/css/font-awesome.css";
 import "./web/components.css";
 import "appy-style/src/look.css";
 
-class EyedropperTool {
-    constructor(app) {
-        this.app = app;
-    }
-    mouseDown(surf,pt) {
-        this.mouseDrag(surf,pt);
-    }
-    mouseDrag(surf,pt) {
-        this.app.selectColor(DocStore.getDoc().model.getData(pt));
-    }
-    mouseUp() {
-        this.app.selectPencil();
-    }
-    getOptionsPanel() {
-        return <label>none</label>
-    }
-}
 
 
 export default class App extends Component {
@@ -59,6 +41,13 @@ export default class App extends Component {
     }
 }
 
+const ToggleButtonTemplate = (props) => {
+    return <ToggleButton onToggle={props.onSelect}
+                         selected={props.selected}
+                         tooltip={props.item.tooltip}
+    ><i className={"fa fa-"+props.item.icon}></i></ToggleButton>
+};
+
 class DocPanel extends React.Component {
     constructor(props) {
         super(props);
@@ -71,11 +60,32 @@ class DocPanel extends React.Component {
             dirty:false
         };
         this.state.shiftLayerOnly = false;
-        this.state.pencil_tool = new PencilTool(this);
-        this.state.eyedropper_tool = new EyedropperTool(this);
-        this.state.eraser_tool = new EraserTool(this);
-        this.state.move_tool = new MoveTool(this);
-        this.state.selected_tool = this.state.pencil_tool;
+
+        this.tools = [
+            {
+                tool: new PencilTool(this),
+                tooltip:'Pencil',
+                icon:'pencil',
+            },
+            {
+                tool: new EraserTool(this),
+                tooltip:'Eraser',
+                icon:'eraser'
+            },
+            {
+                tool: new EyedropperTool(this),
+                tooltip:'Eyedropper',
+                icon:'eyedropper'
+            },
+            {
+                tool: new MoveTool(this),
+                tooltip:'Move Layer(s)',
+                icon:'arrows'
+            },
+        ];
+        this.state.selected_tool = this.tools[0];
+        this.selectTool = (item) => this.setState({selected_tool:item});
+
         this.state.user = null;
         this.state.doclist = [];
         this.state.loginVisible = false;
@@ -119,18 +129,6 @@ class DocPanel extends React.Component {
     }
     selectColor(color) {
         this.setState({selectedColor:color});
-    }
-    selectPencil() {
-        this.setState({ selected_tool: this.state.pencil_tool});
-    }
-    selectEyedropper() {
-        this.setState({ selected_tool: this.state.eyedropper_tool});
-    }
-    selectEraser() {
-        this.setState({ selected_tool: this.state.eraser_tool});
-    }
-    selectMove() {
-        this.setState({ selected_tool: this.state.move_tool});
     }
     exportPNG(scale) {
         PopupState.done();
@@ -314,10 +312,7 @@ class DocPanel extends React.Component {
         return (<HBox fill className="panel">
 			<VBox className="panel left">
 				<ColorWellButton model={model} selectedColor={this.state.selectedColor} content={cp}/>
-				<ToggleButton onToggle={this.selectPencil.bind(this)} selected={this.state.selected_tool === this.state.pencil_tool} tooltip="Pencil"><i className="fa fa-pencil"></i></ToggleButton>
-				<ToggleButton onToggle={this.selectEyedropper.bind(this)} selected={this.state.selected_tool === this.state.eyedropper_tool} tooltip="Eyedropper"><i className="fa fa-eyedropper"></i></ToggleButton>
-				<ToggleButton onToggle={this.selectEraser.bind(this)} selected={this.state.selected_tool === this.state.eraser_tool} tooltip="Eraser"><i className="fa fa-eraser"></i></ToggleButton>
-				<ToggleButton onToggle={this.selectMove.bind(this)} selected={this.state.selected_tool === this.state.move_tool} tooltip="Move Layer(s)"><i className="fa fa-arrows"></i></ToggleButton>
+                <VToggleGroup list={this.tools} selected={this.state.selected_tool} template={ToggleButtonTemplate} onChange={this.selectTool}/>
 				<label/>
 				<Button onClick={this.execUndo.bind(this)} disabled={!model.isUndoAvailable()} tooltip="Undo"><i className="fa fa-undo"/></Button>
 				<Button onClick={this.execRedo.bind(this)} disabled={!model.isRedoAvailable()} tooltip="Redo"><i className="fa fa-repeat"/></Button>
@@ -351,11 +346,11 @@ class DocPanel extends React.Component {
 				</HBox>
 				<HBox className="panel">
 					<label><b>options</b></label>
-                    {this.state.selected_tool.getOptionsPanel()}
+                    {this.state.selected_tool.tool.getOptionsPanel()}
 				</HBox>
 				<DrawingSurface
 					tabIndex="1"
-					tool={this.state.selected_tool} model={model} drawGrid={this.state.drawGrid} scale={this.state.scale}
+					tool={this.state.selected_tool.tool} model={model} drawGrid={this.state.drawGrid} scale={this.state.scale}
 					onKeyDown={this.canvasKeyDown.bind(this)}
 				/>
 				<RecentColors colors={this.state.recentColors} model={model} onSelectColor={this.selectColor.bind(this)}/>

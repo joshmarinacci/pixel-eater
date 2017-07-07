@@ -38,11 +38,12 @@ export default class Button extends React.Component {
     render() {
         var hover = this.renderHover();
         var cls = this.generateStyle();
+        let {onToggle, tooltip, ...rest} = this.props;
         return <button className={cls}
                        onMouseOver={this.mouseOver.bind(this)}
                        onMouseOut={this.mouseOut.bind(this)}
                        onClick={this.onClick.bind(this)}
-            {...this.props}
+            {...rest}
         >{this.props.children}{hover}</button>
     }
 }
