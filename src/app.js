@@ -20,7 +20,7 @@ import OpenDocPanel from "./OpenDocPanel";
 import SharePanel from "./SharePanel";
 import LoginPanel from "./LoginPanel";
 import RegistrationPanel from "./RegistrationPanel";
-import {VBox, HBox, Spacer, PopupContainer, VToggleGroup} from "appy-comps";
+import {VBox, HBox, Spacer, PopupContainer, VToggleGroup, PopupManager} from "appy-comps";
 import {KEYBOARD} from "./u";
 import { PencilTool, EraserTool, MoveTool, EyedropperTool } from "./Tools";
 import "font-awesome/css/font-awesome.css";
@@ -111,10 +111,11 @@ class DocPanel extends React.Component {
             } else {
                 UserStore.logout(() => this.setState({user:null}));
             }
-        }
+        };
 
-        this.toggleGrid = (() => this.setState({drawGrid: !this.state.drawGrid}));
-        this.togglePreview = (() => this.setState({ drawPreview: !this.state.drawPreview}));
+        this.toggleGrid = () => this.setState({drawGrid: !this.state.drawGrid});
+        this.togglePreview = () => this.setState({ drawPreview: !this.state.drawPreview});
+        this.toggleLayers = () => this.setState({ showLayers: !this.state.showLayers});
     }
 
     getModel() {
@@ -126,9 +127,6 @@ class DocPanel extends React.Component {
         this.model_listener = nextProps.doc.model.changed((mod)=>this.setState({model:mod}));
     }
 
-    toggleLayers() {
-        this.setState({ showLayers: !this.state.showLayers})
-    }
     selectColor(color) {
         this.setState({selectedColor:color});
     }
@@ -297,45 +295,72 @@ class DocPanel extends React.Component {
         PopupState.done();
         this.props.doc.model.setBackgroundColor(color);
     }
-    render() {
+    renderSideToolbar() {
+        let model = this.props.doc.model;
         var loggedOut = UserStore.getUser()===null;
+        let cp =  <ColorPicker model={model} onSelectColor={this.selectColor.bind(this)}/>;
+        return <VBox className="panel left">
+            <ColorWellButton model={model} selectedColor={this.state.selectedColor} content={cp}/>
+            <VToggleGroup list={this.tools} selected={this.state.selected_tool} template={ToggleButtonTemplate} onChange={this.selectTool}/>
+            <Spacer/>
+            <Button onClick={this.execUndo.bind(this)} disabled={!model.isUndoAvailable()} tooltip="Undo"><i className="fa fa-undo"/></Button>
+            <Button onClick={this.execRedo.bind(this)} disabled={!model.isRedoAvailable()} tooltip="Redo"><i className="fa fa-repeat"/></Button>
+            <ToggleButton onToggle={this.toggleGrid} selected={this.state.drawGrid} tooltip="Show/Hide Grid"><i className="fa fa-th"/></ToggleButton>
+            <ToggleButton onToggle={this.togglePreview} selected={this.state.drawPreview} tooltip="Show/Hide Preview">Preview</ToggleButton>
+            <Spacer/>
+            <Button onClick={this.newDoc.bind(this)}    disabled={loggedOut} tooltip="New Image"><i className="fa fa-file-o"/></Button>
+            <Button onClick={this.saveDoc.bind(this)}   disabled={loggedOut} tooltip="Save Image"><i className="fa fa-save"/></Button>
+            <Button onClick={this.openDoc.bind(this)}   disabled={loggedOut} tooltip="Open Image"><i className="fa fa-folder-open"/></Button>
+            <Button onClick={this.resizeDoc.bind(this)} tooltip="Resize Doc">resize</Button>
+            <ToggleButton onToggle={this.toggleLayers} selected={this.state.showLayers} tooltip="Show/Hide Layers">Layers</ToggleButton>
+        </VBox>
+    }
+
+    renderTopToolbar() {
+        let cp2 = <ColorPicker model={this.props.doc.model} onSelectColor={this.selectBGColor.bind(this)}/>
+        return <HBox className="panel top">
+            <button onClick={(e)=>PopupManager.show(cp2,e.target)} className="fa fa-gear"/>
+            <input type="text" ref="doc_title" value={this.props.doc.title} onChange={this.titleEdited.bind(this)}/>
+            <Spacer/>
+            <Button onClick={this.zoomIn.bind(this)}><i className="fa fa-plus"/></Button>
+            <Button onClick={this.zoomOut.bind(this)}><i className="fa fa-minus"/></Button>
+            <DropdownButton icon="share" direction="left">
+                <li className="disabled">Tweet</li>
+                <li onClick={this.exportPNG.bind(this,1)}>Export as PNG 1x</li>
+                <li onClick={this.exportPNG.bind(this,2)}>Export as PNG 2x</li>
+                <li onClick={this.exportPNG.bind(this,4)}>Export as PNG 4x</li>
+                <li onClick={this.exportPNG.bind(this,8)}>Export as PNG 8x</li>
+                <li className="disabled">Export as JSON</li>
+                <li onClick={this.openShare.bind(this)}>Get Sharing Link</li>
+            </DropdownButton>
+        </HBox>
+    }
+
+    renderBottomToolbar() {
+        return <HBox className="panel bottom">
+            <button onClick={this.loginLogout}>{this.state.user?"logout":"login"}</button>
+            <label>{this.state.user?this.state.user.username:'not logged in'}</label>
+            <Spacer/>
+            <label><i>{this.state.dirty?"unsaved changes":""}</i></label>
+        </HBox>
+    }
+
+    renderPreviewPanel() {
+        return this.state.drawPreview?<VBox><PreviewPanel model={this.props.doc.model}/></VBox>:"";
+    }
+
+    renderLayersPanel() {
+        return <VBox className="panel right">
+            {this.state.showLayers?<LayersPanel model={this.props.doc.model}/>:""}
+        </VBox>
+    }
+
+    render() {
         var model = this.props.doc.model;
-        let cp = <ColorPicker model={model} onSelectColor={this.selectColor.bind(this)}/>;
         return (<HBox fill className="panel">
-			<VBox className="panel left">
-				<ColorWellButton model={model} selectedColor={this.state.selectedColor} content={cp}/>
-                <VToggleGroup list={this.tools} selected={this.state.selected_tool} template={ToggleButtonTemplate} onChange={this.selectTool}/>
-				<Spacer/>
-				<Button onClick={this.execUndo.bind(this)} disabled={!model.isUndoAvailable()} tooltip="Undo"><i className="fa fa-undo"/></Button>
-				<Button onClick={this.execRedo.bind(this)} disabled={!model.isRedoAvailable()} tooltip="Redo"><i className="fa fa-repeat"/></Button>
-				<ToggleButton onToggle={this.toggleGrid} selected={this.state.drawGrid} tooltip="Show/Hide Grid"><i className="fa fa-th"/></ToggleButton>
-				<ToggleButton onToggle={this.togglePreview} selected={this.state.drawPreview} tooltip="Show/Hide Preview">Preview</ToggleButton>
-				<Spacer/>
-				<Button onClick={this.newDoc.bind(this)}    disabled={loggedOut} tooltip="New Image"><i className="fa fa-file-o"/></Button>
-				<Button onClick={this.saveDoc.bind(this)}   disabled={loggedOut} tooltip="Save Image"><i className="fa fa-save"/></Button>
-				<Button onClick={this.openDoc.bind(this)}   disabled={loggedOut} tooltip="Open Image"><i className="fa fa-folder-open"/></Button>
-				<Button onClick={this.resizeDoc.bind(this)} tooltip="Resize Doc">resize</Button>
-				<ToggleButton onToggle={this.toggleLayers.bind(this)} selected={this.state.showLayers} tooltip="Show/Hide Layers">Layers</ToggleButton>
-			</VBox>
+            {this.renderSideToolbar()}
 			<VBox grow>
-				<HBox className="panel top">
-					<DropdownButton icon="gear" tooltip="Background color">
-						<ColorPicker model={this.props.doc.model} onSelectColor={this.selectBGColor.bind(this)}/>
-					</DropdownButton>
-					<input type="text" ref="doc_title" value={this.props.doc.title} onChange={this.titleEdited.bind(this)}/>
-                    <Spacer/>
-					<Button onClick={this.zoomIn.bind(this)}><i className="fa fa-plus"/></Button>
-					<Button onClick={this.zoomOut.bind(this)}><i className="fa fa-minus"/></Button>
-					<DropdownButton icon="share" direction="left">
-						<li className="disabled">Tweet</li>
-						<li onClick={this.exportPNG.bind(this,1)}>Export as PNG 1x</li>
-						<li onClick={this.exportPNG.bind(this,2)}>Export as PNG 2x</li>
-						<li onClick={this.exportPNG.bind(this,4)}>Export as PNG 4x</li>
-						<li onClick={this.exportPNG.bind(this,8)}>Export as PNG 8x</li>
-						<li className="disabled">Export as JSON</li>
-						<li onClick={this.openShare.bind(this)}>Get Sharing Link</li>
-					</DropdownButton>
-				</HBox>
+                {this.renderTopToolbar()}
 				<HBox className="panel">
 					<label><b>options</b></label>
                     {this.state.selected_tool.tool.getOptionsPanel()}
@@ -346,17 +371,10 @@ class DocPanel extends React.Component {
 					onKeyDown={this.canvasKeyDown.bind(this)}
 				/>
 				<RecentColors colors={this.state.recentColors} model={model} onSelectColor={this.selectColor.bind(this)}/>
-				<HBox className="panel bottom">
-					<button onClick={this.loginLogout}>{this.state.user?"logout":"login"}</button>
-					<label>{this.state.user?this.state.user.username:'not logged in'}</label>
-					<Spacer/>
-					<label><i>{this.state.dirty?"unsaved changes":""}</i></label>
-				</HBox>
+                {this.renderBottomToolbar()}
 			</VBox>
-            {this.state.drawPreview?<VBox ><PreviewPanel model={model}/></VBox>:""}
-			<VBox className="panel right">
-                {this.state.showLayers?<LayersPanel model={model}/>:""}
-			</VBox>
+            {this.renderPreviewPanel()}
+            {this.renderLayersPanel()}
 
             <LoginPanel
                 visible={this.state.loginVisible}
