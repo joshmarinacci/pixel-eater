@@ -66,23 +66,28 @@ class DocPanel extends React.Component {
                 tool: new PencilTool(this),
                 tooltip:'Pencil',
                 icon:'pencil',
+                keyCode: KEYBOARD.P
             },
             {
                 tool: new EraserTool(this),
                 tooltip:'Eraser',
-                icon:'eraser'
+                icon:'eraser',
+                keyCode: KEYBOARD.E
             },
             {
                 tool: new EyedropperTool(this),
                 tooltip:'Eyedropper',
-                icon:'eyedropper'
+                icon:'eyedropper',
+                keyCode: KEYBOARD.I
             },
             {
                 tool: new MoveTool(this),
                 tooltip:'Move Layer(s)',
-                icon:'arrows'
+                icon:'arrows',
+                keyCode: KEYBOARD.V
             },
         ];
+
         this.state.selected_tool = this.tools[0];
         this.selectTool = (item) => this.setState({selected_tool:item});
 
@@ -288,18 +293,8 @@ class DocPanel extends React.Component {
         this.setState({scale: this.state.scale>>1});
     }
     canvasKeyDown(e) {
-        if(e.keyCode === KEYBOARD.E) {
-            this.selectEraser();
-        }
-        if(e.keyCode === KEYBOARD.P) {
-            this.selectPencil();
-        }
-        if(e.keyCode === KEYBOARD.I) {
-            this.selectEyedropper();
-        }
-        if(e.keyCode === KEYBOARD.V) {
-            this.selectMove();
-        }
+        let tool = this.tools.find((tool) => e.keyCode === tool.keyCode);
+        if(tool) this.selectTool(tool);
     }
     selectBGColor(color) {
         PopupState.done();
