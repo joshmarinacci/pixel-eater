@@ -14,21 +14,18 @@ export default class extends Component {
         this.cancel = () => this.setState({visible:false});
         this.changedWidth = () =>  this.setState({ width:Number.parseInt(this.refs.width.value,10) });
         this.changedHeight = () => this.setState({ height:Number.parseInt(this.refs.height.value,10) });
+        this.okay = () => {
+            this.props.model.resize(this.state.width,this.state.height);
+            this.setState({ visible:false });
+        }
     }
     componentWillReceiveProps(nextProps) {
-        this.handleProps(nextProps);
-    }
-
-    handleProps(props) {
         this.setState({
-            width: props.model.getWidth(),
-            height: props.model.getHeight()
+            width: nextProps.model.getWidth(),
+            height: nextProps.model.getHeight()
         });
     }
-    okay() {
-        this.props.model.resize(this.state.width,this.state.height);
-        this.setState({ visible:false });
-    }
+
     render() {
         return <Dialog visible={this.state.visible}>
             <header>Resize Canvas Dimensions</header>
