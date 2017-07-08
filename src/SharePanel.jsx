@@ -1,5 +1,5 @@
 import React, {Component} from "react";
-import {Dialog, VBox, HBox} from "appy-comps";
+import {Dialog, VBox, HBox, DialogManager} from "appy-comps";
 import Config from "./Config"
 
 
@@ -13,15 +13,15 @@ export default class SharePanel extends Component {
     }
 
     render() {
-        return <Dialog visible={this.props.visible}>
+        return <Dialog visible={true}>
             <header>Share</header>
             <VBox className="form">
-            <HBox>
-                <input className="grow" type="text" defaultValue={this.generateURL()}/>
-            </HBox>
+                <HBox>
+                    <input className="grow" type="text" defaultValue={this.generateURL()}/>
+                </HBox>
             </VBox>
             <footer className="children-right">
-                <button onClick={this.props.onCanceled}>cancel</button>
+                <button onClick={()=>DialogManager.hide()}>close</button>
             </footer>
         </Dialog>
     }

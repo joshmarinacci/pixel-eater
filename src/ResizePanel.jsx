@@ -1,5 +1,6 @@
 import React, {Component} from "react";
-import {Dialog, VBox, HBox} from "appy-comps";
+import {Dialog, VBox, HBox, DialogManager} from "appy-comps";
+
 
 export default class extends Component {
     constructor(props) {
@@ -11,12 +12,13 @@ export default class extends Component {
         };
 
         this.show = () => this.setState({visible:true});
-        this.cancel = () => this.setState({visible:false});
+        this.cancel = () => DialogManager.hide();
         this.changedWidth = () =>  this.setState({ width:Number.parseInt(this.refs.width.value,10) });
         this.changedHeight = () => this.setState({ height:Number.parseInt(this.refs.height.value,10) });
         this.okay = () => {
             this.props.model.resize(this.state.width,this.state.height);
-            this.setState({ visible:false });
+            // this.setState({ visible:false });
+            DialogManager.hide();
         }
     }
     componentWillReceiveProps(nextProps) {
@@ -27,7 +29,7 @@ export default class extends Component {
     }
 
     render() {
-        return <Dialog visible={this.state.visible}>
+        return <Dialog visible={true}>
             <header>Resize Canvas Dimensions</header>
             <VBox className="form">
                 <HBox>

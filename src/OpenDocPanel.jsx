@@ -19,7 +19,7 @@ export default class OpenDocPanel extends Component {
         });
     }
     render() {
-        return <Dialog visible={this.props.visible}>
+        return <Dialog visible={true}>
             <header>Open</header>
             <VBox>
                 <ul>

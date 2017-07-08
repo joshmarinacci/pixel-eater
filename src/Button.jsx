@@ -26,11 +26,7 @@ export default class Button extends React.Component {
         return hover;
     }
     onClick() {
-        if(this.props.onClick) {
-            this.props.onClick();
-        } else {
-            console.log("no click defined");
-        }
+        if(this.props.onClick) this.props.onClick();
     }
     generateStyle() {
         return "tooltip-button";

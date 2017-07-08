@@ -64,7 +64,7 @@ export default class extends Component {
     }
 
     render() {
-        return <Dialog visible={this.props.visible}>
+        return <Dialog visible={true}>
             <header>New Doc</header>
             <VBox className="form">
                 <HBox>

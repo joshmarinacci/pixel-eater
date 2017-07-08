@@ -21,7 +21,7 @@ export default class RegistrationPanel extends Component {
         })
     }
     render() {
-        return <Dialog visible={this.props.visible}>
+        return <Dialog visible={true}>
             <header>Register</header>
             <VBox className="form">
                 <HBox>

@@ -25,7 +25,7 @@ export default class LoginPanel extends Component {
         });
     }
     render() {
-        return <Dialog visible={this.props.visible}>
+        return <Dialog visible={true}>
             <header>Login</header>
             <div className="vbox form">
                 <div className="hbox">

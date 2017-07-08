@@ -20,7 +20,7 @@ import OpenDocPanel from "./OpenDocPanel";
 import SharePanel from "./SharePanel";
 import LoginPanel from "./LoginPanel";
 import RegistrationPanel from "./RegistrationPanel";
-import {VBox, HBox, Spacer, PopupContainer, VToggleGroup, PopupManager} from "appy-comps";
+import {VBox, HBox, Spacer, PopupContainer, VToggleGroup, PopupManager, DialogManager, DialogContainer} from "appy-comps";
 import {KEYBOARD} from "./u";
 import { PencilTool, EraserTool, MoveTool, EyedropperTool } from "./Tools";
 import "font-awesome/css/font-awesome.css";
@@ -93,11 +93,6 @@ class DocPanel extends React.Component {
 
         this.state.user = null;
         this.state.doclist = [];
-        this.state.loginVisible = false;
-        this.state.registerVisible = false;
-        this.state.openVisible = false;
-        this.state.shareVisible = false;
-        this.state.newVisible = false;
         this.state.recentColors = [];
 
         UserStore.checkLoggedIn((user) => this.setState({user:user}));
@@ -107,7 +102,11 @@ class DocPanel extends React.Component {
 
         this.loginLogout  = () => {
             if(!this.state.user) {
-                this.setState({loginVisible:true});
+                DialogManager.show(<LoginPanel
+                    onCompleted={this.onLoginCompleted}
+                    onCanceled={this.onLoginCanceled}
+                    switchToRegister={this.switchToRegister}
+                />);
             } else {
                 UserStore.logout(() => this.setState({user:null}));
             }
@@ -116,6 +115,133 @@ class DocPanel extends React.Component {
         this.toggleGrid = () => this.setState({drawGrid: !this.state.drawGrid});
         this.togglePreview = () => this.setState({ drawPreview: !this.state.drawPreview});
         this.toggleLayers = () => this.setState({ showLayers: !this.state.showLayers});
+        this.zoomIn = () => this.setState({scale: this.state.scale<<1});
+        this.zoomOut = () => this.setState({scale: this.state.scale>>1});
+        this.resizeDoc = () => DialogManager.show(<ResizePanel model={this.props.doc.model}/>);
+
+        this.execUndo = () => this.props.doc.model.execUndo();
+        this.execRedo = () => this.props.doc.model.execRedo();
+
+        this.openDoc = () => {
+            if(this.state.dirty) {
+                this.refs.alert.show({
+                    text:'Document not saved!',
+                    okayText:'Discard Changes',
+                    cancelText:'Cancel',
+                    onCancel:()=> this.refs.alert.hide(),
+                    onOkay:()=> {
+                        this.refs.alert.hide();
+                        DocStore.loadDocList((docs)=>{
+                            this.setState({doclist:docs});
+                            DialogManager.show(<OpenDocPanel
+                                docs={docs}
+                                onSelectDoc={this.openDocPerform}
+                                onCanceled={this.openDocCanceled}
+                                onDeleteDoc={this.deleteDoc}
+                            />);
+                        });
+                    }
+                });
+            } else {
+                DocStore.loadDocList((docs)=>{
+                    this.setState({doclist:docs});
+                    DialogManager.show(<OpenDocPanel
+                        docs={docs}
+                        onSelectDoc={this.openDocPerform}
+                        onCanceled={this.openDocCanceled}
+                        onDeleteDoc={this.deleteDoc}
+                    />);
+                });
+            }
+        };
+        this.openDocCanceled = () => DialogManager.hide();
+        this.openDocPerform = (id) => {
+            this.setState({doclist:[], dirty:false});
+            DocStore.loadDoc(id);
+        };
+
+
+        this.onLoginCompleted = (user) => {
+            DialogManager.hide();
+            this.setState({user:user});
+        };
+        this.onLoginCanceled = () => DialogManager.hide();
+        this.onRegistrationCompleted = (user)  => {
+            DialogManager.hide();
+            this.setState({user:user});
+        };
+        this.onRegistrationCanceled = () => DialogManager.hide();
+        this.switchToRegister = () => {
+            DialogManager.hide();
+            DialogManager.show(<RegistrationPanel
+                onCompleted={this.onRegistrationCompleted}
+                onCanceled={this.onRegistrationCanceled}
+                switchToRegister={this.switchToLogin}
+            />);
+        };
+        this.switchToLogin = () => {
+            DialogManager.hide();
+            DialogManager.show(<LoginPanel
+                onCompleted={this.onLoginCompleted}
+                onCanceled={this.onLoginCanceled}
+                switchToRegister={this.switchToRegister}
+            />);
+        };
+
+        this.newDoc = () => {
+            if(this.state.dirty) {
+                this.refs.alert.show({
+                    text:'Document not saved!',
+                    okayText:'Discard Changes',
+                    cancelText:'Cancel',
+                    onCancel:()=> this.refs.alert.hide(),
+                    onOkay:()=> {
+                        this.refs.alert.hide();
+                        this.showNewDocDialog();
+                    }
+                });
+            } else {
+                this.showNewDocDialog();
+            }
+        };
+        this.showNewDocDialog = () => {
+            DialogManager.show(<NewDocPanel
+                onCancel={this.newDocCanceled}
+                onOkay={this.newDocPerformed}
+            />);
+        };
+
+        this.newDocPerformed = (settings) => {
+            DialogManager.hide();
+            var doc = DocStore.newDoc();
+            doc.model = new BitmapModel(settings.w,settings.h);
+            doc.title = settings.title;
+            DocStore.setDoc(doc);
+            this.setState({ doc: doc});
+        };
+        this.newDocCanceled = () => DialogManager.hide();
+
+        this.saveDoc = (cb) => {
+            DocStore.save(DocStore.getDoc(), (res) => {
+                DocStore.getDoc().id=res.id;
+                if(typeof cb === 'function') cb();
+                this.setState({dirty:false});
+            });
+        };
+
+
+        this.openShare = () => DialogManager.show(<SharePanel id={DocStore.getDoc().id}/>);
+        this.openShareCanceled = () => DialogManager.hide();
+
+        this.deleteDoc = (id) => {
+            DocStore.deleteDoc(id, (err,status) => console.log("result of delete is",err,status));
+        };
+
+        this.selectBGColor = (color) => {
+            PopupState.done();
+            this.props.doc.model.setBackgroundColor(color);
+        };
+        this.selectColor = (color) => this.setState({selectedColor:color});
     }
 
     getModel() {
@@ -127,9 +253,6 @@ class DocPanel extends React.Component {
         this.model_listener = nextProps.doc.model.changed((mod)=>this.setState({model:mod}));
     }
 
-    selectColor(color) {
-        this.setState({selectedColor:color});
-    }
     exportPNG(scale) {
         PopupState.done();
         this.saveDoc(function() {
@@ -138,13 +261,6 @@ class DocPanel extends React.Component {
                 + "?download=true"
                 + "&scale="+scale
                 +"&"+Math.floor(Math.random()*100000);
-        });
-    }
-    saveDoc(cb) {
-        DocStore.save(DocStore.getDoc(), (res) => {
-            DocStore.getDoc().id=res.id;
-            if(typeof cb === 'function') cb();
-            this.setState({dirty:false});
         });
     }
     setPixel(pt,new_color) {
@@ -175,167 +291,57 @@ class DocPanel extends React.Component {
             })
         }
     }
-    execUndo() {
-        this.props.doc.model.execUndo();
-    }
-    execRedo() {
-        this.props.doc.model.execRedo();
-    }
 
-    openDoc() {
-        if(this.state.dirty) {
-            this.refs.alert.show({
-                text:'Document not saved!',
-                okayText:'Discard Changes',
-                cancelText:'Cancel',
-                onCancel:()=> this.refs.alert.hide(),
-                onOkay:()=> {
-                    this.refs.alert.hide();
-                    DocStore.loadDocList((docs)=>this.setState({doclist:docs, openVisible:true}));
-                }
-            });
-        } else {
-            DocStore.loadDocList((docs)=>this.setState({doclist:docs, openVisible:true}));
-        }
-
-    }
-    openDocCanceled() {
-        this.setState({openVisible:false})
-    }
-    openDocPerform(id) {
-        this.setState({doclist:[], openVisible:false})
-        DocStore.loadDoc(id);
-        this.setState({dirty:false});
-    }
-
-    openShare() {
-        this.setState({shareVisible:true});
-    }
-    openShareCanceled() {
-        this.setState({shareVisible:false});
-    }
-
-    deleteDoc(id) {
-        DocStore.deleteDoc(id, function(err,status) {
-            console.log("result is",err,status);
-        });
-    }
-
-    newDoc() {
-        if(this.state.dirty) {
-            this.refs.alert.show({
-                text:'Document not saved!',
-                okayText:'Discard Changes',
-                cancelText:'Cancel',
-                onCancel:()=> this.refs.alert.hide(),
-                onOkay:()=> {
-                    this.refs.alert.hide();
-                    this.setState({newVisible: true});
-                }
-            });
-        } else {
-            this.setState({newVisible: true});
-        }
-    }
-    newDocCanceled() {
-        this.setState({newVisible:false});
-    }
-    newDocPerformed(settings) {
-        this.setState({newVisible:false});
-        var doc = DocStore.newDoc();
-        doc.model = new BitmapModel(settings.w,settings.h);
-        doc.title = settings.title;
-        DocStore.setDoc(doc);
-        this.setState({ doc: doc});
-    }
-
-    resizeDoc() {
-        this.refs.resizePanel.show();
-    }
-
-    onLoginCompleted(user) {
-        this.setState({user:user, loginVisible:false});
-    }
-    onLoginCanceled() {
-        this.setState({loginVisible:false});
-    }
-    onRegistrationCompleted(user) {
-        this.setState({user:user, registerVisible:false});
-    }
-    onRegistrationCanceled() {
-        this.setState({ registerVisible:false});
-    }
     titleEdited() {
         DocStore.getDoc().title = this.refs.doc_title.value;
         this.setState({doc:DocStore.getDoc()});
-    }
-    switchToRegister() {
-        this.setState({
-            loginVisible:false,
-            registerVisible:true
-        })
-    }
-    switchToLogin() {
-        this.setState({
-            loginVisible:true,
-            registerVisible:false
-        })
-    }
-    zoomIn() {
-        this.setState({scale: this.state.scale<<1});
-    }
-    zoomOut() {
-        this.setState({scale: this.state.scale>>1});
     }
     canvasKeyDown(e) {
         let tool = this.tools.find((tool) => e.keyCode === tool.keyCode);
         if(tool) this.selectTool(tool);
     }
-    selectBGColor(color) {
-        PopupState.done();
-        this.props.doc.model.setBackgroundColor(color);
-    }
+
     renderSideToolbar() {
         let model = this.props.doc.model;
         var loggedOut = UserStore.getUser()===null;
-        let cp =  <ColorPicker model={model} onSelectColor={this.selectColor.bind(this)}/>;
+        let cp =  <ColorPicker model={model} onSelectColor={this.selectColor}/>;
         return <VBox className="panel left">
             <ColorWellButton model={model} selectedColor={this.state.selectedColor} content={cp}/>
             <VToggleGroup list={this.tools} selected={this.state.selected_tool} template={ToggleButtonTemplate} onChange={this.selectTool}/>
             <Spacer/>
-            <Button onClick={this.execUndo.bind(this)} disabled={!model.isUndoAvailable()} tooltip="Undo"><i className="fa fa-undo"/></Button>
-            <Button onClick={this.execRedo.bind(this)} disabled={!model.isRedoAvailable()} tooltip="Redo"><i className="fa fa-repeat"/></Button>
+            <Button onClick={this.execUndo} disabled={!model.isUndoAvailable()} tooltip="Undo"><i className="fa fa-undo"/></Button>
+            <Button onClick={this.execRedo} disabled={!model.isRedoAvailable()} tooltip="Redo"><i className="fa fa-repeat"/></Button>
             <ToggleButton onToggle={this.toggleGrid} selected={this.state.drawGrid} tooltip="Show/Hide Grid"><i className="fa fa-th"/></ToggleButton>
             <ToggleButton onToggle={this.togglePreview} selected={this.state.drawPreview} tooltip="Show/Hide Preview">Preview</ToggleButton>
             <Spacer/>
-            <Button onClick={this.newDoc.bind(this)}    disabled={loggedOut} tooltip="New Image"><i className="fa fa-file-o"/></Button>
-            <Button onClick={this.saveDoc.bind(this)}   disabled={loggedOut} tooltip="Save Image"><i className="fa fa-save"/></Button>
-            <Button onClick={this.openDoc.bind(this)}   disabled={loggedOut} tooltip="Open Image"><i className="fa fa-folder-open"/></Button>
-            <Button onClick={this.resizeDoc.bind(this)} tooltip="Resize Doc">resize</Button>
+            <Button onClick={this.newDoc}    disabled={loggedOut} tooltip="New Image"><i className="fa fa-file-o"/></Button>
+            <Button onClick={this.saveDoc}   disabled={loggedOut} tooltip="Save Image"><i className="fa fa-save"/></Button>
+            <Button onClick={this.openDoc}   disabled={loggedOut} tooltip="Open Image"><i className="fa fa-folder-open"/></Button>
+            <Button onClick={this.resizeDoc} tooltip="Resize Doc">resize</Button>
             <ToggleButton onToggle={this.toggleLayers} selected={this.state.showLayers} tooltip="Show/Hide Layers">Layers</ToggleButton>
         </VBox>
     }
-
     renderTopToolbar() {
-        let cp2 = <ColorPicker model={this.props.doc.model} onSelectColor={this.selectBGColor.bind(this)}/>
+        let cp2 = <ColorPicker model={this.props.doc.model} onSelectColor={this.selectBGColor}/>
+        let sharePopup = <div>
+            <li className="disabled">Tweet</li>
+            <li onClick={this.exportPNG.bind(this,1)}>Export as PNG 1x</li>
+            <li onClick={this.exportPNG.bind(this,2)}>Export as PNG 2x</li>
+            <li onClick={this.exportPNG.bind(this,4)}>Export as PNG 4x</li>
+            <li onClick={this.exportPNG.bind(this,8)}>Export as PNG 8x</li>
+            <li className="disabled">Export as JSON</li>
+            <li onClick={this.openShare}>Get Sharing Link</li>
+        </div>;
         return <HBox className="panel top">
             <button onClick={(e)=>PopupManager.show(cp2,e.target)} className="fa fa-gear"/>
             <input type="text" ref="doc_title" value={this.props.doc.title} onChange={this.titleEdited.bind(this)}/>
             <Spacer/>
-            <Button onClick={this.zoomIn.bind(this)}><i className="fa fa-plus"/></Button>
-            <Button onClick={this.zoomOut.bind(this)}><i className="fa fa-minus"/></Button>
-            <DropdownButton icon="share" direction="left">
-                <li className="disabled">Tweet</li>
-                <li onClick={this.exportPNG.bind(this,1)}>Export as PNG 1x</li>
-                <li onClick={this.exportPNG.bind(this,2)}>Export as PNG 2x</li>
-                <li onClick={this.exportPNG.bind(this,4)}>Export as PNG 4x</li>
-                <li onClick={this.exportPNG.bind(this,8)}>Export as PNG 8x</li>
-                <li className="disabled">Export as JSON</li>
-                <li onClick={this.openShare.bind(this)}>Get Sharing Link</li>
-            </DropdownButton>
+            <Button onClick={this.zoomIn}><i className="fa fa-plus"/></Button>
+            <Button onClick={this.zoomOut}><i className="fa fa-minus"/></Button>
+            <button onClick={(e)=>PopupManager.show(sharePopup, e.target)} className="fa fa-share"/>
+            <button onClick={this.openShare}>share</button>
         </HBox>
     }
-
     renderBottomToolbar() {
         return <HBox className="panel bottom">
             <button onClick={this.loginLogout}>{this.state.user?"logout":"login"}</button>
@@ -344,17 +350,14 @@ class DocPanel extends React.Component {
             <label><i>{this.state.dirty?"unsaved changes":""}</i></label>
         </HBox>
     }
-
     renderPreviewPanel() {
         return this.state.drawPreview?<VBox><PreviewPanel model={this.props.doc.model}/></VBox>:"";
     }
-
     renderLayersPanel() {
         return <VBox className="panel right">
             {this.state.showLayers?<LayersPanel model={this.props.doc.model}/>:""}
         </VBox>
     }
-
     render() {
         var model = this.props.doc.model;
         return (<HBox fill className="panel">
@@ -370,44 +373,15 @@ class DocPanel extends React.Component {
 					tool={this.state.selected_tool.tool} model={model} drawGrid={this.state.drawGrid} scale={this.state.scale}
 					onKeyDown={this.canvasKeyDown.bind(this)}
 				/>
-				<RecentColors colors={this.state.recentColors} model={model} onSelectColor={this.selectColor.bind(this)}/>
+				<RecentColors colors={this.state.recentColors} model={model} onSelectColor={this.selectColor}/>
                 {this.renderBottomToolbar()}
 			</VBox>
             {this.renderPreviewPanel()}
             {this.renderLayersPanel()}
 
-            <LoginPanel
-                visible={this.state.loginVisible}
-                onCompleted={this.onLoginCompleted.bind(this)}
-                onCanceled={this.onLoginCanceled.bind(this)}
-                switchToRegister={this.switchToRegister.bind(this)}
-            />
-            <ResizePanel ref="resizePanel" model={model}/>
             <AlertPanel ref="alert"/>
-            <NewDocPanel
-                visible={this.state.newVisible}
-                onCancel={this.newDocCanceled.bind(this)}
-                onOkay={this.newDocPerformed.bind(this)}
-            />
-            <RegistrationPanel
-                visible={this.state.registerVisible}
-                onCompleted={this.onRegistrationCompleted.bind(this)}
-                onCanceled={this.onRegistrationCanceled.bind(this)}
-                switchToRegister={this.switchToLogin.bind(this)}
-            />
 
-            <OpenDocPanel
-                visible={this.state.openVisible}
-                docs={this.state.doclist}
-                onSelectDoc={this.openDocPerform.bind(this)}
-                onCanceled={this.openDocCanceled.bind(this)}
-                onDeleteDoc={this.deleteDoc.bind(this)}
-            />
-            <SharePanel
-                visible={this.state.shareVisible}
-                onCanceled={this.openShareCanceled.bind(this)}
-                id={DocStore.getDoc().id}
-            />
+            <DialogContainer/>
             <PopupContainer/>
         </HBox>)
     }
