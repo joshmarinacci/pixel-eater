@@ -7,16 +7,8 @@ import Config from "./Config";
 export default {
     login(data) {
         return POST_JSON(Config.url("/login"),data).then((val) => {
-            console.log("got back",val);
-            if(val.account) {
-                console.log("logged in okay!");
-                return GET_JSON(Config.url("/whoami")).then((data) => {
-                    this.user = data.user;
-                    return data.user;
-                })
-            } else {
-                return val;
-            }
+            if(val.account) return this.checkLoggedIn();
+            return val;
         })
     },
 

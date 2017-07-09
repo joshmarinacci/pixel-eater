@@ -1,6 +1,6 @@
 import React, {Component} from "react";
 import UserStore from "./UserStore";
-import {Dialog, Spacer} from "appy-comps";
+import {Dialog, Spacer, VBox, HBox} from "appy-comps";
 
 
 export default class LoginPanel extends Component {
@@ -12,30 +12,29 @@ export default class LoginPanel extends Component {
     }
     tryLogin(e) {
         e.stopPropagation();
-        let data = {
+        UserStore.login({
             username: this.refs.username.value,
             password: this.refs.password.value
-        };
-        UserStore.login(data)
+            })
             .then((user) => this.props.onCompleted(user))
             .catch((e)=>  this.setState({errorText:e.message}));
     }
     render() {
         return <Dialog visible={true}>
             <header>Login</header>
-            <div className="vbox form">
-                <div className="hbox">
+            <VBox className="form">
+                <HBox>
                     <label>username</label>
                     <input type="text" ref="username"/><br/>
-                </div>
-                <div className="hbox">
+                </HBox>
+                <HBox>
                     <label>password</label>
                     <input type="password" ref="password"/><br/>
-                </div>
-                <div className="hbox">
+                </HBox>
+                <HBox>
                     <label className="error">{this.state.errorText}</label>
-                </div>
-            </div>
+                </HBox>
+            </VBox>
             <footer className="children-right">
                 <button className="primary" onClick={this.props.switchToRegister}>Register!</button>
                 <Spacer/>

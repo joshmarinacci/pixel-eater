@@ -8,17 +8,18 @@ export default class AlertPanel extends Component {
             <VBox className="grow">{this.props.text}</VBox>
             <footer className="children-right">
                 {this.renderCancelButton()}
-                <button
-                    onClick={this.props.onOkay}
-                    className="primary">{this.props.okayText}</button>
+                {this.renderOkayButton()}
             </footer>
         </Dialog>
     }
 
     renderCancelButton() {
-        if (this.props.onCancel) {
-            return <button onClick={this.props.onCancel}>{this.props.cancelText}</button>
-        }
+        if (this.props.onCancel) return <button onClick={this.props.onCancel}>{this.props.cancelText}</button>
+        return "";
+    }
+
+    renderOkayButton() {
+        if(this.props.onOkay) return <button  onClick={this.props.onOkay} className="primary">{this.props.okayText}</button>
         return "";
     }
 }

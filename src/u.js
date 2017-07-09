@@ -10,10 +10,9 @@ export function GET_JSON(path) {
             if(req.readyState === 4 && req.status === 200) {
                 return res(JSON.parse(req.responseText));
             }
-            if(req.status === 401) {
+            if(req.status >= 400) {
                 rej(req)
             }
-            // console.log("status = ", req.status, req.responseText);
         };
         req.open("GET",path,true);
         req.setRequestHeader('Accept', 'application/json');
