@@ -129,7 +129,24 @@ class DocPanel extends React.Component {
                 okayText="Okay"
                 onOkay={()=> DialogManager.hide()}
                 />);
-        }
+        };
+
+        this.listDocs = () => {
+            DialogManager.hide();
+            DocStore.loadDocList().then((docs)=>{
+                this.setState({doclist:docs});
+                DialogManager.show(<OpenDocPanel
+                    docs={docs}
+                    onSelectDoc={this.openDocPerform}
+                    onCanceled={this.openDocCanceled}
+                    onDeleteDoc={this.deleteDoc}
+                />);
+            }).catch((e)=>{
+                console.log("got an error");
+                this.showError('some error happened');
+            });
+        };
+
         this.openDoc = () => {
             if(this.state.dirty) {
                 DialogManager.show(<AlertPanel
@@ -137,34 +154,10 @@ class DocPanel extends React.Component {
                     okayText="Discard Changes"
                     cancelText="Cancel"
                     onCancel={()=>DialogManager.hide()}
-                    onOkay={()=>{
-                        DialogManager.hide();
-                        DocStore.loadDocList().then((docs)=>{
-                            this.setState({doclist:docs});
-                            DialogManager.show(<OpenDocPanel
-                                docs={docs}
-                                onSelectDoc={this.openDocPerform}
-                                onCanceled={this.openDocCanceled}
-                                onDeleteDoc={this.deleteDoc}
-                            />);
-                        }).catch((e)=>{
-                            console.log("got an error");
-                            this.showError('some error happened');
-                        });
-                    }}
+                    onOkay={this.listDocs}
                 />);
             } else {
-                DocStore.loadDocList().then((docs)=>{
-                    this.setState({doclist:docs});
-                    DialogManager.show(<OpenDocPanel
-                        docs={docs}
-                        onSelectDoc={this.openDocPerform}
-                        onCanceled={this.openDocCanceled}
-                        onDeleteDoc={this.deleteDoc}
-                    />);
-                }).catch((e)=>{
-                    this.showError('some error happened');
-                });
+                this.listDocs();
             }
         };
         this.openDocCanceled = () => DialogManager.hide();
