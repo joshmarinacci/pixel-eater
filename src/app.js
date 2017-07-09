@@ -5,7 +5,6 @@ import DocStore from "./DocStore.js";
 import UserStore from "./UserStore";
 import Config from "./Config"
 import BitmapModel from "./BitmapModel"
-import DropdownButton from "./DropdownButton.jsx"
 import Button from "./Button.jsx";
 import ColorPicker from "./ColorPicker.jsx";
 import PopupState from "./PopupState.jsx";
@@ -95,7 +94,9 @@ class DocPanel extends React.Component {
         this.state.doclist = [];
         this.state.recentColors = [];
 
-        UserStore.checkLoggedIn((user) => this.setState({user:user}));
+        UserStore.checkLoggedIn()
+            .then((user) => this.setState({user:user}))
+            .catch((e)=>console.log("not logged in"));
         this.model_listener = this.props.doc.model.changed((mod)=> this.setState({model:mod, dirty:true}));
 
 
@@ -122,16 +123,23 @@ class DocPanel extends React.Component {
         this.execUndo = () => this.props.doc.model.execUndo();
         this.execRedo = () => this.props.doc.model.execRedo();
 
+        this.showError = (txt) => {
+            DialogManager.show(<AlertPanel
+                text={txt}
+                okayText="Okay"
+                onOkay={()=> DialogManager.hide()}
+                />);
+        }
         this.openDoc = () => {
             if(this.state.dirty) {
-                this.refs.alert.show({
-                    text:'Document not saved!',
-                    okayText:'Discard Changes',
-                    cancelText:'Cancel',
-                    onCancel:()=> this.refs.alert.hide(),
-                    onOkay:()=> {
-                        this.refs.alert.hide();
-                        DocStore.loadDocList((docs)=>{
+                DialogManager.show(<AlertPanel
+                    text="Document not saved!"
+                    okayText="Discard Changes"
+                    cancelText="Cancel"
+                    onCancel={()=>DialogManager.hide()}
+                    onOkay={()=>{
+                        DialogManager.hide();
+                        DocStore.loadDocList().then((docs)=>{
                             this.setState({doclist:docs});
                             DialogManager.show(<OpenDocPanel
                                 docs={docs}
@@ -139,11 +147,14 @@ class DocPanel extends React.Component {
                                 onCanceled={this.openDocCanceled}
                                 onDeleteDoc={this.deleteDoc}
                             />);
+                        }).catch((e)=>{
+                            console.log("got an error");
+                            this.showError('some error happened');
                         });
-                    }
-                });
+                    }}
+                />);
             } else {
-                DocStore.loadDocList((docs)=>{
+                DocStore.loadDocList().then((docs)=>{
                     this.setState({doclist:docs});
                     DialogManager.show(<OpenDocPanel
                         docs={docs}
@@ -151,6 +162,8 @@ class DocPanel extends React.Component {
                         onCanceled={this.openDocCanceled}
                         onDeleteDoc={this.deleteDoc}
                     />);
+                }).catch((e)=>{
+                    this.showError('some error happened');
                 });
             }
         };
@@ -190,16 +203,16 @@ class DocPanel extends React.Component {
 
         this.newDoc = () => {
             if(this.state.dirty) {
-                this.refs.alert.show({
-                    text:'Document not saved!',
-                    okayText:'Discard Changes',
-                    cancelText:'Cancel',
-                    onCancel:()=> this.refs.alert.hide(),
-                    onOkay:()=> {
-                        this.refs.alert.hide();
+                DialogManager.show(<AlertPanel
+                    text="Document not saved!"
+                    okayText="Discard Changes"
+                    cancelText="Cancel"
+                    onCancel={()=>DialogManager.hide()}
+                    onOkay={()=>{
+                        DialogManager.hide();
                         this.showNewDocDialog();
-                    }
-                });
+                    }}
+                />);
             } else {
                 this.showNewDocDialog();
             }
@@ -311,14 +324,14 @@ class DocPanel extends React.Component {
             <Spacer/>
             <Button onClick={this.execUndo} disabled={!model.isUndoAvailable()} tooltip="Undo"><i className="fa fa-undo"/></Button>
             <Button onClick={this.execRedo} disabled={!model.isRedoAvailable()} tooltip="Redo"><i className="fa fa-repeat"/></Button>
+            <Button onClick={this.resizeDoc} tooltip="Resize Doc">resize</Button>
             <ToggleButton onToggle={this.toggleGrid} selected={this.state.drawGrid} tooltip="Show/Hide Grid"><i className="fa fa-th"/></ToggleButton>
             <ToggleButton onToggle={this.togglePreview} selected={this.state.drawPreview} tooltip="Show/Hide Preview">Preview</ToggleButton>
+            <ToggleButton onToggle={this.toggleLayers} selected={this.state.showLayers} tooltip="Show/Hide Layers">Layers</ToggleButton>
             <Spacer/>
             <Button onClick={this.newDoc}    disabled={loggedOut} tooltip="New Image"><i className="fa fa-file-o"/></Button>
             <Button onClick={this.saveDoc}   disabled={loggedOut} tooltip="Save Image"><i className="fa fa-save"/></Button>
             <Button onClick={this.openDoc}   disabled={loggedOut} tooltip="Open Image"><i className="fa fa-folder-open"/></Button>
-            <Button onClick={this.resizeDoc} tooltip="Resize Doc">resize</Button>
-            <ToggleButton onToggle={this.toggleLayers} selected={this.state.showLayers} tooltip="Show/Hide Layers">Layers</ToggleButton>
         </VBox>
     }
     renderTopToolbar() {
@@ -351,7 +364,7 @@ class DocPanel extends React.Component {
         </HBox>
     }
     renderPreviewPanel() {
-        return this.state.drawPreview?<VBox><PreviewPanel model={this.props.doc.model}/></VBox>:"";
+        return this.state.drawPreview?<VBox className="panel right"><PreviewPanel model={this.props.doc.model}/></VBox>:"";
     }
     renderLayersPanel() {
         return <VBox className="panel right">
@@ -364,7 +377,7 @@ class DocPanel extends React.Component {
             {this.renderSideToolbar()}
 			<VBox grow>
                 {this.renderTopToolbar()}
-				<HBox className="panel">
+				<HBox className="panel top">
 					<label><b>options</b></label>
                     {this.state.selected_tool.tool.getOptionsPanel()}
 				</HBox>
@@ -378,9 +391,6 @@ class DocPanel extends React.Component {
 			</VBox>
             {this.renderPreviewPanel()}
             {this.renderLayersPanel()}
-
-            <AlertPanel ref="alert"/>
-
             <DialogContainer/>
             <PopupContainer/>
         </HBox>)

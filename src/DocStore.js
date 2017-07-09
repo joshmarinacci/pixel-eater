@@ -24,15 +24,15 @@ export default {
         this.doc = doc;
         this.fireUpdate();
     },
-    save: function(doc, cb) {
+    save: function(doc) {
         doc.version = "2";
-        POST_JSON(Config.url("/save"),doc,(res) => {if(cb)cb(res);} );
+        return POST_JSON(Config.url("/save"),doc);
     },
-    loadDocList:function(cb) {
-        GET_JSON(Config.url("/listfull"), (res) => {if(cb)cb(res)});
+    loadDocList:function() {
+        return GET_JSON(Config.url("/listfull"));
     },
-    loadDoc: function(id,cb) {
-        POST_JSON(Config.url("/load"), {id:id}, (res) => {
+    loadDoc: function(id) {
+        return POST_JSON(Config.url("/load"), {id:id}).then((res) => {
             let doc = {
                 id: res.doc.id,
                 title: res.doc.title
@@ -44,7 +44,7 @@ export default {
                 doc.model = BitmapModel.fromJSON(res.doc.model);
             }
             this.setDoc(doc);
-            if(cb)cb(doc);
+            return doc;
         });
     },
     newDoc: function() {
@@ -54,9 +54,7 @@ export default {
             id:null
         }
     },
-    deleteDoc: function(id,cb) {
-        POST_JSON(Config.url("/delete"), {id:id}, (res) => {
-            if(cb)cb(null,res);
-        });
+    deleteDoc: function(id) {
+        return POST_JSON(Config.url("/delete"), {id:id});
     }
 }

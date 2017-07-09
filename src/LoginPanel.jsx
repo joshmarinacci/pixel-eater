@@ -16,13 +16,9 @@ export default class LoginPanel extends Component {
             username: this.refs.username.value,
             password: this.refs.password.value
         };
-        UserStore.login(data, (err,user) => {
-            if(err) {
-                this.setState({errorText: err.message});
-            } else {
-                this.props.onCompleted(user);
-            }
-        });
+        UserStore.login(data)
+            .then((user) => this.props.onCompleted(user))
+            .catch((e)=>  this.setState({errorText:e.message}));
     }
     render() {
         return <Dialog visible={true}>

@@ -2,41 +2,24 @@ import React, {Component} from "react";
 import {Dialog, VBox} from "appy-comps";
 
 export default class AlertPanel extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            visible: false,
-            text:'nothing',
-            cancelText:'cancel',
-            okayText:'okay',
-            onCancel:null,
-            onOkay:null
-        }
-    }
-
-    show(opts) {
-        this.setState({visible:true});
-        this.setState(opts);
-    }
-    hide() {
-        this.setState({visible:false});
-    }
-
     render() {
-        return <Dialog visible={this.state.visible}>
+        return <Dialog visible={true}>
             <header>Alert</header>
-            <VBox className="grow">
-                {this.state.text}
-            </VBox>
+            <VBox className="grow">{this.props.text}</VBox>
             <footer className="children-right">
+                {this.renderCancelButton()}
                 <button
-                    onClick={this.state.onCancel}
-                    >{this.state.cancelText}</button>
-                <button
-                    onClick={this.state.onOkay}
-                    className="primary">{this.state.okayText}</button>
+                    onClick={this.props.onOkay}
+                    className="primary">{this.props.okayText}</button>
             </footer>
         </Dialog>
+    }
+
+    renderCancelButton() {
+        if (this.props.onCancel) {
+            return <button onClick={this.props.onCancel}>{this.props.cancelText}</button>
+        }
+        return "";
     }
 }
 
