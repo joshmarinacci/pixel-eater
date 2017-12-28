@@ -60,3 +60,4 @@ typings/
 .env
 config.json
 
+rethinkdb_data/
