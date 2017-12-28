@@ -11,7 +11,6 @@ var fs = require('fs');
 var PngRender = require("./PngRenderer");
 var PI = require('pureimage');
 
-var stormpath = require('express-stormpath');
 
 //create an app
 var app = express();
@@ -25,39 +24,10 @@ app.use(cors({origin:true, credentials:true}));
 //assume all bodies will be JSON and parse them automatically
 app.use(bodyParser.json());
 
-
-var stormpathcfg = {
-    // Optional configuration options.
-    application: {
-        href: 'https://api.stormpath.com/v1/applications/YsU8xiLUaoZBupUPBld1x'
-    },
-    web: {
-        produces: ['application/json'],
-        register: {
-            autoLogin: true,
-            form: {
-                fields: {
-                    givenName: {
-                        required: false
-                    },
-                    surname: {
-                        required: false
-                    }
-                }
-            }
-        }
-    }
-};
-
 if(fs.existsSync("config.json")) {
     var cfg = JSON.parse(fs.readFileSync("config.json").toString());
-    stormpathcfg.apiKey = {
-        id: cfg.STORMPATH_CLIENT_APIKEY_ID,
-        secret: cfg.STORMPATH_CLIENT_APIKEY_SECRET
-    }
+    console.log("not currently using config");
 }
-
-app.use(stormpath.init(app, stormpathcfg));
 
 //database connection
 var conn = null;
@@ -103,7 +73,22 @@ function startWebserver(cb) {
     });
 }
 
-app.get('/listfull',stormpath.loginRequired,function(req,res) {
+function loginRequired(req,res,next) {
+    console.log("pretending logged in");
+    if(!req.user) {
+        console.log("not logged in");
+        return res.json({status:'error',message:'user not logged in'});
+    }
+    next();
+}
+
+app.post('/login',function(req,res) {
+    console.log("request to do a login", req.body);
+});
+app.post('/register',function(req,res) {
+    console.log("request to do a register", req.body);
+});
+app.get('/listfull',loginRequired,function(req,res) {
     RethinkDB.table('docs').filter(RethinkDB.row("username").eq(req.user.username)).run(conn)
         .then(function(cursor) {
             return cursor.toArray()
@@ -112,12 +97,12 @@ app.get('/listfull',stormpath.loginRequired,function(req,res) {
             res.json(list);
         });
 });
-app.get('/whoami',stormpath.loginRequired,function(req,res) {
+app.get('/whoami',loginRequired,function(req,res) {
     console.log("whoami = ", req.user);
     res.json({status:'success',user:req.user});
 });
 
-app.post("/save", stormpath.loginRequired, function(req,res) {
+app.post("/save", loginRequired, function(req,res) {
     if(req.body.id) {
         RethinkDB.table('docs').get(req.body.id).update(req.body).run(conn)
             .then(function (ans) {
@@ -138,7 +123,7 @@ app.post("/save", stormpath.loginRequired, function(req,res) {
     }
 });
 
-app.post("/load", stormpath.loginRequired, function(req,res) {
+app.post("/load", loginRequired, function(req,res) {
     RethinkDB.table('docs').get(req.body.id).run(conn)
         .then(function(doc) {
             res.json({status:'success',doc:doc});
@@ -148,7 +133,7 @@ app.post("/load", stormpath.loginRequired, function(req,res) {
         })
 });
 
-app.post("/delete", stormpath.loginRequired, function(req,res) {
+app.post("/delete", loginRequired, function(req,res) {
     if(!req.body.id) {
         res.json({status:'error', message:"missing id parameter", id:req.body.id});
         return;
@@ -187,13 +172,10 @@ app.get('/preview/:id',function(req,res) {
         })
 });
 
-app.on('stormpath.ready', function () {
-    console.log('Stormpath Ready!');
-    startDatabase(function() {
-        console.log("database is ready");
-        startWebserver(function() {
-            console.log('webserver is ready');
-        });
+startDatabase(function() {
+    console.log("database is ready");
+    startWebserver(function() {
+        console.log('webserver is ready');
     });
 });
 

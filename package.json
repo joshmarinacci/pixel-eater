@@ -22,9 +22,13 @@
   "dependencies": {
     "appy-comps": "0.*.*",
     "appy-style": "0.0.7",
+    "body-parser": "^1.17.2",
+    "cors": "^2.8.3",
     "font-awesome": "^4.7.0",
+    "pureimage": "^0.1.0",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
-    "react-scripts": "^1.0.10"
+    "react-scripts": "^1.0.10",
+    "rethinkdb": "^2.3.3"
   }
 }
