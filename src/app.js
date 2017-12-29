@@ -28,6 +28,7 @@ import "appy-style/src/look.css";
 
 
 import ImmutableStore from "./ImmutableStore";
+import SimpleList from './SimpleList'
 
 const IS = new ImmutableStore()
 
@@ -47,23 +48,24 @@ class P  {
     }
 }
 
-// IS.setPixelOnTile(null,0,0,5)
+const SheetListItemRenderer = (props) => {
+    const style = {
+        border:'1px solid black'
+    }
+    if(props.selected) style.backgroundColor ='#ccddff'
+    return <div style={style}>{props.item.get('name')}</div>
+}
 
-
-//
-// const ToggleButtonTemplate = (props) => {
-//     return <ToggleButton onToggle={props.onSelect}
-//                          selected={props.selected}
-//                          tooltip={props.item.tooltip}
-//     ><i className={"fa fa-"+props.item.icon}></i></ToggleButton>
-// };
+const TileViewItemRenderer = (props) => {
+    const style = { border: '1px solid black'};
+    if(props.selected) style.border = '1px solid red';
+    return <TileView style={style} sprite={props.item} scale={2} store={IS} palette={props.palette} onClick={()=>props.onClick(props.index)}/>
+}
 
 export default class App extends Component {
     constructor(props) {
         super(props);
         IS.on('changed', doc =>this.setState({doc:doc}))
-        // this.state.doc = DocStore.getDoc();
-        // DocStore.changed(()=>this.setState({doc:DocStore.getDoc()}));
         this.tools = [
             {
                 tool: new PencilTool(this),
@@ -99,14 +101,13 @@ export default class App extends Component {
             // selectedColor:1,
             // scale: 16,
             // dirty:false,
+            selectedSheetIndex: 0,
             selectedTileIndex: 0,
             selectedTool:this.tools[0],
         };
         this.undoCommand = () => IS.undoCommand()
         this.redoCommand = () => IS.redoCommand()
-        this.selectTile = (index) => {
-            this.setState({selectedTileIndex:index})
-        }
+        this.selectTile = (index) => this.setState({selectedTileIndex:index})
         // this.state.shiftLayerOnly = false;
 
 
@@ -214,7 +215,15 @@ export default class App extends Component {
                 <button onClick={this.redoCommand}>redo</button>
             </div>
             <div style={{ gridColumn:'left/center', gridRow:'center', border:'1px solid green', display:'flex', flexDirection:'row'}}>
-                <div style={{ border: '1px solid green', width:'100px' }}>doc list</div>
+                <div style={{ border: '1px solid green', width:'100px' }}>
+                    <SimpleList
+                        list={this.state.doc.get('sheets')}
+                        style={{width:'100px', border:'1px solid blue'}}
+                        orientation={'vertical'}
+                        renderer={SheetListItemRenderer}
+                        selectedItem={this.state.doc.get('sheets').get(this.state.selectedSheetIndex)}
+                    />
+                </div>
                 <div style={{ border:'1px solid green', width:'100px'}}>
                     {this.renderTileSheet(this.state.doc.get('sheets').get(0))}
                 </div>
@@ -298,13 +307,14 @@ export default class App extends Component {
     }
 
     renderTileSheet(sheet) {
-        const tiles = sheet.get('tiles');
-        const pal = sheet.get('palette')
-        const output = tiles.map((tile,i)=>{
-            return <TileView key={i} sprite={tile} scale={2} store={IS} palette={pal}
-                             onClick={()=>this.selectTile(i)}/>
-        })
-        return <div style={{ display:'flex', flexDirection:'column', alignItems:'start'}}>{output}</div>
+        return <SimpleList
+            list={sheet.get('tiles')}
+            renderer={TileViewItemRenderer}
+            palette={sheet.get('palette')}
+            onClick={this.selectTile}
+            selectedItem={sheet.get('tiles').get(this.state.selectedTileIndex)}
+            orientation='wrap'
+        />
     }
 }
 
@@ -362,8 +372,10 @@ class TileView extends CanvasComponent {
         if(this.props.onClick) this.props.onClick(this.props.sprite)
     }
     render() {
+        const overrideStyle = this.props.style?this.props.style:{}
+        const style = Object.assign(overrideStyle,{})
         return <canvas
-            style={{border:'1px solid black'}}
+            style={style}
             ref={(can)=>this.canvas = can}
             width={this.scale*IS.getTileWidth(this.props.sprite)}
             height={this.scale*IS.getTileHeight(this.props.sprite)}
