@@ -107,7 +107,16 @@ export default class App extends Component {
         };
         this.undoCommand = () => IS.undoCommand()
         this.redoCommand = () => IS.redoCommand()
+
+        this.getSelectedSheet = () => this.state.doc.get('sheets').get(0)
         this.selectTile = (index) => this.setState({selectedTileIndex:index})
+        this.getSelectedTile = () => this.getSelectedSheet().get('tiles').get(this.state.selectedTileIndex)
+
+        this.addTileToSheet = () => IS.addTileToSheet(this.getSelectedSheet());
+        this.removeTileFromSheet = () => {
+            IS.removeTileFromSheet(this.getSelectedSheet(),this.getSelectedTile())
+            this.setState({selectedTileIndex:0})
+        }
         // this.state.shiftLayerOnly = false;
 
 
@@ -310,8 +319,8 @@ export default class App extends Component {
                     orientation='wrap'
                 />
                 <HBox>
-                    <button>add new sprite</button>
-                    <button>remove sprite</button>
+                    <button onClick={this.addTileToSheet}>add new sprite</button>
+                    <button onClick={this.removeTileFromSheet}>remove sprite</button>
                 </HBox>
             </VBox>
         </CollapsingPanel>

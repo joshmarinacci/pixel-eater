@@ -21,11 +21,15 @@ const layer1 = new Map({
     visible:true,
     pixels:EMPTY.set(0,1)
 })
+const layer2 = new Map({
+    visible:true,
+    pixels:EMPTY
+})
 const tile1 = new Map({
     layers:new List([layer1])
 })
 const tile2 = new Map({
-    layers: new List([])
+    layers: new List([layer2])
 })
 
 const palette = new Map({
@@ -93,6 +97,19 @@ export default class  ImmutableStore {
     }
     lookupPaletteColor(palette, val) {
         return palette.get('colors').get(val)
+    }
+    addTileToSheet(sheet) {
+        const layer = new Map({
+            visible:true,
+            pixels:EMPTY
+        })
+        const tile = new Map({
+            layers:new List([layer])
+        })
+        this.setDoc(this.doc.updateIn(['sheets',0,'tiles'], (tiles)=>tiles.push(tile)))
+    }
+    removeTileFromSheet(sheet, tile) {
+        this.setDoc(this.doc.updateIn(['sheets',0,'tiles'], (tiles)=>tiles.filter(test=>test!==tile)))
     }
 
 }
