@@ -179,7 +179,7 @@ export default class App extends Component {
         const layer = tile.get('layers').get(0)
         if(!layer) return;
         if(!layer.get('visible')) return;
-        IS.setPixelOnTile(tile,this.state.selectedTileIndex,pt.x,pt.y,1)
+        IS.setPixelOnTile(tile,pt.x,pt.y,1)
         // model.drawStamp(pt,stamp);
         // this.appendRecentColor(new_color);
     }
