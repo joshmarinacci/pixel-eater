@@ -10,8 +10,8 @@ export default class SimpleList extends Component {
         let { renderer, orientation, list, ...rest} = this.props
         let Renderer = SimpleListRenderer
         if(renderer) Renderer = renderer
-        const style = {
-            display:'flex'
+        let style = {
+            display:'flex',
         }
         if(orientation) {
             if(orientation === 'wrap') {
@@ -21,6 +21,9 @@ export default class SimpleList extends Component {
             if(orientation === 'vertical') {
                 style.flexDirection = 'column'
             }
+        }
+        if(this.props.style) {
+            style = Object.assign(this.props.style,style)
         }
         return <div style={style}>
             {list.map((item, i)=>{

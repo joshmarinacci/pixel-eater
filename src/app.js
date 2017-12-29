@@ -215,7 +215,7 @@ export default class App extends Component {
                 <button onClick={this.redoCommand}>redo</button>
             </div>
             <div style={{ gridColumn:'left/center', gridRow:'center', border:'1px solid green', display:'flex', flexDirection:'row'}}>
-                <div style={{ border: '1px solid green', width:'100px' }}>
+                <CollapsingPanel title="sheets" style={{border:'1px solid #888', backgroundColor:'#dddddd'}}>
                     <SimpleList
                         list={this.state.doc.get('sheets')}
                         style={{width:'100px', border:'1px solid blue'}}
@@ -223,10 +223,8 @@ export default class App extends Component {
                         renderer={SheetListItemRenderer}
                         selectedItem={this.state.doc.get('sheets').get(this.state.selectedSheetIndex)}
                     />
-                </div>
-                <div style={{ border:'1px solid green', width:'100px'}}>
-                    {this.renderTileSheet(this.state.doc.get('sheets').get(0))}
-                </div>
+                </CollapsingPanel>
+                {this.renderTileSheet(this.state.doc.get('sheets').get(0))}
             </div>
             <div style={{ gridColumn:'center/right', gridRow:'center', border:'1px solid green', alignItems:'stretch', display:'flex'}}>
                 <TileEditor
@@ -236,13 +234,6 @@ export default class App extends Component {
                 />
             </div>
             <div style={{ gridColumn:'right', gridRow:'center', border:'1px solid green'}}>preview</div>
-            {/*{this.renderSideToolbar()}*/}
-            {/*{this.renderTopToolbar()}*/}
-                    {/*{this.state.selected_tool.tool.getOptionsPanel()}*/}
-                {/*<RecentColors colors={this.state.recentColors} model={model} onSelectColor={this.selectColor}/>*/}
-                {/*{this.renderBottomToolbar()}*/}
-            {/*{this.renderPreviewPanel()}*/}
-            {/*{this.renderLayersPanel()}*/}
             <DialogContainer/>
             <PopupContainer/>
         </div>
@@ -307,14 +298,23 @@ export default class App extends Component {
     }
 
     renderTileSheet(sheet) {
-        return <SimpleList
-            list={sheet.get('tiles')}
-            renderer={TileViewItemRenderer}
-            palette={sheet.get('palette')}
-            onClick={this.selectTile}
-            selectedItem={sheet.get('tiles').get(this.state.selectedTileIndex)}
-            orientation='wrap'
-        />
+        return <CollapsingPanel title="tiles" style={{border:'1px solid #888', backgroundColor:'#dddddd'}}>
+            <VBox>
+                <SimpleList
+                    style={{flex:1}}
+                    list={sheet.get('tiles')}
+                    renderer={TileViewItemRenderer}
+                    palette={sheet.get('palette')}
+                    onClick={this.selectTile}
+                    selectedItem={sheet.get('tiles').get(this.state.selectedTileIndex)}
+                    orientation='wrap'
+                />
+                <HBox>
+                    <button>add new sprite</button>
+                    <button>remove sprite</button>
+                </HBox>
+            </VBox>
+        </CollapsingPanel>
     }
 }
 
@@ -417,5 +417,31 @@ class TileView extends CanvasComponent {
     }
 }
 
+class CollapsingPanel extends Component {
+    constructor(props) {
+        super(props)
+        this.state = {
+            open:true
+        }
+        this.toggleOpen = () => this.setState({open:!this.state.open})
+    }
+    render() {
+        const overrideStyle = this.props.style?this.props.style:{}
+        const style = Object.assign(overrideStyle,{})
+        if(this.state.open) {
+            return <VBox style={style}>
+                    <HBox style={{backgroundColor:'black', color:'white'}}>
+                        <button className="fa fa-chevron-down" onClick={this.toggleOpen}/>
+                        {this.props.title}
+                    </HBox>
+                    {this.state.open?this.props.children:""}
+                </VBox>
 
+        } else {
+            return <VBox style={style}>
+                    <button className="fa fa-chevron-right" onClick={this.toggleOpen}/>
+                </VBox>
+        }
+    }
+}
 
