@@ -175,11 +175,11 @@ export default class App extends Component {
     }
     */
     drawStamp(pt, stamp, new_color) {
-        const tile = this.state.doc.get('sheets').get(0).get('tiles').get('0')
+        const tile = this.getSelectedTile()
         const layer = tile.get('layers').get(0)
         if(!layer) return;
         if(!layer.get('visible')) return;
-        IS.setPixelOnTile(tile,pt.x,pt.y,1)
+        IS.setPixelOnTile(tile,this.state.selectedTileIndex,pt.x,pt.y,1)
         // model.drawStamp(pt,stamp);
         // this.appendRecentColor(new_color);
     }
@@ -238,8 +238,8 @@ export default class App extends Component {
             <div style={{ gridColumn:'center/right', gridRow:'center', border:'1px solid green', alignItems:'stretch', display:'flex'}}>
                 <TileEditor
                     selectedTool={this.state.selectedTool}
-                    tile={this.state.doc.get('sheets').get(0).get('tiles').get(this.state.selectedTileIndex)}
-                    sheet={this.state.doc.get('sheets').get(0)}
+                    tile={this.getSelectedTile()}
+                    sheet={this.getSelectedSheet()}
                 />
             </div>
             <div style={{ gridColumn:'right', gridRow:'center', border:'1px solid green'}}>preview</div>

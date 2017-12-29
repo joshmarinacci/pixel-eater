@@ -83,8 +83,8 @@ export default class  ImmutableStore {
         return tile.get('layers')
     }
 
-    setPixelOnTile(tile,x,y,index) {
-        this.setDoc(this.doc.updateIn(['sheets',0,'tiles',0,'layers',0,'pixels',x+y*16], value => index))
+    setPixelOnTile(tile,tileIndex,x,y,index) {
+        this.setDoc(this.doc.updateIn(['sheets',0,'tiles',tileIndex,'layers',0,'pixels',x+y*16], value => index))
     }
     getPixelOnLayer(layer,x,y) {
         return layer.get('pixels').get(x + y * 16)
