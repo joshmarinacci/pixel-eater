@@ -25,6 +25,7 @@
     "body-parser": "^1.17.2",
     "cors": "^2.8.3",
     "font-awesome": "^4.7.0",
+    "immutable": "^3.8.2",
     "pureimage": "^0.1.0",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
