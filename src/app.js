@@ -30,6 +30,23 @@ import "appy-style/src/look.css";
 import ImmutableStore from "./ImmutableStore";
 
 const IS = new ImmutableStore()
+
+class P  {
+    constructor(x,y) {
+        this.x = x
+        this.y = y
+    }
+    sub(pt) {
+        return new P(this.x-pt.x,this.y-pt.y)
+    }
+    div(scalar) {
+        return new P(this.x/scalar, this.y/scalar)
+    }
+    floor() {
+        return new P(Math.floor(this.x),Math.floor(this.y))
+    }
+}
+
 // IS.setPixelOnTile(null,0,0,5)
 
 
@@ -81,12 +98,15 @@ export default class App extends Component {
             // showLayers:true,
             // selectedColor:1,
             // scale: 16,
-            // dirty:false
+            // dirty:false,
+            selectedTileIndex: 0,
             selectedTool:this.tools[0],
         };
-
         this.undoCommand = () => IS.undoCommand()
         this.redoCommand = () => IS.redoCommand()
+        this.selectTile = (index) => {
+            this.setState({selectedTileIndex:index})
+        }
         // this.state.shiftLayerOnly = false;
 
 
@@ -195,11 +215,15 @@ export default class App extends Component {
             </div>
             <div style={{ gridColumn:'left/center', gridRow:'center', border:'1px solid green', display:'flex', flexDirection:'row'}}>
                 <div style={{ border: '1px solid green', width:'100px' }}>doc list</div>
-                <div style={{ border:'1px solid green', width:'100px'}}>sprite list</div>
+                <div style={{ border:'1px solid green', width:'100px'}}>
+                    {this.renderTileSheet(this.state.doc.get('sheets').get(0))}
+                </div>
             </div>
             <div style={{ gridColumn:'center/right', gridRow:'center', border:'1px solid green', alignItems:'stretch', display:'flex'}}>
-                <TileEditor selectedTool={this.state.selectedTool} tile={this.state.doc.get('sheets').get(0).get('tiles').get(0)}
-                            sheet={this.state.doc.get('sheets').get(0)}
+                <TileEditor
+                    selectedTool={this.state.selectedTool}
+                    tile={this.state.doc.get('sheets').get(0).get('tiles').get(this.state.selectedTileIndex)}
+                    sheet={this.state.doc.get('sheets').get(0)}
                 />
             </div>
             <div style={{ gridColumn:'right', gridRow:'center', border:'1px solid green'}}>preview</div>
@@ -272,6 +296,16 @@ export default class App extends Component {
             {this.state.showLayers?<LayersPanel model={this.props.doc.model}/>:""}
         </VBox>
     }
+
+    renderTileSheet(sheet) {
+        const tiles = sheet.get('tiles');
+        const pal = sheet.get('palette')
+        const output = tiles.map((tile,i)=>{
+            return <TileView key={i} sprite={tile} scale={2} store={IS} palette={pal}
+                             onClick={()=>this.selectTile(i)}/>
+        })
+        return <div style={{ display:'flex', flexDirection:'column', alignItems:'start'}}>{output}</div>
+    }
 }
 
 class TileEditor extends Component{
@@ -280,7 +314,6 @@ class TileEditor extends Component{
         return <div style={{ display:'flex', flexDirection:'row', alignItems: 'stretch', border:'1px solid red', flex:'1'}}>
             <div style={{flex:'0'}}>layers</div>
             <div>toolbar</div>
-            <div style={{ flex:'1', border:'1px solid red'}}>drawing surface</div>
             <DrawingSurface
                 tabIndex="1"
                 tool={this.props.selectedTool.tool} model={this.props.tile} drawGrid={true} scale={16}
@@ -289,6 +322,86 @@ class TileEditor extends Component{
                 // onKeyDown={this.canvasKeyDown.bind(this)}
             />
         </div>
+    }
+}
+
+
+class CanvasComponent extends Component {
+    constructor(props) {
+        super(props)
+        this.scale = 8
+        if(props.scale) this.scale = props.scale
+    }
+    componentDidMount() {
+        this.draw();
+    }
+    setState(state) {
+        super.setState(state)
+        setTimeout(() => this.draw(),100)
+    }
+    toCanvas(e) {
+        const rect = this.canvas.getBoundingClientRect()
+        return new P(e.clientX,e.clientY).sub(new P(rect.left,rect.top))
+    }
+    render() {
+        return <div><canvas
+            ref={(can)=>this.canvas = can}
+            width={400} height={400}
+            onMouseDown={(e) => this.mousedown(this.toCanvas(e),e)}
+            onMouseMove={this.mousemove}
+            onMouseUp={this.mouseup}
+        /></div>
+    }
+}
+
+class TileView extends CanvasComponent {
+    componentWillReceiveProps(props) {
+        setTimeout(() => this.draw(),100)
+    }
+    mousedown = (pt,e) => {
+        if(this.props.onClick) this.props.onClick(this.props.sprite)
+    }
+    render() {
+        return <canvas
+            style={{border:'1px solid black'}}
+            ref={(can)=>this.canvas = can}
+            width={this.scale*IS.getTileWidth(this.props.sprite)}
+            height={this.scale*IS.getTileHeight(this.props.sprite)}
+            onMouseDown={(e) => this.mousedown(this.toCanvas(e),e)}
+            onMouseMove={this.mousemove}
+            onMouseUp={this.mouseup}
+        />
+    }
+
+    draw() {
+        if(!this.canvas) return
+        const c = this.canvas.getContext('2d')
+        this.drawSprite(c,this.props.sprite,this.scale)
+    }
+    drawSprite(c, sprite, scale) {
+        sprite.get('layers').forEach((layer) => this.drawLayer(c,layer))
+    }
+    drawLayer(c, layer) {
+        if(!layer.get('visible')) return;
+        c.save();
+        c.globalAlpha = layer.opacity;
+        let sc = this.props.scale;
+        let model = this.props.sprite;
+        for(let y=0; y<this.getHeight(); y++) {
+            for (let x = 0; x < this.getWidth(); x++) {
+                const val = this.props.store.getPixelOnLayer(layer, x, y);
+                if(val === -1) continue;
+                c.fillStyle = this.props.store.lookupPaletteColor(this.props.palette, val);
+                c.fillRect(x * sc, y * sc, sc, sc);
+            }
+        }
+        c.restore();
+    }
+    getWidth() {
+        return this.props.store.getTileWidth(this.props.model)
+    }
+    getHeight() {
+        return this.props.store.getTileHeight(this.props.model)
     }
 }
 

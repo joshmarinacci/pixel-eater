@@ -70,6 +70,6 @@ asdf
  
 
 
-comment out old stuff. just have single selected tile that you can edit
-add spritesheet viewer/selector w/ plus/minus buttons
+* //comment out old stuff. just have single selected tile that you can edit
+* add spritesheet viewer/selector w/ plus/minus buttons
 add doc list

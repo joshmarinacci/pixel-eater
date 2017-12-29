@@ -65,7 +65,7 @@ export default class  ImmutableStore {
     setDoc(doc) {
         this.doc = doc
         this.undoStack.push(doc)
-        console.log("undo buffer length",this.undoStack.length)
+        // console.log("undo buffer length",this.undoStack.length)
         this.listeners.forEach((cb)=>cb?cb(this.doc):null)
     }
     undoCommand() {
