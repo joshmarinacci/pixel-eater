@@ -18,7 +18,7 @@
   "bugs": {
     "url": "https://github.com/joshmarinacci/pixel-eater/issues"
   },
-  "homepage": "https://github.com/joshmarinacci/pixel-eater#readme",
+  "homepage": "https://joshondesign.com/p/apps/pixel-eater/",
   "dependencies": {
     "appy-comps": "0.*.*",
     "appy-style": "0.0.7",
