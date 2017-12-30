@@ -214,15 +214,15 @@ export default class App extends Component {
             top:0, bottom:0, right:0, left:0,
             display:'grid',
             border:'1px solid red',
-            gridTemplateColumns: "[left]400px [center]auto [right]300px",
+            gridTemplateColumns: "[left]100px [center]auto [right]100px",
             gridTemplateRows: "[toolbar]50px [center]auto [statusbar]50px",
             alignItems:'stretch'
         }
         return <div style={gridStyle}>
-            <div style={{ gridRow:'toolbar'}}>
+            <HBox style={{ gridRow:'toolbar'}}>
                 <button onClick={this.undoCommand}>undo</button>
                 <button onClick={this.redoCommand}>redo</button>
-            </div>
+            </HBox>
             <div style={{ gridColumn:'left/center', gridRow:'center', border:'1px solid green', display:'flex', flexDirection:'row'}}>
                 <CollapsingPanel title="sheets" style={{border:'1px solid #888', backgroundColor:'#dddddd'}}>
                     <SimpleList
@@ -328,18 +328,30 @@ export default class App extends Component {
 }
 
 class TileEditor extends Component{
+    constructor(props) {
+        super(props)
+        this.state = {
+            scale: 6
+        }
+        this.zoomIn  = () => this.setState({scale:this.state.scale+1})
+        this.zoomOut = () => this.setState({scale:this.state.scale-1})
+    }
     render() {
         const pal = this.props.sheet.get('palette')
-        return <div style={{ display:'flex', flexDirection:'row', alignItems: 'stretch', border:'1px solid red', flex:'1'}}>
+        return <div style={{ border:'1px solid red', flex:'1'}}>
             <div style={{flex:'0'}}>layers</div>
             <div>toolbar</div>
-            <DrawingSurface
-                tabIndex="1"
-                tool={this.props.selectedTool.tool} model={this.props.tile} drawGrid={true} scale={16}
-                palette={pal}
-                store={IS}
-                // onKeyDown={this.canvasKeyDown.bind(this)}
-            />
+            <button onClick={this.zoomIn}>zoom in</button>
+            <button onClick={this.zoomOut}>zoom out</button>
+            <div style={{overflow:'scroll', maxHeight:'500px', maxWidth:'500px'}}>
+                <DrawingSurface
+                    tabIndex="1"
+                    tool={this.props.selectedTool.tool} model={this.props.tile} drawGrid={true} scale={Math.pow(2,this.state.scale)}
+                    palette={pal}
+                    store={IS}
+                    onKeyDown={()=>console.log("keypress")}
+                />
+            </div>
         </div>
     }
 }
@@ -430,7 +442,7 @@ class CollapsingPanel extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            open:true
+            open:false
         }
         this.toggleOpen = () => this.setState({open:!this.state.open})
     }

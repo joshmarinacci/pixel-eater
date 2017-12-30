@@ -103,6 +103,17 @@ export default class DrawingSurface extends Component {
     }
 
     componentDidMount() {
+        this.refs.canvas.addEventListener("gesturestart", ()=>{
+
+        }, false)
+        this.refs.canvas.addEventListener("gesturechange", (e)=> {
+            e.preventDefault();
+            console.log("scaled", e.scale)
+            e.target.style.webkitTransform = 'scale(' + e.scale + ')';
+        })
+        this.refs.canvas.addEventListener("gestureend", ()=>{
+            console.log("ended");
+        }, false);
         this.drawCanvas();
     }
 
