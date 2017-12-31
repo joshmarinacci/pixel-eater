@@ -104,7 +104,12 @@ export default class App extends Component {
             selectedSheetIndex: 0,
             selectedTileIndex: 0,
             selectedTool:this.tools[0],
+            scale: 6
         };
+
+        this.zoomIn  = () => this.setState({scale:this.state.scale+1})
+        this.zoomOut = () => this.setState({scale:this.state.scale-1})
+
         this.undoCommand = () => IS.undoCommand()
         this.redoCommand = () => IS.redoCommand()
 
@@ -213,17 +218,17 @@ export default class App extends Component {
             position:'absolute',
             top:0, bottom:0, right:0, left:0,
             display:'grid',
-            border:'1px solid red',
-            gridTemplateColumns: "[left]100px [center]auto [right]100px",
-            gridTemplateRows: "[toolbar]50px [center]auto [statusbar]50px",
+            border:'0px solid red',
+            gridTemplateColumns: "[left] 200px [layers] 200px [center] auto [drawingtools] 50px [right] 100px",
+            gridTemplateRows: "[toolbar] 3em [center] auto [statusbar] 3em",
             alignItems:'stretch'
         }
         return <div style={gridStyle}>
-            <HBox style={{ gridRow:'toolbar'}}>
+            <HBox className='border-bottom' style={{ gridRow:'toolbar', gridColumn:'left/right'}}>
                 <button onClick={this.undoCommand}>undo</button>
                 <button onClick={this.redoCommand}>redo</button>
             </HBox>
-            <div style={{ gridColumn:'left/center', gridRow:'center', border:'1px solid green', display:'flex', flexDirection:'row'}}>
+            <div className="border-left" style={{ gridColumn:'left/center', gridRow:'center/statusbar', display:'flex', flexDirection:'row'}}>
                 <CollapsingPanel title="sheets" style={{border:'1px solid #888', backgroundColor:'#dddddd'}}>
                     <SimpleList
                         list={this.state.doc.get('sheets')}
@@ -235,14 +240,15 @@ export default class App extends Component {
                 </CollapsingPanel>
                 {this.renderTileSheet(this.state.doc.get('sheets').get(0))}
             </div>
-            <div style={{ gridColumn:'center/right', gridRow:'center', border:'1px solid green', alignItems:'stretch', display:'flex'}}>
-                <TileEditor
-                    selectedTool={this.state.selectedTool}
-                    tile={this.getSelectedTile()}
-                    sheet={this.getSelectedSheet()}
-                />
-            </div>
-            <div style={{ gridColumn:'right', gridRow:'center', border:'1px solid green'}}>preview</div>
+            <VBox className="border-right border-left" style={{ gridColumn:'layers/center', gridRow:'center/statusbar'}}>
+                <div>layers</div>
+                <div>draw tools</div>
+                <button onClick={this.zoomIn}>zoom in</button>
+                <button onClick={this.zoomOut}>zoom out</button>
+            </VBox>
+            {this.renderDrawingSurface()}
+            <div className="border-left" style={{ gridColumn:'right', gridRow:'center/statusbar', border:'1px solid black', borderWidth:'0 0 1px 1px'}}>preview</div>
+            <div className="border-top" style={{ gridColumn:'left/right', gridRow:'statusbar'}}>status bar</div>
             <DialogContainer/>
             <PopupContainer/>
         </div>
@@ -305,7 +311,6 @@ export default class App extends Component {
             {this.state.showLayers?<LayersPanel model={this.props.doc.model}/>:""}
         </VBox>
     }
-
     renderTileSheet(sheet) {
         return <CollapsingPanel title="tiles" style={{border:'1px solid #888', backgroundColor:'#dddddd'}}>
             <VBox>
@@ -325,33 +330,23 @@ export default class App extends Component {
             </VBox>
         </CollapsingPanel>
     }
-}
-
-class TileEditor extends Component{
-    constructor(props) {
-        super(props)
-        this.state = {
-            scale: 6
-        }
-        this.zoomIn  = () => this.setState({scale:this.state.scale+1})
-        this.zoomOut = () => this.setState({scale:this.state.scale-1})
-    }
-    render() {
-        const pal = this.props.sheet.get('palette')
-        return <div style={{ border:'1px solid red', flex:'1'}}>
-            <div style={{flex:'0'}}>layers</div>
-            <div>toolbar</div>
-            <button onClick={this.zoomIn}>zoom in</button>
-            <button onClick={this.zoomOut}>zoom out</button>
-            <div style={{overflow:'scroll', maxHeight:'500px', maxWidth:'500px'}}>
-                <DrawingSurface
-                    tabIndex="1"
-                    tool={this.props.selectedTool.tool} model={this.props.tile} drawGrid={true} scale={Math.pow(2,this.state.scale)}
-                    palette={pal}
-                    store={IS}
-                    onKeyDown={()=>console.log("keypress")}
-                />
-            </div>
+    renderDrawingSurface() {
+        const pal = this.getSelectedSheet().get('palette')
+        return <div style={{
+            border:'1px solid black',
+            gridColumn:'center/right',
+            gridRow:'center/statusbar',
+            overflow:'scroll',
+        }}>
+            <DrawingSurface
+                tabIndex="1"
+                tool={this.state.selectedTool.tool} model={this.getSelectedTile()} drawGrid={true} scale={Math.pow(2,this.state.scale)}
+                palette={pal}
+                store={IS}
+                onKeyDown={()=>console.log("keypress")}
+                onZoomIn={this.zoomIn}
+                onZoomOut={this.zoomOut}
+            />
         </div>
     }
 }

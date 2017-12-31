@@ -103,16 +103,20 @@ export default class DrawingSurface extends Component {
     }
 
     componentDidMount() {
-        this.refs.canvas.addEventListener("gesturestart", ()=>{
-
+        this.refs.canvas.addEventListener("gesturestart", (e)=>{
+            this.startScale = e.scale;
         }, false)
         this.refs.canvas.addEventListener("gesturechange", (e)=> {
             e.preventDefault();
-            console.log("scaled", e.scale)
             e.target.style.webkitTransform = 'scale(' + e.scale + ')';
         })
-        this.refs.canvas.addEventListener("gestureend", ()=>{
-            console.log("ended");
+        this.refs.canvas.addEventListener("gestureend", (e)=>{
+            if(e.scale > this.startScale) {
+                this.props.onZoomIn()
+            } else {
+                this.props.onZoomOut()
+            }
+            e.target.style.webkitTransform = '';
         }, false);
         this.drawCanvas();
     }
@@ -188,18 +192,15 @@ export default class DrawingSurface extends Component {
     render() {
         let width = this.props.store.getTileWidth(this.props.model) * this.props.scale+1
         let height = this.props.store.getTileHeight(this.props.model) * this.props.scale+1
-
-        return <div className="grow scroll">
-            <canvas ref="canvas"
-                    tabIndex="1"
-                    width={width}
-                    height={height}
-                    onMouseUp={this.mouseUp.bind(this)}
-                    onMouseDown={this.mouseDown.bind(this)}
-                    onMouseMove={this.mouseMove.bind(this)}
-                    onContextMenu={this.contextMenu.bind(this)}
-                    onKeyDown={this.keyDown.bind(this)}
-            />
-        </div>
+        return <canvas ref="canvas"
+                tabIndex="1"
+                width={width}
+                height={height}
+                onMouseUp={this.mouseUp.bind(this)}
+                onMouseDown={this.mouseDown.bind(this)}
+                onMouseMove={this.mouseMove.bind(this)}
+                onContextMenu={this.contextMenu.bind(this)}
+                onKeyDown={this.keyDown.bind(this)}
+        />
     }
 }
