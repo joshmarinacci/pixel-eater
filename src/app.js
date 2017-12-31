@@ -218,13 +218,13 @@ export default class App extends Component {
             position:'absolute',
             top:0, bottom:0, right:0, left:0,
             display:'grid',
-            border:'0px solid red',
+            border:'1px solid red',
             gridTemplateColumns: "[left] 200px [layers] 200px [center] auto [drawingtools] 50px [right] 100px",
             gridTemplateRows: "[toolbar] 3em [center] auto [statusbar] 3em",
-            alignItems:'stretch'
+            // alignItems:'stretch'
         }
         return <div style={gridStyle}>
-            <HBox className='border-bottom' style={{ gridRow:'toolbar', gridColumn:'left/right'}}>
+            <HBox className='border-bottom' style={{ gridRow:'toolbar', gridColumn:'left/-1'}}>
                 <button onClick={this.undoCommand}>undo</button>
                 <button onClick={this.redoCommand}>redo</button>
             </HBox>
@@ -247,8 +247,8 @@ export default class App extends Component {
                 <button onClick={this.zoomOut}>zoom out</button>
             </VBox>
             {this.renderDrawingSurface()}
-            <div className="border-left" style={{ gridColumn:'right', gridRow:'center/statusbar', border:'1px solid black', borderWidth:'0 0 1px 1px'}}>preview</div>
-            <div className="border-top" style={{ gridColumn:'left/right', gridRow:'statusbar'}}>status bar</div>
+            <div className="border-left" style={{ gridColumn:'right', gridRow:'center/statusbar' }}>preview</div>
+            <div className="border-top border-bottom border" style={{ gridColumn:'left/-1', gridRow:'statusbar/-1'}}>status bar</div>
             <DialogContainer/>
             <PopupContainer/>
         </div>

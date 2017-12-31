@@ -233,3 +233,4 @@ label {
 .border-right  { border: 1px solid black; border-width: 0   1px 0   0px; }
 .border-top    { border: 1px solid black; border-width: 1px 0   0   0px; }
 .border-bottom { border: 1px solid black; border-width: 0   0   1px 0px; }
+.border        { border: 1px solid black;}
