@@ -219,41 +219,35 @@ export default class App extends Component {
             top:0, bottom:0, right:0, left:0,
             display:'grid',
             border:'1px solid red',
-            gridTemplateColumns: "[left] 200px [layers] 200px [center] auto [drawingtools] 50px [right] 100px",
+            gridTemplateColumns: "[left] 200px [center] auto [drawingtools] 50px [right] 100px",
             gridTemplateRows: "[toolbar] 3em [center] auto [statusbar] 3em",
-            // alignItems:'stretch'
         }
         return <div style={gridStyle}>
-            <HBox className='border-bottom' style={{ gridRow:'toolbar', gridColumn:'left/-1'}}>
-                <button onClick={this.undoCommand}>undo</button>
-                <button onClick={this.redoCommand}>redo</button>
-            </HBox>
+            {this.renderTopToolbar()}
             <div className="border-left" style={{ gridColumn:'left/center', gridRow:'center/statusbar', display:'flex', flexDirection:'row'}}>
-                <CollapsingPanel title="sheets" style={{border:'1px solid #888', backgroundColor:'#dddddd'}}>
-                    <SimpleList
-                        list={this.state.doc.get('sheets')}
-                        style={{width:'100px', border:'1px solid blue'}}
-                        orientation={'vertical'}
-                        renderer={SheetListItemRenderer}
-                        selectedItem={this.state.doc.get('sheets').get(this.state.selectedSheetIndex)}
-                    />
-                </CollapsingPanel>
+                {this.renderDocSelector()}
                 {this.renderTileSheet(this.state.doc.get('sheets').get(0))}
+                {this.renderDrawingToolsPanel()}
             </div>
-            <VBox className="border-right border-left" style={{ gridColumn:'layers/center', gridRow:'center/statusbar'}}>
-                <div>layers</div>
-                <div>draw tools</div>
-                <button onClick={this.zoomIn}>zoom in</button>
-                <button onClick={this.zoomOut}>zoom out</button>
-            </VBox>
             {this.renderDrawingSurface()}
-            <div className="border-left" style={{ gridColumn:'right', gridRow:'center/statusbar' }}>preview</div>
-            <div className="border-top border-bottom border" style={{ gridColumn:'left/-1', gridRow:'statusbar/-1'}}>status bar</div>
+            {this.renderPreviewPanel()}
+            {this.renderBottomToolbar()}
             <DialogContainer/>
             <PopupContainer/>
         </div>
     }
 
+    renderDocSelector() {
+        return <CollapsingPanel title="sheets" style={{border:'1px solid #888', backgroundColor:'#dddddd'}}>
+            <SimpleList
+                list={this.state.doc.get('sheets')}
+                style={{width:'100px', border:'1px solid blue'}}
+                orientation={'vertical'}
+                renderer={SheetListItemRenderer}
+                selectedItem={this.state.doc.get('sheets').get(this.state.selectedSheetIndex)}
+            />
+        </CollapsingPanel>
+    }
     renderSideToolbar() {
         let model = this.props.doc.model;
         var loggedOut = UserStore.getUser()===null;
@@ -275,6 +269,13 @@ export default class App extends Component {
         </VBox>
     }
     renderTopToolbar() {
+        return <HBox className='border-bottom' style={{ gridRow:'toolbar', gridColumn:'left/-1'}}>
+            <button onClick={this.undoCommand}>undo</button>
+            <button onClick={this.redoCommand}>redo</button>
+            <button onClick={this.zoomIn}>zoom in</button>
+            <button onClick={this.zoomOut}>zoom out</button>
+        </HBox>
+        /*
         let cp2 = <ColorPicker model={this.props.doc.model} onSelectColor={this.selectBGColor}/>
         let sharePopup = <div>
             <li className="disabled">Tweet</li>
@@ -294,17 +295,28 @@ export default class App extends Component {
             <button onClick={(e)=>PopupManager.show(sharePopup, e.target)} className="fa fa-share"/>
             <button onClick={this.openShare}>share</button>
         </HBox>
+        */
     }
     renderBottomToolbar() {
-        return <HBox className="panel bottom">
-            <button onClick={this.loginLogout}>{this.state.user?"logout":"login"}</button>
-            <label>{this.state.user?this.state.user.username:'not logged in'}</label>
-            <Spacer/>
-            <label><i>{this.state.dirty?"unsaved changes":""}</i></label>
-        </HBox>
+        return <div className="border-top border-bottom border" style={{ gridColumn:'left/-1', gridRow:'statusbar/-1'}}>status bar</div>
+
+        // return <HBox className="panel bottom">
+        //     <button onClick={this.loginLogout}>{this.state.user?"logout":"login"}</button>
+        //     <label>{this.state.user?this.state.user.username:'not logged in'}</label>
+        //     <Spacer/>
+        //     <label><i>{this.state.dirty?"unsaved changes":""}</i></label>
+        // </HBox>
     }
     renderPreviewPanel() {
-        return this.state.drawPreview?<VBox className="panel right"><PreviewPanel model={this.props.doc.model}/></VBox>:"";
+        return <CollapsingPanel title="preview" style={{
+            border:'1px solid #888',
+            borderWidth:'0 0 0 1px',
+            backgroundColor:'#dddddd',
+            gridColumn:'right',
+            gridRow:'center/statusbar' }}>
+            <div>preview</div>
+        </CollapsingPanel>
+        // return this.state.drawPreview?<VBox className="panel right"><PreviewPanel model={this.props.doc.model}/></VBox>:"";
     }
     renderLayersPanel() {
         return <VBox className="panel right">
@@ -348,6 +360,14 @@ export default class App extends Component {
                 onZoomOut={this.zoomOut}
             />
         </div>
+    }
+    renderDrawingToolsPanel() {
+        return <CollapsingPanel title="layers"style={{ border:'1px solid black'}}>
+            <VBox>
+                <div>layers</div>
+                <div>draw tools</div>
+            </VBox>
+        </CollapsingPanel>
     }
 }
 
