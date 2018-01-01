@@ -16,17 +16,21 @@ const empty = [];
 for(let i=0; i<16*16; i++) empty[i] = 0;
 let EMPTY = new List(empty)
 
+function makeLayer() {
+    return new Map({
+        visible:true,
+        id:genID(),
+        title:'a layer',
+        pixels:EMPTY
+    })
+}
 
-const layer1 = new Map({
-    visible:true,
-    pixels:EMPTY.set(0,1)
-})
-const layer2 = new Map({
-    visible:true,
-    pixels:EMPTY
-})
+const layer1 = makeLayer()
+const layer1b = makeLayer()
+const layer2 = makeLayer()
+
 const tile1 = new Map({
-    layers:new List([layer1])
+    layers:new List([layer1])//, layer1b])
 })
 const tile2 = new Map({
     layers: new List([layer2])
@@ -50,8 +54,6 @@ const doc = new Map({
     sheets:new List([sheet]),
     palettes:new List([palette])
 })
-
-
 
 export default class  ImmutableStore {
     constructor() {
@@ -83,10 +85,9 @@ export default class  ImmutableStore {
         return tile.get('layers')
     }
 
-    setPixelOnTile(tile,x,y,value) {
-        let path = ['sheets',0,'tiles']
-        const ind = this.doc.getIn(path).indexOf(tile)
-        path = path.concat([ind,'layers',0,'pixels',x+y*16])
+    setPixelOnTile(tile,layer,x,y,value) {
+        const layer_index = tile.get('layers').indexOf(layer)
+        const path = this.findTilePath(tile).concat(['layers',layer_index,'pixels',x+y*16])
         this.setDoc(this.doc.setIn(path, value))
     }
     getPixelOnLayer(layer,x,y) {
@@ -102,10 +103,7 @@ export default class  ImmutableStore {
         return palette.get('colors').get(val)
     }
     addTileToSheet(sheet) {
-        const layer = new Map({
-            visible:true,
-            pixels:EMPTY
-        })
+        const layer = makeLayer()
         const tile = new Map({
             layers:new List([layer])
         })
@@ -113,6 +111,21 @@ export default class  ImmutableStore {
     }
     removeTileFromSheet(sheet, tile) {
         this.setDoc(this.doc.updateIn(['sheets',0,'tiles'], (tiles)=>tiles.filter(test=>test!==tile)))
+    }
+    findTilePath(tile) {
+        let path = ['sheets',0,'tiles']
+        return path.concat([this.doc.getIn(path).indexOf(tile)])
+    }
+    addLayerToTile(tile) {
+        const layer = makeLayer()
+        const path = this.findTilePath(tile).concat(['layers'])
+        this.setDoc(this.doc.updateIn(path,(layers)=>layers.push(layer)))
+    }
+    toggleLayerVisibility(tile,layer) {
+        const layer_index = tile.get('layers').indexOf(layer)
+        const path = this.findTilePath(tile).concat(['layers',layer_index,'visible'])
+        const oldval = this.doc.getIn(path);
+        this.setDoc(this.doc.setIn(path,!oldval))
     }
 
 }

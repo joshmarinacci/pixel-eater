@@ -103,6 +103,7 @@ export default class App extends Component {
             // dirty:false,
             selectedSheetIndex: 0,
             selectedTileIndex: 0,
+            selectedLayerIndex: 0,
             selectedTool:this.tools[0],
             scale: 6
         };
@@ -116,6 +117,8 @@ export default class App extends Component {
         this.getSelectedSheet = () => this.state.doc.get('sheets').get(0)
         this.selectTile = (index) => this.setState({selectedTileIndex:index})
         this.getSelectedTile = () => this.getSelectedSheet().get('tiles').get(this.state.selectedTileIndex)
+        this.selectLayer = (layer,index) => this.setState({selectedLayerIndex:index})
+        this.getSelectedLayer = () => this.getSelectedTile().get('layers').get(this.state.selectedLayerIndex)
 
         this.addTileToSheet = () => IS.addTileToSheet(this.getSelectedSheet());
         this.removeTileFromSheet = () => {
@@ -180,11 +183,7 @@ export default class App extends Component {
     }
     */
     drawStamp(pt, stamp, new_color) {
-        const tile = this.getSelectedTile()
-        const layer = tile.get('layers').get(0)
-        if(!layer) return;
-        if(!layer.get('visible')) return;
-        IS.setPixelOnTile(tile,pt.x,pt.y,1)
+        IS.setPixelOnTile(this.getSelectedTile(),this.getSelectedLayer(),pt.x,pt.y,1)
         // model.drawStamp(pt,stamp);
         // this.appendRecentColor(new_color);
     }
@@ -219,7 +218,7 @@ export default class App extends Component {
             top:0, bottom:0, right:0, left:0,
             display:'grid',
             border:'1px solid red',
-            gridTemplateColumns: "[left] 200px [center] auto [drawingtools] 50px [right] 100px",
+            gridTemplateColumns: "[left] 300px [center] auto [drawingtools] 50px [right] 100px",
             gridTemplateRows: "[toolbar] 3em [center] auto [statusbar] 3em",
         }
         return <div style={gridStyle}>
@@ -364,7 +363,11 @@ export default class App extends Component {
     renderDrawingToolsPanel() {
         return <CollapsingPanel title="layers"style={{ border:'1px solid black'}}>
             <VBox>
-                <div>layers</div>
+                <LayersPanel
+                    model={this.getSelectedTile()} store={IS}
+                    selectedLayer={this.getSelectedLayer()}
+                    onLayerSelected={this.selectLayer}
+                />
                 <div>draw tools</div>
             </VBox>
         </CollapsingPanel>

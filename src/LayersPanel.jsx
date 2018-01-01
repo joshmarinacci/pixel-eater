@@ -1,8 +1,24 @@
-import React from "react";
-import DraggableList from "./DraggableList.jsx";
+import React, {Component} from "react";
 import {VBox, HBox, Spacer} from "appy-comps";
+import SimpleList from './SimpleList'
 
-class LayerItem extends React.Component {
+const LayerItemRenderer = (props) => {
+    const visible_class = "fa " + (props.item.get('visible')?"fa-eye":"fa-eye-slash")
+    const name = props.item.get('title')
+    const style = {}
+    if(props.selected) {
+        style.backgroundColor ='#ccddff'
+    }
+    return <HBox className="layer" style={style} onClick={()=>props.layerSelected(props.item, props.index)}>
+        {name}
+        <Spacer/>
+        <button className={visible_class} onClick={(e)=>{
+            e.stopPropagation()
+            props.toggleVisible(props.item)}}/>
+    </HBox>
+}
+
+class LayerItem extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -95,48 +111,32 @@ class LayerItem extends React.Component {
     }
 }
 
-export default class LayersPanel extends React.Component {
-    addLayer() {
-        let layer = this.props.model.appendLayer();
-        this.props.model.setSelectedLayer(layer);
+export default class LayersPanel extends Component {
+    addLayer = () => {
+        this.props.store.addLayerToTile(this.props.model)
     }
-    deleteLayer() {
-        let sel = this.props.model.getCurrentLayer();
-        this.props.model.deleteLayer(sel)
-    }
-    moveLayerUp() {
-        let cur = this.props.model.getCurrentLayer();
-        let n = this.props.model.getLayerIndex(cur);
-        if(n > 0) this.props.model.moveLayerTo(cur,n-1);
-        this.props.model.setSelectedLayer(cur);
-    }
-    moveLayerDown() {
-        let cur = this.props.model.getCurrentLayer();
-        let n = this.props.model.getLayerIndex(cur);
-        if(n+1 < this.props.model.layers.length) this.props.model.moveLayerTo(cur,n+1);
-        this.props.model.setSelectedLayer(cur);
-    }
-    itemDropped(remove,insert,item) {
-        this.props.model.moveLayerTo(item,insert);
-        this.props.model.setSelectedLayer(item);
-    }
-    makeLayerItem(l,i,cb) {
-        return <LayerItem model={this.props.model} layer={l} onMouseDown={cb}/>
+    toggleVisible = (layer) => {
+        const tile = this.props.model
+        this.props.store.toggleLayerVisibility(tile,layer)
     }
     render() {
-        let model = this.props.model;
+        const layers = this.props.store.getLayers(this.props.model)
         return <VBox grow>
-            <DraggableList className="grow" id='layers-panel' style={{width:'10em'}}
-                           data={model.getLayers()}
-                           templateFunction={this.makeLayerItem.bind(this)}
-                           onDropItem={this.itemDropped.bind(this)}
+            <SimpleList
+                list={layers}
+                style={{border:'1px solid blue'}}
+                orientation={'vertical'}
+                renderer={LayerItemRenderer}
+                selectedItem={this.props.selectedLayer}
+                layerSelected={this.props.onLayerSelected}
+                toggleVisible={this.toggleVisible}
             />
             <HBox className="panel bottom">
-                <button onClick={this.addLayer.bind(this)}><i className="fa fa-plus"/></button>
-                <button onClick={this.moveLayerUp.bind(this)}><i className="fa fa-arrow-up"/></button>
-                <button onClick={this.moveLayerDown.bind(this)}><i className="fa fa-arrow-down"/></button>
+                <button onClick={this.addLayer}><i className="fa fa-plus"/></button>
+                <button onClick={this.moveLayerUp}><i className="fa fa-arrow-up"/></button>
+                <button onClick={this.moveLayerDown}><i className="fa fa-arrow-down"/></button>
                 <Spacer/>
-                <button onClick={this.deleteLayer.bind(this)}><i className="fa fa-trash"/></button>
+                <button onClick={this.deleteLayer}><i className="fa fa-trash"/></button>
             </HBox>
         </VBox>
     }
