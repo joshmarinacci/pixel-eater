@@ -128,6 +128,7 @@ export default class App extends Component {
         this.redoCommand = () => IS.redoCommand()
 
         this.getSelectedSheet = () => this.state.doc.get('sheets').get(0)
+        this.getCurrentPalette = () => this.getSelectedSheet().get('palette')
         this.selectTile = (index) => this.setState({selectedTileIndex:index})
         this.getSelectedTile = () => this.getSelectedSheet().get('tiles').get(this.state.selectedTileIndex)
         this.selectLayer = (layer,index) => this.setState({selectedLayerIndex:index})
@@ -364,6 +365,7 @@ export default class App extends Component {
         </div>
     }
     renderDrawingToolsPanel() {
+        let cp =  <ColorPicker palette={this.getCurrentPalette()} onSelectColor={this.selectColor}/>;
         return <CollapsingPanel title="layers"style={{ border:'1px solid black'}}>
             <VBox>
                 <LayersPanel
@@ -372,11 +374,15 @@ export default class App extends Component {
                     onLayerSelected={this.selectLayer}
                 />
                 <HBox>
+                    <ColorWellButton
+                        lookupColor={(color)=> IS.lookupPaletteColor(this.getCurrentPalette(), color)}
+                        selectedColor={this.state.selectedColor} content={cp}/>
                     <VToggleGroup
                         list={this.tools}
                         selected={this.state.selectedTool}
                         template={ToggleButtonTemplate}
                         onChange={this.selectTool}/>
+
                 </HBox>
             </VBox>
         </CollapsingPanel>

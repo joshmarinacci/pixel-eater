@@ -16,10 +16,9 @@ export default class extends Component {
         this.props.onSelectColor(i);
     }
     render() {
-        var wells = this.props.model.getPalette().map((c,i) => {
-            const colorStyle ={border:'0px solid black', backgroundColor:c, width:32,height:32, display:'inline-block', margin:0, padding:0};
+        return <div style={popupStyle}>{this.props.palette.get('colors').map((c,i) => {
+             const colorStyle ={border:'0px solid black', backgroundColor:c, width:32,height:32, display:'inline-block', margin:0, padding:0};
             return <div key={i} style={colorStyle} onClick={this.selectColor.bind(this, c, i)} />
-        });
-        return <div style={popupStyle}>{wells}</div>
+        })}</div>
     }
 }
