@@ -1,5 +1,4 @@
 import React, {Component} from "react";
-import {VBox, HBox, Spacer} from "appy-comps";
 
 const SimpleListRenderer = (props) => {
     return <div>an item is here {props.item.toString()}</div>

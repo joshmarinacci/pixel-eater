@@ -186,23 +186,9 @@ export default class App extends Component {
                 +"&"+Math.floor(Math.random()*100000);
         });
     }*/
-    /*
-    setPixel(pt,new_color) {
-        var model = this.props.doc.model;
-        var layer = model.getCurrentLayer();
-        if(!layer) return;
-        if(!model.isLayerVisible(layer)) return;
-        model.setPixel(pt,new_color);
-        this.appendRecentColor(new_color);
-    }
-    */
     drawStamp(pt, stamp, new_color) {
         IS.setStampOnTile(this.getSelectedTile(),this.getSelectedLayer(),pt.x,pt.y,stamp)
         // this.appendRecentColor(new_color);
-    }
-    /*
-    shiftLayers(pt) {
-        this.props.doc.model.shiftLayers(pt);
     }
     appendRecentColor(color) {
         var n = this.state.recentColors.indexOf(color);
@@ -213,16 +199,17 @@ export default class App extends Component {
             })
         }
     }
-
+    /*
     titleEdited() {
         DocStore.getDoc().title = this.refs.doc_title.value;
         this.setState({doc:DocStore.getDoc()});
     }
-    canvasKeyDown(e) {
+    */
+    canvasKeyDown = (e) => {
         let tool = this.tools.find((tool) => e.keyCode === tool.keyCode);
         if(tool) this.selectTool(tool);
     }
-    */
+
 
 
     render() {
@@ -364,10 +351,13 @@ export default class App extends Component {
         }}>
             <DrawingSurface
                 tabIndex="1"
-                tool={this.state.selectedTool.tool} model={this.getSelectedTile()} drawGrid={true} scale={Math.pow(2,this.state.scale)}
+                tool={this.state.selectedTool.tool}
+                model={this.getSelectedTile()}
+                drawGrid={true}
+                scale={Math.pow(2,this.state.scale)}
                 palette={pal}
                 store={IS}
-                onKeyDown={()=>console.log("keypress")}
+                onKeyDown={this.canvasKeyDown}
                 onZoomIn={this.zoomIn}
                 onZoomOut={this.zoomOut}
             />
