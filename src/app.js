@@ -62,16 +62,29 @@ const TileViewItemRenderer = (props) => {
     return <TileView style={style} sprite={props.item} scale={2} store={IS} palette={props.palette} onClick={()=>props.onClick(props.index)}/>
 }
 
+const ToggleButtonTemplate = (props) => {
+    return <ToggleButton onToggle={props.onSelect}
+                         selected={props.selected}
+                         tooltip={props.item.tooltip}
+    ><i className={"fa fa-"+props.item.icon}></i></ToggleButton>
+};
+
 export default class App extends Component {
     constructor(props) {
         super(props);
         IS.on('changed', doc =>this.setState({doc:doc}))
         this.tools = [
             {
-                tool: new PencilTool(this),
+                tool: new PencilTool(this, 1),
                 tooltip:'Pencil',
                 icon:'pencil',
                 keyCode: KEYBOARD.P
+            },
+            {
+                tool: new PencilTool(this, 3),
+                tooltip:'Fat Pencil',
+                icon:'pencil',
+                // keyCode: KEYBOARD.P
             },
             {
                 tool: new EraserTool(this),
@@ -98,7 +111,7 @@ export default class App extends Component {
             // drawGrid:true,
             // drawPreview:false,
             // showLayers:true,
-            // selectedColor:1,
+            selectedColor:1,
             // scale: 16,
             // dirty:false,
             selectedSheetIndex: 0,
@@ -128,7 +141,7 @@ export default class App extends Component {
         // this.state.shiftLayerOnly = false;
 
 
-        // this.selectTool = (item) => this.setState({selected_tool:item});
+        this.selectTool = (item) => this.setState({selectedTool:item});
 
         // this.state.user = null;
         // this.state.doclist = [];
@@ -183,8 +196,7 @@ export default class App extends Component {
     }
     */
     drawStamp(pt, stamp, new_color) {
-        IS.setPixelOnTile(this.getSelectedTile(),this.getSelectedLayer(),pt.x,pt.y,1)
-        // model.drawStamp(pt,stamp);
+        IS.setStampOnTile(this.getSelectedTile(),this.getSelectedLayer(),pt.x,pt.y,stamp)
         // this.appendRecentColor(new_color);
     }
     /*
@@ -368,7 +380,13 @@ export default class App extends Component {
                     selectedLayer={this.getSelectedLayer()}
                     onLayerSelected={this.selectLayer}
                 />
-                <div>draw tools</div>
+                <HBox>
+                    <VToggleGroup
+                        list={this.tools}
+                        selected={this.state.selectedTool}
+                        template={ToggleButtonTemplate}
+                        onChange={this.selectTool}/>
+                </HBox>
             </VBox>
         </CollapsingPanel>
     }

@@ -24,9 +24,9 @@ export class EyedropperTool {
 
 
 export class PencilTool {
-    constructor(app) {
+    constructor(app, size) {
         this.app = app;
-        this.size = 1;
+        this.size = size;
         this.hoverEffect = (c,scale,pt) => {
             let sc = scale;
             c.save();

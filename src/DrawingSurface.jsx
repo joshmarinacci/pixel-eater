@@ -61,14 +61,14 @@ export default class DrawingSurface extends Component {
         // let height = this.props.store.getTileHeight(this.props.model) * sc
         // let bg = this.props.model.getBackgroundColor();
         let bg = 0;
-        c.fillStyle = 'black';//this.props.model.lookupCanvasColor(bg);
+        c.fillStyle = 'yellow';//this.props.model.lookupCanvasColor(bg);
         c.fillRect(this.state.xoff, this.state.yoff, width, height);
     }
 
     drawLayer(c, layer) {
         if(!layer.get('visible')) return;
         c.save();
-        c.globalAlpha = layer.opacity;
+        c.globalAlpha = layer.get('opacity');
         let sc = this.props.scale;
         let model = this.props.model;
         for(let y=0; y<this.getHeight(); y++) {

@@ -13,15 +13,18 @@ function genID() {
 }
 
 const empty = [];
-for(let i=0; i<16*16; i++) empty[i] = 0;
+for(let i=0; i<16*16; i++) empty[i] = -1;
 let EMPTY = new List(empty)
 
 function makeLayer() {
     return new Map({
         visible:true,
+        opacity:1.0,
         id:genID(),
         title:'a layer',
-        pixels:EMPTY
+        pixels:EMPTY,
+        width:16,
+        height:16
     })
 }
 
@@ -89,6 +92,26 @@ export default class  ImmutableStore {
         const layer_index = tile.get('layers').indexOf(layer)
         const path = this.findTilePath(tile).concat(['layers',layer_index,'pixels',x+y*16])
         this.setDoc(this.doc.setIn(path, value))
+    }
+    setStampOnTile(tile,layer,x,y,stamp) {
+        const layer_index = tile.get('layers').indexOf(layer)
+        const path = this.findTilePath(tile).concat(['layers',layer_index,'pixels'])
+        this.setDoc(this.doc.updateIn(path,(pixels)=>{
+            for(let i=0; i<stamp.w; i++) {
+                for(let j=0; j<stamp.h; j++) {
+                    if(x+i >= layer.get('width')) continue;
+                    if(x+i < 0) continue;
+                    if(y+j >= layer.get('height')) continue;
+                    if(y+j < 0) continue;
+                    let ia = i + j*stamp.w;
+                    let ib = x+i + (y+j)*layer.get('width')
+                    const val = stamp.data[ia]
+                    pixels = pixels.set(ib,val)
+                }
+            }
+            return pixels
+        }))
+
     }
     getPixelOnLayer(layer,x,y) {
         return layer.get('pixels').get(x + y * 16)
