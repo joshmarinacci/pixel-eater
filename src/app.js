@@ -172,7 +172,8 @@ export default class App extends Component {
         //     PopupState.done();
         //     this.props.doc.model.setBackgroundColor(color);
         // };
-        // this.selectColor = (color) => this.setState({selectedColor:color});
+        this.selectColor = (color) => this.setState({selectedColor:color});
+        this.getColorAtPixel = (pt) => IS.getPixelOnLayer(this.getSelectedLayer(),pt.x,pt.y)
     }
     /*
     exportPNG(scale) {

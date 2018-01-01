@@ -12,7 +12,7 @@ export class EyedropperTool {
         this.mouseDrag(surf,pt);
     }
     mouseDrag(surf,pt) {
-        this.app.selectColor(DocStore.getDoc().model.getData(pt));
+        this.app.selectColor(this.app.getColorAtPixel(pt))
     }
     mouseUp() {
         this.app.selectTool(this.app.tools[0])
