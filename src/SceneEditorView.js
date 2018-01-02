@@ -35,8 +35,10 @@ export default class SceneEditorView extends CanvasComponent {
                 const ty = tileRef.get('y')*this.scale*16
                 c.translate(tx,ty)
                 drawSprite(this.props.store,palette,c,tile,this.scale)
-                c.strokeStyle = 'black'
-                c.strokeRect(0,0,this.scale*16,this.scale*16)
+                if(this.props.showGrid) {
+                    c.strokeStyle = 'black'
+                    c.strokeRect(0, 0, this.scale * 16, this.scale * 16)
+                }
                 c.restore()
             })
         })

@@ -81,6 +81,7 @@ export default class App extends Component {
         this.state = {
             doc: IS.getDoc(),
             drawGrid:true,
+            drawSceneGrid:true,
             selectedColor:1,
             selectedSheetIndex: 0,
             selectedTileIndex: 0,
@@ -109,6 +110,7 @@ export default class App extends Component {
         }
         this.selectTool = (item) => this.setState({selectedTool:item});
         this.toggleGrid = () => this.setState({drawGrid: !this.state.drawGrid});
+        this.toggleSceneGrid = () => this.setState({drawSceneGrid: !this.state.drawSceneGrid})
 
         this.showError = (txt) => {
             DialogManager.show(<AlertPanel
@@ -185,6 +187,7 @@ export default class App extends Component {
             <button onClick={this.zoomOut}>zoom out</button>
             <button onClick={this.toggleGrid}>show grid</button>
             <Spacer/>
+            <button onClick={this.toggleSceneGrid}>scene grid</button>
         </HBox>
     }
 
@@ -267,7 +270,11 @@ export default class App extends Component {
             backgroundColor:'#dddddd',
         }}>
             <div style={{overflow:'scroll'}}>
-                <SceneEditorView store={IS} scene={IS.getDefaultScene()} tile={this.getSelectedTile()} sheet={this.getSelectedSheet()}/>
+                <SceneEditorView store={IS} scene={IS.getDefaultScene()}
+                                 tile={this.getSelectedTile()}
+                                 sheet={this.getSelectedSheet()}
+                                 showGrid={this.state.drawSceneGrid}
+                />
             </div>
         </CollapsingPanel>
     }
