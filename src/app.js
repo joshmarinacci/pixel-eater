@@ -7,7 +7,7 @@ import ColorWellButton from './ColorWellButton.jsx'
 import AlertPanel from './AlertPanel.jsx'
 import {DialogContainer, DialogManager, HBox, PopupContainer, Spacer, VBox, VToggleGroup, HToggleGroup} from 'appy-comps'
 import {KEYBOARD} from './u'
-import {EraserTool, EyedropperTool, MoveTool, PencilTool} from './Tools'
+import {EraserTool, EyedropperTool, LineTool, MoveTool, PencilTool} from './Tools'
 import 'font-awesome/css/font-awesome.css'
 import './web/components.css'
 import 'appy-style/src/look.css'
@@ -76,6 +76,12 @@ export default class App extends Component {
                 keyCode: KEYBOARD.I
             },
             {
+                tool: new LineTool(this),
+                tooltip:'Line',
+                icon:'line',
+                keyCode: KEYBOARD.L
+            },
+            {
                 tool: new MoveTool(this),
                 tooltip:'Move Layer(s)',
                 icon:'arrows',
@@ -116,7 +122,7 @@ export default class App extends Component {
         this.undoCommand = () => IS.undoCommand()
         this.redoCommand = () => IS.redoCommand()
 
-        this.getSelectedSheet = () => this.state.doc.get('sheets').get(0)
+        this.getSelectedSheet = () => IS.getDoc().get('sheets').get(0)
         this.getCurrentPalette = () => this.getSelectedSheet().get('palette')
         this.selectTile = (index) => this.setState({selectedTileIndex:index})
         this.getSelectedTile = () => this.getSelectedSheet().get('tiles').get(this.state.selectedTileIndex)

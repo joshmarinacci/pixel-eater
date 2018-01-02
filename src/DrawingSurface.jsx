@@ -25,8 +25,7 @@ export default class DrawingSurface extends Component {
             hoverEffect: null,
             hoverPoint: null
         };
-
-        // this.props.model.changed(() => this.drawCanvas());
+        if(props.tool) this.state.hoverEffect = props.tool.hoverEffect
     }
     getWidth() {
         return this.props.store.getTileWidth(this.props.model)
@@ -47,12 +46,12 @@ export default class DrawingSurface extends Component {
         layers.map((layer)=>this.drawLayer(c,layer))
         // this.props.model.getReverseLayers().map((layer) => this.drawLayer(c, layer));
         if(this.props.drawGrid === true) this.drawGrid(c, width, height);
-        // if(this.state.hoverEffect && this.state.hoverPoint) {
-        //     c.save();
-        //     c.translate(0.5+this.state.xoff,0.5+this.state.yoff);
-        //     this.state.hoverEffect(c,this.props.scale,this.state.hoverPoint);
-        //     c.restore();
-        // }
+        if(this.state.hoverEffect && this.state.hoverPoint) {
+            c.save();
+            c.translate(0.5+this.state.xoff,0.5+this.state.yoff);
+            this.state.hoverEffect(c,this.props.scale,this.state.hoverPoint);
+            c.restore();
+        }
     }
 
     drawBackground(c, width,height) {
@@ -127,7 +126,7 @@ export default class DrawingSurface extends Component {
             width:this.getWidth(),
             height:this.getHeight()
         });
-        // if(props.tool) this.setState({hoverEffect: props.tool.hoverEffect});
+        if(props.tool) this.setState({hoverEffect: props.tool.hoverEffect});
         setTimeout(this.drawCanvas.bind(this),0);
     }
 
@@ -156,11 +155,13 @@ export default class DrawingSurface extends Component {
         e.stopPropagation();
         let modelPoint = this.getModelPoint(e);
         this.setState({hoverPoint:modelPoint});
-        if(!this.state.down) return setTimeout(this.drawCanvas.bind(this),0);
-        if(!modelPoint.equals(this.state.prevPoint)) {
-            this.props.tool.mouseDrag(this,modelPoint);
-            this.setState({prevPoint:modelPoint});
+        if(this.state.down) {
+            if(!modelPoint.equals(this.state.prevPoint)) {
+                this.props.tool.mouseDrag(this, modelPoint);
+                this.setState({prevPoint: modelPoint});
+            }
         }
+        return setTimeout(this.drawCanvas.bind(this),0);
     }
 
     mouseToModel(mousePoint) {
@@ -172,6 +173,7 @@ export default class DrawingSurface extends Component {
     mouseUp() {
         this.setState({down:false});
         this.props.tool.mouseUp(this);
+        return setTimeout(this.drawCanvas.bind(this),0);
     }
 
     keyDown(e) {

@@ -3,6 +3,7 @@ import ToggleButton from "./ToggleButton.jsx"
 import {KEYBOARD} from "./u";
 import DocStore from "./DocStore.js";
 import {HBox} from "appy-comps";
+import P from './P'
 
 export class EyedropperTool {
     constructor(app) {
@@ -21,7 +22,6 @@ export class EyedropperTool {
         return <label>none</label>
     }
 }
-
 
 export class PencilTool {
     constructor(app, size) {
@@ -63,6 +63,75 @@ export class PencilTool {
             <ToggleButton selected={this.size === 3} onToggle={this.setSize3}>3px</ToggleButton>
             <ToggleButton selected={this.size === 5} onToggle={this.setSize5}>5px</ToggleButton>
         </HBox>
+    }
+}
+
+export class LineTool {
+    constructor(app) {
+        this.app = app
+        this.start = null
+        this.end = null
+        this.hoverEffect = (c,scale,pt) => {
+            if(!this.start) return
+            c.save()
+            c.strokeStyle = 'orange'
+            const sc = scale
+            c.translate(0.5*sc,0.5*sc)
+            c.beginPath()
+            c.moveTo(this.start.x*sc,this.start.y*sc)
+            c.lineTo(pt.x*sc,pt.y*sc)
+            c.stroke()
+            c.restore()
+        }
+    }
+    mouseDown(surf,pt) {
+        console.log("setting the start point")
+        this.start = pt
+    }
+    mouseDrag(surf,pt) {
+        let col = this.app.state.selectedColor;
+        this.end = pt
+    }
+    mouseUp(surf) {
+        let value = this.app.state.selectedColor;
+
+
+        //bresenham's line algorithm
+        let x1 = this.start.x
+        let x2 = this.end.x
+        let y1 = this.start.y
+        let y2 = this.end.y
+        let dx = Math.abs(x2 - x1)
+        let dy = Math.abs(y2 - y1)
+        let sx = (x1 < x2) ? 1 : -1
+        let sy = (y1 < y2) ? 1 : -1
+        let err = dx - dy
+
+        //first point
+        this.setTileXY(x1,y1, value);
+        //main loop
+        while(!((x1 === x2) && (y1 === y2))) {
+            const e2 = err << 1
+            if(e2 > -dy) {
+                err -= dy;
+                x1 += sx;
+            }
+            if(e2 < dx) {
+                err += dx;
+                y1 += sy;
+            }
+            this.setTileXY(x1,y1,value);
+        }
+        this.start = null
+    }
+    setTileXY(x,y,color) {
+        const stamp = {
+            w:1,
+            h:1,
+            data:[color]
+        }
+        const newDoc = this.app.drawStamp(new P(x,y),stamp, color);
+        console.log("got the new doc",newDoc.hashCode(),newDoc.toJSON())
     }
 }
 
