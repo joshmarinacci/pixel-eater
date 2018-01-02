@@ -11,8 +11,8 @@ export default class SceneEditorView extends CanvasComponent {
         setTimeout(() => this.draw(),100)
     }
     mousedown = (pt,e) => {
-        pt = pt.div(16).div(this.scale)
-        this.props.store.setTileInScene(this.props.sheet,this.props.tile, Math.floor(pt.x), Math.floor(pt.y))
+        pt = pt.div(16).div(this.scale).floor()
+        this.props.store.setTileInScene(this.props.sheet,this.props.tile, pt)
     }
 
     draw() {

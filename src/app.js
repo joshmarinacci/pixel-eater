@@ -185,7 +185,7 @@ export default class App extends Component {
             <Spacer/>
             <button onClick={this.zoomIn}>zoom in</button>
             <button onClick={this.zoomOut}>zoom out</button>
-            <button onClick={this.toggleGrid}>show grid</button>
+            <button onClick={this.toggleGrid}>sprite grid</button>
             <Spacer/>
             <button onClick={this.toggleSceneGrid}>scene grid</button>
         </HBox>

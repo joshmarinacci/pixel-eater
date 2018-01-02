@@ -27,6 +27,14 @@ function makeLayer() {
         height:16
     })
 }
+function makeTile() {
+    const layer = makeLayer()
+    const tile = new Map({
+        id:genID(),
+        layers:new List([layer])
+    })
+    return tile
+}
 
 const layer1 = makeLayer()
 const layer2 = makeLayer()
@@ -220,10 +228,7 @@ export default class  ImmutableStore {
     }
     addTileToSheet(sheet) {
         const layer = makeLayer()
-        const tile = new Map({
-            layers:new List([layer])
-        })
-        this.setDoc(this.doc.updateIn(['sheets',0,'tiles'], (tiles)=>tiles.push(tile)))
+        this.setDoc(this.doc.updateIn(['sheets',0,'tiles'], (tiles)=>tiles.push(makeTile())))
     }
     removeTileFromSheet(sheet, tile) {
         this.setDoc(this.doc.updateIn(['sheets',0,'tiles'], (tiles)=>tiles.filter(test=>test!==tile)))
@@ -252,10 +257,10 @@ export default class  ImmutableStore {
     getSceneHeight(scene) {
         return scene.get('height')
     }
-    setTileInScene(sheet,tile,x,y) {
+    setTileInScene(sheet,tile,pt) {
         const tileRef = new Map({
-            x:x,
-            y:y,
+            x:pt.x,
+            y:pt.y,
             sheetId:sheet.get('id'),
             tileId:tile.get('id')
         })

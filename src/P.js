@@ -13,6 +13,7 @@ export default class P {
     }
 
     floor() {
+        // noinspection JSSuspiciousNameCombination
         return new P(Math.floor(this.x), Math.floor(this.y))
     }
 }
