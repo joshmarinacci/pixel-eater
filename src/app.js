@@ -108,12 +108,8 @@ export default class App extends Component {
 
         this.state = {
             doc: IS.getDoc(),
-            // drawGrid:true,
-            // drawPreview:false,
-            // showLayers:true,
+            drawGrid:true,
             selectedColor:1,
-            // scale: 16,
-            // dirty:false,
             selectedSheetIndex: 0,
             selectedTileIndex: 0,
             selectedLayerIndex: 0,
@@ -139,26 +135,8 @@ export default class App extends Component {
             IS.removeTileFromSheet(this.getSelectedSheet(),this.getSelectedTile())
             this.setState({selectedTileIndex:0})
         }
-        // this.state.shiftLayerOnly = false;
-
-
         this.selectTool = (item) => this.setState({selectedTool:item});
-
-        // this.state.user = null;
-        // this.state.doclist = [];
-        // this.state.recentColors = [];
-
-        // this.model_listener = this.props.doc.model.changed((mod)=> this.setState({model:mod, dirty:true}));
-
-        // this.toggleGrid = () => this.setState({drawGrid: !this.state.drawGrid});
-        // this.togglePreview = () => this.setState({ drawPreview: !this.state.drawPreview});
-        // this.toggleLayers = () => this.setState({ showLayers: !this.state.showLayers});
-        // this.zoomIn = () => this.setState({scale: this.state.scale<<1});
-        // this.zoomOut = () => this.setState({scale: this.state.scale>>1});
-        // this.resizeDoc = () => DialogManager.show(<ResizePanel model={this.props.doc.model}/>);
-
-        // this.execUndo = () => this.props.doc.model.execUndo();
-        // this.execRedo = () => this.props.doc.model.execRedo();
+        this.toggleGrid = () => this.setState({drawGrid: !this.state.drawGrid});
 
         this.showError = (txt) => {
             DialogManager.show(<AlertPanel
@@ -168,11 +146,6 @@ export default class App extends Component {
                 />);
         };
 
-
-        // this.selectBGColor = (color) => {
-        //     PopupState.done();
-        //     this.props.doc.model.setBackgroundColor(color);
-        // };
         this.selectColor = (color) => this.setState({selectedColor:color});
         this.getColorAtPixel = (pt) => IS.getPixelOnLayer(this.getSelectedLayer(),pt.x,pt.y)
     }
@@ -200,12 +173,6 @@ export default class App extends Component {
             })
         }
     }
-    /*
-    titleEdited() {
-        DocStore.getDoc().title = this.refs.doc_title.value;
-        this.setState({doc:DocStore.getDoc()});
-    }
-    */
     canvasKeyDown = (e) => {
         let tool = this.tools.find((tool) => e.keyCode === tool.keyCode);
         if(tool) this.selectTool(tool);
@@ -224,110 +191,45 @@ export default class App extends Component {
         }
         return <div style={gridStyle}>
             {this.renderTopToolbar()}
-            <div className="border-left" style={{ gridColumn:'left/center', gridRow:'center/statusbar', display:'flex', flexDirection:'row'}}>
+            <div className="border-left" style={{ gridColumn:'1/-1', gridRow:'center/statusbar', display:'flex', flexDirection:'row', overflow:'scroll'}}>
                 {this.renderDocSelector()}
                 {this.renderTileSheet(this.state.doc.get('sheets').get(0))}
                 {this.renderDrawingToolsPanel()}
+                {this.renderDrawingSurface()}
+                {this.renderSceneEditor()}
             </div>
-            {this.renderDrawingSurface()}
-            {this.renderSceneEditor()}
             {this.renderBottomToolbar()}
             <DialogContainer/>
             <PopupContainer/>
         </div>
     }
 
+    renderTopToolbar() {
+        return <HBox className='border-bottom' style={{ gridRow:'toolbar', gridColumn:'left/-1'}}>
+            <Spacer/>
+            <button onClick={this.undoCommand}>undo</button>
+            <button onClick={this.redoCommand}>redo</button>
+            <Spacer/>
+            <button onClick={this.zoomIn}>zoom in</button>
+            <button onClick={this.zoomOut}>zoom out</button>
+            <button onClick={this.toggleGrid}>show grid</button>
+            <Spacer/>
+        </HBox>
+    }
+
     renderDocSelector() {
-        return <CollapsingPanel title="sheets" style={{border:'1px solid #888', backgroundColor:'#dddddd'}}>
+        return <CollapsingPanel title="sheets" width='200px' style={{border:'1px solid #888', backgroundColor:'#dddddd'}}>
             <SimpleList
                 list={this.state.doc.get('sheets')}
-                style={{width:'100px', border:'1px solid blue'}}
+                style={{flex:1}}
                 orientation={'vertical'}
                 renderer={SheetListItemRenderer}
                 selectedItem={this.state.doc.get('sheets').get(this.state.selectedSheetIndex)}
             />
         </CollapsingPanel>
     }
-    renderSideToolbar() {
-        let model = this.props.doc.model;
-        var loggedOut = UserStore.getUser()===null;
-        let cp =  <ColorPicker model={model} onSelectColor={this.selectColor}/>;
-        return <VBox className="panel left">
-            <ColorWellButton model={model} selectedColor={this.state.selectedColor} content={cp}/>
-            {/*<VToggleGroup list={this.tools} selected={this.state.selected_tool} template={ToggleButtonTemplate} onChange={this.selectTool}/>*/}
-            <Spacer/>
-            <Button onClick={this.execUndo} disabled={!model.isUndoAvailable()} tooltip="Undo"><i className="fa fa-undo"/></Button>
-            <Button onClick={this.execRedo} disabled={!model.isRedoAvailable()} tooltip="Redo"><i className="fa fa-repeat"/></Button>
-            <Button onClick={this.resizeDoc} tooltip="Resize Doc">resize</Button>
-            <ToggleButton onToggle={this.toggleGrid} selected={this.state.drawGrid} tooltip="Show/Hide Grid"><i className="fa fa-th"/></ToggleButton>
-            <ToggleButton onToggle={this.togglePreview} selected={this.state.drawPreview} tooltip="Show/Hide Preview">Preview</ToggleButton>
-            <ToggleButton onToggle={this.toggleLayers} selected={this.state.showLayers} tooltip="Show/Hide Layers">Layers</ToggleButton>
-            <Spacer/>
-            <Button onClick={this.newDoc}    disabled={loggedOut} tooltip="New Image"><i className="fa fa-file-o"/></Button>
-            <Button onClick={this.saveDoc}   disabled={loggedOut} tooltip="Save Image"><i className="fa fa-save"/></Button>
-            <Button onClick={this.openDoc}   disabled={loggedOut} tooltip="Open Image"><i className="fa fa-folder-open"/></Button>
-        </VBox>
-    }
-    renderTopToolbar() {
-        return <HBox className='border-bottom' style={{ gridRow:'toolbar', gridColumn:'left/-1'}}>
-            <button onClick={this.undoCommand}>undo</button>
-            <button onClick={this.redoCommand}>redo</button>
-            <button onClick={this.zoomIn}>zoom in</button>
-            <button onClick={this.zoomOut}>zoom out</button>
-        </HBox>
-        /*
-        let cp2 = <ColorPicker model={this.props.doc.model} onSelectColor={this.selectBGColor}/>
-        let sharePopup = <div>
-            <li className="disabled">Tweet</li>
-            <li onClick={this.exportPNG.bind(this,1)}>Export as PNG 1x</li>
-            <li onClick={this.exportPNG.bind(this,2)}>Export as PNG 2x</li>
-            <li onClick={this.exportPNG.bind(this,4)}>Export as PNG 4x</li>
-            <li onClick={this.exportPNG.bind(this,8)}>Export as PNG 8x</li>
-            <li className="disabled">Export as JSON</li>
-            <li onClick={this.openShare}>Get Sharing Link</li>
-        </div>;
-        return <HBox className="panel top">
-            <button onClick={(e)=>PopupManager.show(cp2,e.target)} className="fa fa-gear"/>
-            <input type="text" ref="doc_title" value={this.props.doc.title} onChange={this.titleEdited.bind(this)}/>
-            <Spacer/>
-            <Button onClick={this.zoomIn}><i className="fa fa-plus"/></Button>
-            <Button onClick={this.zoomOut}><i className="fa fa-minus"/></Button>
-            <button onClick={(e)=>PopupManager.show(sharePopup, e.target)} className="fa fa-share"/>
-            <button onClick={this.openShare}>share</button>
-        </HBox>
-        */
-    }
-    renderBottomToolbar() {
-        return <div className="border-top border-bottom border" style={{ gridColumn:'left/-1', gridRow:'statusbar/-1'}}>status bar</div>
-
-        // return <HBox className="panel bottom">
-        //     <button onClick={this.loginLogout}>{this.state.user?"logout":"login"}</button>
-        //     <label>{this.state.user?this.state.user.username:'not logged in'}</label>
-        //     <Spacer/>
-        //     <label><i>{this.state.dirty?"unsaved changes":""}</i></label>
-        // </HBox>
-    }
-    renderSceneEditor() {
-        return <CollapsingPanel title="preview" style={{
-            border:'1px solid #888',
-            borderWidth:'0 0 0 1px',
-            backgroundColor:'#dddddd',
-            gridColumn:'right/-1',
-            gridRow:'center/statusbar' }}>
-            <div>
-                <SceneEditorView store={IS} scene={IS.getDefaultScene()} tile={this.getSelectedTile()} sheet={this.getSelectedSheet()}/>
-            </div>
-        </CollapsingPanel>
-        // return this.state.drawPreview?<VBox className="panel right"><PreviewPanel model={this.props.doc.model}/></VBox>:"";
-    }
-    renderLayersPanel() {
-        return <VBox className="panel right">
-            {this.state.showLayers?<LayersPanel model={this.props.doc.model}/>:""}
-        </VBox>
-    }
     renderTileSheet(sheet) {
-        return <CollapsingPanel title="tiles" style={{border:'1px solid #888', backgroundColor:'#dddddd'}}>
-            <VBox>
+        return <CollapsingPanel title="tiles" width='200px' style={{border:'1px solid #888', backgroundColor:'#dddddd'}}>
                 <SimpleList
                     style={{flex:1}}
                     list={sheet.get('tiles')}
@@ -337,38 +239,15 @@ export default class App extends Component {
                     selectedItem={sheet.get('tiles').get(this.state.selectedTileIndex)}
                     orientation='wrap'
                 />
-                <HBox>
-                    <button onClick={this.addTileToSheet}>add new sprite</button>
-                    <button onClick={this.removeTileFromSheet}>remove sprite</button>
+                <HBox style={{flex:0}}>
+                    <button onClick={this.addTileToSheet}>+</button>
+                    <button onClick={this.removeTileFromSheet}>-</button>
                 </HBox>
-            </VBox>
         </CollapsingPanel>
-    }
-    renderDrawingSurface() {
-        const pal = this.getSelectedSheet().get('palette')
-        return <div style={{
-            border:'1px solid black',
-            gridColumn:'center/right',
-            gridRow:'center/statusbar',
-            overflow:'scroll',
-        }}>
-            <DrawingSurface
-                tabIndex="1"
-                tool={this.state.selectedTool.tool}
-                model={this.getSelectedTile()}
-                drawGrid={true}
-                scale={Math.pow(2,this.state.scale)}
-                palette={pal}
-                store={IS}
-                onKeyDown={this.canvasKeyDown}
-                onZoomIn={this.zoomIn}
-                onZoomOut={this.zoomOut}
-            />
-        </div>
     }
     renderDrawingToolsPanel() {
         let cp =  <ColorPicker palette={this.getCurrentPalette()} onSelectColor={this.selectColor}/>;
-        return <CollapsingPanel title="layers"style={{ border:'1px solid black'}}>
+        return <CollapsingPanel title="layers & tools" width='200px' style={{ border:'1px solid black', backgroundColor:'#dddddd'}}>
             <VBox>
                 <LayersPanel
                     model={this.getSelectedTile()} store={IS}
@@ -388,6 +267,42 @@ export default class App extends Component {
                 </HBox>
             </VBox>
         </CollapsingPanel>
+    }
+    renderDrawingSurface() {
+        const pal = this.getSelectedSheet().get('palette')
+        return <div style={{
+            border:'1px solid black',
+            overflow:'scroll',
+            flex:1
+        }}>
+            <DrawingSurface
+                tabIndex="1"
+                tool={this.state.selectedTool.tool}
+                model={this.getSelectedTile()}
+                drawGrid={this.state.drawGrid}
+                scale={Math.pow(2,this.state.scale)}
+                palette={pal}
+                store={IS}
+                onKeyDown={this.canvasKeyDown}
+                onZoomIn={this.zoomIn}
+                onZoomOut={this.zoomOut}
+            />
+        </div>
+    }
+    renderSceneEditor() {
+        return <CollapsingPanel title="preview" flex={1} style={{
+            border:'1px solid #888',
+            borderWidth:'0 0 0 1px',
+            backgroundColor:'#dddddd',
+        }}>
+            <div style={{overflow:'scroll'}}>
+                <SceneEditorView store={IS} scene={IS.getDefaultScene()} tile={this.getSelectedTile()} sheet={this.getSelectedSheet()}/>
+            </div>
+        </CollapsingPanel>
+    }
+
+    renderBottomToolbar() {
+        return <div className="border-top border-bottom border" style={{ gridColumn:'left/-1', gridRow:'statusbar/-1'}}>status bar</div>
     }
 }
 
@@ -483,17 +398,26 @@ class CollapsingPanel extends Component {
     }
     render() {
         const overrideStyle = this.props.style?this.props.style:{}
-        const style = Object.assign(overrideStyle,{})
+        const style = Object.assign(overrideStyle,{
+            flex:0
+        })
         if(this.state.open) {
+            if(this.props.flex) style.flex = this.props.flex
+            if(this.props.width) style.width = this.props.width
+            if(this.props.width) style.minWidth = this.props.width
             return <VBox style={style}>
                     <HBox style={{backgroundColor:'black', color:'white'}}>
                         <button className="fa fa-chevron-down" onClick={this.toggleOpen}/>
                         {this.props.title}
                     </HBox>
                     {this.state.open?this.props.children:""}
+                    <div>obottom</div>
                 </VBox>
 
         } else {
+            style.flex = 0
+            style.minWidth = 'auto'
+            style.width = 'auto'
             return <VBox style={style}>
                     <button className="fa fa-chevron-right" onClick={this.toggleOpen}/>
                 </VBox>
