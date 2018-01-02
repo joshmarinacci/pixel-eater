@@ -19,6 +19,8 @@ export default class SceneEditorView extends CanvasComponent {
         if(!this.canvas) return
         const c = this.canvas.getContext('2d')
         const scene = this.props.scene;
+        c.fillStyle = 'white'
+        c.fillRect(0,0,this.canvas.width,this.canvas.height)
         scene.get('layers').forEach((layer)=>{
             if(!layer.get('visible')) return
             layer.get('tiles').forEach((tileRef)=>{
