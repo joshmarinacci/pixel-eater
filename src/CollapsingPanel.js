@@ -24,7 +24,6 @@ export default class CollapsingPanel extends Component {
                     {this.props.title}
                 </HBox>
                 {this.state.open?this.props.children:""}
-                <div>obottom</div>
             </VBox>
 
         } else {

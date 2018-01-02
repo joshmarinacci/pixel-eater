@@ -92,7 +92,7 @@ export default class App extends Component {
             selectedTileIndex: 0,
             selectedLayerIndex: 0,
             selectedTool:this.tools[0],
-            scale: 6,
+            scale: 5,
             recentColors:[]
         };
 
@@ -279,13 +279,19 @@ export default class App extends Component {
             borderWidth:'0 0 0 1px',
             backgroundColor:'#dddddd',
         }}>
-            <div style={{overflow:'scroll'}}>
+            <div style={{overflow:'scroll', flex:1}}>
                 <SceneEditorView store={IS} scene={IS.getDefaultScene()}
                                  tile={this.getSelectedTile()}
                                  sheet={this.getSelectedSheet()}
                                  showGrid={this.state.drawSceneGrid}
                 />
             </div>
+            <HBox>
+                <label>selected tile</label>
+                <TileView store={IS} sprite={this.getSelectedTile()} scale={1} palette={this.getCurrentPalette()}/>
+                <label>width: 4</label>
+                <label>height: 4 </label>
+            </HBox>
         </CollapsingPanel>
     }
 

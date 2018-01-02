@@ -27,6 +27,8 @@ export default class TileView extends CanvasComponent {
     draw() {
         if(!this.canvas) return
         const c = this.canvas.getContext('2d')
+        c.fillStyle = 'white'
+        c.fillRect(0,0,this.canvas.width,this.canvas.height)
         GraphicsUtils.drawSprite(this.props.store, this.props.palette , c, this.props.sprite, this.scale)
     }
     getWidth() {
