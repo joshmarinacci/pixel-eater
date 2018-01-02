@@ -1,52 +1,24 @@
-import React, {Component} from "react";
-import DrawingSurface from "./DrawingSurface.jsx"
-import LayersPanel from "./LayersPanel.jsx";
-import DocStore from "./DocStore.js";
-import UserStore from "./UserStore";
-import Config from "./Config"
-import BitmapModel from "./BitmapModel"
-import Button from "./Button.jsx";
-import ColorPicker from "./ColorPicker.jsx";
-import PopupState from "./PopupState.jsx";
-import RecentColors from "./RecentColors.jsx";
-import ToggleButton from "./ToggleButton.jsx"
-import ColorWellButton from "./ColorWellButton.jsx";
-import PreviewPanel from "./PreviewPanel.jsx"
-import ResizePanel from "./ResizePanel.jsx";
-import AlertPanel from "./AlertPanel.jsx";
-import NewDocPanel from "./NewDocPanel";
-import OpenDocPanel from "./OpenDocPanel";
-import SharePanel from "./SharePanel";
-import LoginPanel from "./LoginPanel";
-import RegistrationPanel from "./RegistrationPanel";
-import {VBox, HBox, Spacer, PopupContainer, VToggleGroup, PopupManager, DialogManager, DialogContainer} from "appy-comps";
-import {KEYBOARD} from "./u";
-import { PencilTool, EraserTool, MoveTool, EyedropperTool } from "./Tools";
-import "font-awesome/css/font-awesome.css";
-import "./web/components.css";
-import "appy-style/src/look.css";
+import React, {Component} from 'react'
+import DrawingSurface from './DrawingSurface.jsx'
+import LayersPanel from './LayersPanel.jsx'
+import ColorPicker from './ColorPicker.jsx'
+import ToggleButton from './ToggleButton.jsx'
+import ColorWellButton from './ColorWellButton.jsx'
+import AlertPanel from './AlertPanel.jsx'
+import {DialogContainer, DialogManager, HBox, PopupContainer, Spacer, VBox, VToggleGroup} from 'appy-comps'
+import {KEYBOARD} from './u'
+import {EraserTool, EyedropperTool, MoveTool, PencilTool} from './Tools'
+import 'font-awesome/css/font-awesome.css'
+import './web/components.css'
+import 'appy-style/src/look.css'
 
-
-import ImmutableStore from "./ImmutableStore";
+import ImmutableStore from './ImmutableStore'
 import SimpleList from './SimpleList'
+import SceneEditorView from './SceneEditorView'
+import CollapsingPanel from './CollapsingPanel'
+import TileView from "./TileView"
 
 const IS = new ImmutableStore()
-
-class P  {
-    constructor(x,y) {
-        this.x = x
-        this.y = y
-    }
-    sub(pt) {
-        return new P(this.x-pt.x,this.y-pt.y)
-    }
-    div(scalar) {
-        return new P(this.x/scalar, this.y/scalar)
-    }
-    floor() {
-        return new P(Math.floor(this.x),Math.floor(this.y))
-    }
-}
 
 const SheetListItemRenderer = (props) => {
     const style = {
@@ -185,7 +157,6 @@ export default class App extends Component {
             position:'absolute',
             top:0, bottom:0, right:0, left:0,
             display:'grid',
-            border:'1px solid red',
             gridTemplateColumns: "[left] 300px [center] auto [drawingtools] 50px [right] 300px",
             gridTemplateRows: "[toolbar] 3em [center] auto [statusbar] 3em",
         }
@@ -307,173 +278,4 @@ export default class App extends Component {
 }
 
 
-class CanvasComponent extends Component {
-    constructor(props) {
-        super(props)
-        this.scale = 8
-        if(props.scale) this.scale = props.scale
-    }
-    componentDidMount() {
-        this.draw();
-    }
-    setState(state) {
-        super.setState(state)
-        setTimeout(() => this.draw(),100)
-    }
-    toCanvas(e) {
-        const rect = this.canvas.getBoundingClientRect()
-        return new P(e.clientX,e.clientY).sub(new P(rect.left,rect.top))
-    }
-    render() {
-        return <div><canvas
-            ref={(can)=>this.canvas = can}
-            width={400} height={400}
-            onMouseDown={(e) => this.mousedown(this.toCanvas(e),e)}
-            onMouseMove={this.mousemove}
-            onMouseUp={this.mouseup}
-        /></div>
-    }
-}
 
-class TileView extends CanvasComponent {
-    componentWillReceiveProps(props) {
-        setTimeout(() => this.draw(),100)
-    }
-    mousedown = (pt,e) => {
-        if(this.props.onClick) this.props.onClick(this.props.sprite)
-    }
-    render() {
-        const overrideStyle = this.props.style?this.props.style:{}
-        const style = Object.assign(overrideStyle,{})
-        return <canvas
-            style={style}
-            ref={(can)=>this.canvas = can}
-            width={this.scale*IS.getTileWidth(this.props.sprite)}
-            height={this.scale*IS.getTileHeight(this.props.sprite)}
-            onMouseDown={(e) => this.mousedown(this.toCanvas(e),e)}
-            onMouseMove={this.mousemove}
-            onMouseUp={this.mouseup}
-        />
-    }
-
-    draw() {
-        if(!this.canvas) return
-        const c = this.canvas.getContext('2d')
-        drawSprite(this.props.store, this.props.palette , c, this.props.sprite, this.scale)
-    }
-    getWidth() {
-        return this.props.store.getTileWidth(this.props.model)
-    }
-    getHeight() {
-        return this.props.store.getTileHeight(this.props.model)
-    }
-}
-
-function drawSprite(store,palette,c,sprite,scale) {
-    sprite.get('layers').forEach((layer) => {
-        if(!layer.get('visible')) return;
-        c.save();
-        const w = store.getTileWidth(sprite)
-        const h = store.getTileHeight(sprite)
-        c.globalAlpha = layer.opacity;
-        for(let y=0; y<h; y++) {
-            for (let x = 0; x < w; x++) {
-                const val = store.getPixelOnLayer(layer, x, y);
-                if(val === -1) continue;
-                c.fillStyle = store.lookupPaletteColor(palette, val);
-                c.fillRect(x * scale, y * scale, scale, scale);
-            }
-        }
-        c.restore();
-    })
-}
-
-class CollapsingPanel extends Component {
-    constructor(props) {
-        super(props)
-        this.state = {
-            open:false
-        }
-        this.toggleOpen = () => this.setState({open:!this.state.open})
-    }
-    render() {
-        const overrideStyle = this.props.style?this.props.style:{}
-        const style = Object.assign(overrideStyle,{
-            flex:0
-        })
-        if(this.state.open) {
-            if(this.props.flex) style.flex = this.props.flex
-            if(this.props.width) style.width = this.props.width
-            if(this.props.width) style.minWidth = this.props.width
-            return <VBox style={style}>
-                    <HBox style={{backgroundColor:'black', color:'white'}}>
-                        <button className="fa fa-chevron-down" onClick={this.toggleOpen}/>
-                        {this.props.title}
-                    </HBox>
-                    {this.state.open?this.props.children:""}
-                    <div>obottom</div>
-                </VBox>
-
-        } else {
-            style.flex = 0
-            style.minWidth = 'auto'
-            style.width = 'auto'
-            return <VBox style={style}>
-                    <button className="fa fa-chevron-right" onClick={this.toggleOpen}/>
-                </VBox>
-        }
-    }
-}
-
-class SceneEditorView extends CanvasComponent {
-    constructor(props) {
-        super(props)
-        this.scale = 4
-    }
-    componentWillReceiveProps(props) {
-        setTimeout(() => this.draw(),100)
-    }
-    mousedown = (pt,e) => {
-        pt = pt.div(16).div(this.scale)
-        this.props.store.setTileInScene(this.props.sheet,this.props.tile, Math.floor(pt.x), Math.floor(pt.y))
-    }
-
-    draw() {
-        if(!this.canvas) return
-        const c = this.canvas.getContext('2d')
-        const scene = this.props.scene;
-        scene.get('layers').forEach((layer)=>{
-            if(!layer.get('visible')) return
-            layer.get('tiles').forEach((tileRef)=>{
-                const tileId = tileRef.get('tileId')
-                const sheetId = tileRef.get('sheetId')
-                const doc = this.props.store.getDoc()
-                const sheet = doc.get('sheets').find((sheet)=>sheet.get('id')===sheetId)
-                const palette = sheet.get('palette')
-                const tile = sheet.get('tiles').find((tile)=>tile.get('id')===tileId)
-                c.save();
-                const tx = tileRef.get('x')*this.scale*16
-                const ty = tileRef.get('y')*this.scale*16
-                c.translate(tx,ty)
-                drawSprite(this.props.store,palette,c,tile,this.scale)
-                c.strokeStyle = 'black'
-                c.strokeRect(0,0,this.scale*16,this.scale*16)
-                c.restore()
-            })
-        })
-    }
-
-    render() {
-        const overrideStyle = this.props.style?this.props.style:{}
-        const style = Object.assign(overrideStyle,{})
-        return <canvas
-            style={style}
-            ref={(can)=>this.canvas = can}
-            width={this.scale*IS.getSceneWidth(this.props.scene)*16}
-            height={this.scale*IS.getSceneHeight(this.props.scene)*16}
-            onMouseDown={(e) => this.mousedown(this.toCanvas(e),e)}
-            onMouseMove={this.mousemove}
-            onMouseUp={this.mouseup}
-        />
-    }
-}
