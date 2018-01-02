@@ -219,7 +219,7 @@ export default class App extends Component {
             top:0, bottom:0, right:0, left:0,
             display:'grid',
             border:'1px solid red',
-            gridTemplateColumns: "[left] 300px [center] auto [drawingtools] 50px [right] 100px",
+            gridTemplateColumns: "[left] 300px [center] auto [drawingtools] 50px [right] 300px",
             gridTemplateRows: "[toolbar] 3em [center] auto [statusbar] 3em",
         }
         return <div style={gridStyle}>
@@ -230,7 +230,7 @@ export default class App extends Component {
                 {this.renderDrawingToolsPanel()}
             </div>
             {this.renderDrawingSurface()}
-            {this.renderPreviewPanel()}
+            {this.renderSceneEditor()}
             {this.renderBottomToolbar()}
             <DialogContainer/>
             <PopupContainer/>
@@ -307,14 +307,16 @@ export default class App extends Component {
         //     <label><i>{this.state.dirty?"unsaved changes":""}</i></label>
         // </HBox>
     }
-    renderPreviewPanel() {
+    renderSceneEditor() {
         return <CollapsingPanel title="preview" style={{
             border:'1px solid #888',
             borderWidth:'0 0 0 1px',
             backgroundColor:'#dddddd',
-            gridColumn:'right',
+            gridColumn:'right/-1',
             gridRow:'center/statusbar' }}>
-            <div>preview</div>
+            <div>
+                <SceneEditorView store={IS} scene={IS.getDefaultScene()} tile={this.getSelectedTile()} sheet={this.getSelectedSheet()}/>
+            </div>
         </CollapsingPanel>
         // return this.state.drawPreview?<VBox className="panel right"><PreviewPanel model={this.props.doc.model}/></VBox>:"";
     }
@@ -442,26 +444,7 @@ class TileView extends CanvasComponent {
     draw() {
         if(!this.canvas) return
         const c = this.canvas.getContext('2d')
-        this.drawSprite(c,this.props.sprite,this.scale)
-    }
-    drawSprite(c, sprite, scale) {
-        sprite.get('layers').forEach((layer) => this.drawLayer(c,layer))
-    }
-    drawLayer(c, layer) {
-        if(!layer.get('visible')) return;
-        c.save();
-        c.globalAlpha = layer.opacity;
-        let sc = this.props.scale;
-        let model = this.props.sprite;
-        for(let y=0; y<this.getHeight(); y++) {
-            for (let x = 0; x < this.getWidth(); x++) {
-                const val = this.props.store.getPixelOnLayer(layer, x, y);
-                if(val === -1) continue;
-                c.fillStyle = this.props.store.lookupPaletteColor(this.props.palette, val);
-                c.fillRect(x * sc, y * sc, sc, sc);
-            }
-        }
-        c.restore();
+        drawSprite(this.props.store, this.props.palette , c, this.props.sprite, this.scale)
     }
     getWidth() {
         return this.props.store.getTileWidth(this.props.model)
@@ -469,6 +452,25 @@ class TileView extends CanvasComponent {
     getHeight() {
         return this.props.store.getTileHeight(this.props.model)
     }
+}
+
+function drawSprite(store,palette,c,sprite,scale) {
+    sprite.get('layers').forEach((layer) => {
+        if(!layer.get('visible')) return;
+        c.save();
+        const w = store.getTileWidth(sprite)
+        const h = store.getTileHeight(sprite)
+        c.globalAlpha = layer.opacity;
+        for(let y=0; y<h; y++) {
+            for (let x = 0; x < w; x++) {
+                const val = store.getPixelOnLayer(layer, x, y);
+                if(val === -1) continue;
+                c.fillStyle = store.lookupPaletteColor(palette, val);
+                c.fillRect(x * scale, y * scale, scale, scale);
+            }
+        }
+        c.restore();
+    })
 }
 
 class CollapsingPanel extends Component {
@@ -499,3 +501,55 @@ class CollapsingPanel extends Component {
     }
 }
 
+class SceneEditorView extends CanvasComponent {
+    constructor(props) {
+        super(props)
+        this.scale = 4
+    }
+    componentWillReceiveProps(props) {
+        setTimeout(() => this.draw(),100)
+    }
+    mousedown = (pt,e) => {
+        pt = pt.div(16).div(this.scale)
+        this.props.store.setTileInScene(this.props.sheet,this.props.tile, Math.floor(pt.x), Math.floor(pt.y))
+    }
+
+    draw() {
+        if(!this.canvas) return
+        const c = this.canvas.getContext('2d')
+        const scene = this.props.scene;
+        scene.get('layers').forEach((layer)=>{
+            if(!layer.get('visible')) return
+            layer.get('tiles').forEach((tileRef)=>{
+                const tileId = tileRef.get('tileId')
+                const sheetId = tileRef.get('sheetId')
+                const doc = this.props.store.getDoc()
+                const sheet = doc.get('sheets').find((sheet)=>sheet.get('id')===sheetId)
+                const palette = sheet.get('palette')
+                const tile = sheet.get('tiles').find((tile)=>tile.get('id')===tileId)
+                c.save();
+                const tx = tileRef.get('x')*this.scale*16
+                const ty = tileRef.get('y')*this.scale*16
+                c.translate(tx,ty)
+                drawSprite(this.props.store,palette,c,tile,this.scale)
+                c.strokeStyle = 'black'
+                c.strokeRect(0,0,this.scale*16,this.scale*16)
+                c.restore()
+            })
+        })
+    }
+
+    render() {
+        const overrideStyle = this.props.style?this.props.style:{}
+        const style = Object.assign(overrideStyle,{})
+        return <canvas
+            style={style}
+            ref={(can)=>this.canvas = can}
+            width={this.scale*IS.getSceneWidth(this.props.scene)*16}
+            height={this.scale*IS.getSceneHeight(this.props.scene)*16}
+            onMouseDown={(e) => this.mousedown(this.toCanvas(e),e)}
+            onMouseMove={this.mousemove}
+            onMouseUp={this.mouseup}
+        />
+    }
+}

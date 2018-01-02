@@ -29,13 +29,14 @@ function makeLayer() {
 }
 
 const layer1 = makeLayer()
-const layer1b = makeLayer()
 const layer2 = makeLayer()
 
 const tile1 = new Map({
-    layers:new List([layer1])//, layer1b])
+    id:genID(),
+    layers:new List([layer1])
 })
 const tile2 = new Map({
+    id:genID(),
     layers: new List([layer2])
 })
 
@@ -124,10 +125,30 @@ const sheet = new Map({
     palette:palette
 })
 
+const scene = new Map({
+    name:'scene 1',
+    width:4,
+    height:4,
+    layers:new List([
+        new Map({
+            visible: true,
+            id: genID(),
+            tiles: List([
+                new Map({
+                    x:0,
+                    y:0,
+                    sheetId:sheet.get('id'),
+                    tileId:tile1.get('id')
+                })
+            ])
+        })
+    ])
+})
 
 const doc = new Map({
     sheets:new List([sheet]),
-    palettes:new List([palette])
+    palettes:new List([palette]),
+    scenes:new List([scene])
 })
 
 export default class  ImmutableStore {
@@ -222,6 +243,24 @@ export default class  ImmutableStore {
         const oldval = this.doc.getIn(path);
         this.setDoc(this.doc.setIn(path,!oldval))
     }
-
+    getDefaultScene() {
+        return this.doc.get('scenes').get(0)
+    }
+    getSceneWidth(scene) {
+        return scene.get('width')
+    }
+    getSceneHeight(scene) {
+        return scene.get('height')
+    }
+    setTileInScene(sheet,tile,x,y) {
+        const tileRef = new Map({
+            x:x,
+            y:y,
+            sheetId:sheet.get('id'),
+            tileId:tile.get('id')
+        })
+        const path = ['scenes',0,'layers',0,'tiles']
+        this.setDoc(this.doc.updateIn(path,tiles=> tiles.push(tileRef)))
+    }
 }
 
