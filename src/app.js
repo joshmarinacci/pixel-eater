@@ -60,7 +60,7 @@ export default class App extends Component {
             {
                 tool: new PencilTool(this, 3),
                 tooltip:'Fat Pencil',
-                icon:'pencil',
+                icon:'paint-brush',
                 // keyCode: KEYBOARD.P
             },
             {
@@ -78,7 +78,7 @@ export default class App extends Component {
             {
                 tool: new LineTool(this),
                 tooltip:'Line',
-                icon:'line',
+                icon:'line-chart',
                 keyCode: KEYBOARD.L
             },
             {
