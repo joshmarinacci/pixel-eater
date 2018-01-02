@@ -5,7 +5,7 @@ import ColorPicker from './ColorPicker.jsx'
 import ToggleButton from './ToggleButton.jsx'
 import ColorWellButton from './ColorWellButton.jsx'
 import AlertPanel from './AlertPanel.jsx'
-import {DialogContainer, DialogManager, HBox, PopupContainer, Spacer, VBox, VToggleGroup} from 'appy-comps'
+import {DialogContainer, DialogManager, HBox, PopupContainer, Spacer, VBox, VToggleGroup, HToggleGroup} from 'appy-comps'
 import {KEYBOARD} from './u'
 import {EraserTool, EyedropperTool, MoveTool, PencilTool} from './Tools'
 import 'font-awesome/css/font-awesome.css'
@@ -83,6 +83,19 @@ export default class App extends Component {
             },
         ];
 
+        this.sceneTools = [
+            {
+                name:'draw',
+                tooltip:'Draw',
+                icon:'pencil'
+            },
+            {
+                name:'erase',
+                tooltip:'Eraser',
+                icon:'eraser',
+            }
+        ]
+
         this.state = {
             doc: IS.getDoc(),
             drawGrid:true,
@@ -92,6 +105,7 @@ export default class App extends Component {
             selectedTileIndex: 0,
             selectedLayerIndex: 0,
             selectedTool:this.tools[0],
+            selectedSceneTool:this.sceneTools[0],
             scale: 5,
             recentColors:[]
         };
@@ -115,6 +129,7 @@ export default class App extends Component {
             this.setState({selectedTileIndex:0})
         }
         this.selectTool = (item) => this.setState({selectedTool:item});
+        this.selectSceneTool = (tool) => this.setState({selectedSceneTool:tool})
         this.toggleGrid = () => this.setState({drawGrid: !this.state.drawGrid});
         this.toggleSceneGrid = () => this.setState({drawSceneGrid: !this.state.drawSceneGrid})
 
@@ -280,10 +295,12 @@ export default class App extends Component {
             backgroundColor:'#dddddd',
         }}>
             <div style={{overflow:'scroll', flex:1}}>
-                <SceneEditorView store={IS} scene={IS.getDefaultScene()}
+                <SceneEditorView store={IS}
+                                 scene={IS.getDefaultScene()}
                                  tile={this.getSelectedTile()}
                                  sheet={this.getSelectedSheet()}
                                  showGrid={this.state.drawSceneGrid}
+                                 tool={this.state.selectedSceneTool}
                 />
             </div>
             <HBox>
@@ -291,6 +308,11 @@ export default class App extends Component {
                 <TileView store={IS} sprite={this.getSelectedTile()} scale={1} palette={this.getCurrentPalette()}/>
                 <label>width: 4</label>
                 <label>height: 4 </label>
+            <HToggleGroup
+                list={this.sceneTools}
+                selected={this.state.selectedSceneTool}
+                template={ToggleButtonTemplate}
+                onChange={this.selectSceneTool}/>
             </HBox>
         </CollapsingPanel>
     }

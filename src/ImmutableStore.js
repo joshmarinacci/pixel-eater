@@ -255,7 +255,7 @@ export default class  ImmutableStore {
     getSceneHeight(scene) {
         return scene.get('height')
     }
-    setTileInScene(sheet,tile,pt) {
+    setTileInScene(scene,tile,pt) {
         const tileRef = new Map({
             x:pt.x,
             y:pt.y,
@@ -264,6 +264,12 @@ export default class  ImmutableStore {
         })
         const path = ['scenes',0,'layers',0,'tiles']
         this.setDoc(this.doc.updateIn(path,tiles=> tiles.push(tileRef)))
+    }
+    removeTileInScene(scene,pt) {
+        const path = ['scenes',0,'layers',0,'tiles']
+        this.setDoc(this.doc.updateIn(path, tiles =>{
+            return tiles.filter((tile)=>!(tile.get('x') === pt.x && tile.get('y') === pt.y))
+        }));
     }
 }
 
