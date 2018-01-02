@@ -18,6 +18,7 @@ export default class SimpleList extends Component {
                 style.flexWrap = 'wrap'
                 style.justifyContent = 'flex-start'
                 style.alignItems = 'flex-start'
+                style.alignContent = 'flex-start'
             }
             if(orientation === 'vertical') {
                 style.flexDirection = 'column'

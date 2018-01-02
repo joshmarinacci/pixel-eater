@@ -83,10 +83,11 @@ export default class DrawingSurface extends Component {
     }
 
     drawGrid(c, width, height) {
-        c.strokeStyle = 'black';
         let sc = this.props.scale;
         c.save();
-        c.translate(0.5+this.state.xoff,0.5+this.state.yoff);
+        c.lineWidth = 0.5
+        c.strokeStyle = 'black'
+        c.translate(0.50+this.state.xoff,0.50+this.state.yoff);
         c.beginPath();
         let heigh = this.props.store.getTileHeight(this.props.model)
         let wid = this.props.store.getTileWidth(this.props.model)

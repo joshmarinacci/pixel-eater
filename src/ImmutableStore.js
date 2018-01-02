@@ -28,12 +28,10 @@ function makeLayer() {
     })
 }
 function makeTile() {
-    const layer = makeLayer()
-    const tile = new Map({
+    return new Map({
         id:genID(),
-        layers:new List([layer])
+        layers:new List([makeLayer()])
     })
-    return tile
 }
 
 const layer1 = makeLayer()

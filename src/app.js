@@ -41,6 +41,11 @@ const ToggleButtonTemplate = (props) => {
     ><i className={"fa fa-"+props.item.icon}></i></ToggleButton>
 };
 
+const RecentColorRenderer = (props) => {
+    const color = IS.lookupPaletteColor(props.palette, props.item)
+    return <div style={{backgroundColor:color, width:'32px', height:'32px', border:'1px solid black', margin:'1px'}} onClick={()=>props.onClick(props.item)}></div>
+}
+
 export default class App extends Component {
     constructor(props) {
         super(props);
@@ -87,7 +92,8 @@ export default class App extends Component {
             selectedTileIndex: 0,
             selectedLayerIndex: 0,
             selectedTool:this.tools[0],
-            scale: 6
+            scale: 6,
+            recentColors:[]
         };
 
         this.zoomIn  = () => this.setState({scale:this.state.scale+1})
@@ -136,15 +142,14 @@ export default class App extends Component {
     }*/
     drawStamp(pt, stamp, new_color) {
         IS.setStampOnTile(this.getSelectedTile(),this.getSelectedLayer(),pt.x,pt.y,stamp)
-        // this.appendRecentColor(new_color);
+        this.appendRecentColor(new_color);
     }
     appendRecentColor(color) {
-        var n = this.state.recentColors.indexOf(color);
+        const n = this.state.recentColors.indexOf(color)
         if(n < 0) {
-            this.state.recentColors.push(color);
-            this.setState({
-                recentColors:this.state.recentColors
-            })
+            const colors = this.state.recentColors.slice()
+            colors.push(color)
+            this.setState({recentColors:colors})
         }
     }
     canvasKeyDown = (e) => {
@@ -229,21 +234,26 @@ export default class App extends Component {
                     onLayerSelected={this.selectLayer}
                 />
                 <HBox>
-                    <ColorWellButton
-                        lookupColor={(color)=> IS.lookupPaletteColor(this.getCurrentPalette(), color)}
-                        selectedColor={this.state.selectedColor} content={cp}/>
                     <VToggleGroup
                         list={this.tools}
                         selected={this.state.selectedTool}
                         template={ToggleButtonTemplate}
                         onChange={this.selectTool}/>
-
+                    <ColorWellButton
+                        lookupColor={(color)=> IS.lookupPaletteColor(this.getCurrentPalette(), color)}
+                        selectedColor={this.state.selectedColor} content={cp}/>
+                    <SimpleList
+                        orientation="wrap"
+                        list={this.state.recentColors}
+                        palette={this.getCurrentPalette()}
+                        onClick={this.selectColor}
+                        renderer={RecentColorRenderer}
+                    />
                 </HBox>
             </VBox>
         </CollapsingPanel>
     }
     renderDrawingSurface() {
-        const pal = this.getSelectedSheet().get('palette')
         return <div style={{
             border:'1px solid black',
             overflow:'scroll',
@@ -255,7 +265,7 @@ export default class App extends Component {
                 model={this.getSelectedTile()}
                 drawGrid={this.state.drawGrid}
                 scale={Math.pow(2,this.state.scale)}
-                palette={pal}
+                palette={this.getSelectedSheet().get('palette')}
                 store={IS}
                 onKeyDown={this.canvasKeyDown}
                 onZoomIn={this.zoomIn}
