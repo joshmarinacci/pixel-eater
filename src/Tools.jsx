@@ -130,8 +130,7 @@ export class LineTool {
             h:1,
             data:[color]
         }
-        const newDoc = this.app.drawStamp(new P(x,y),stamp, color);
-        console.log("got the new doc",newDoc.hashCode(),newDoc.toJSON())
+        this.app.drawStamp(new P(x,y),stamp, color);
     }
 }
 
