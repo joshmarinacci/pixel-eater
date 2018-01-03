@@ -184,7 +184,11 @@ export default class App extends Component {
         let tool = this.tools.find((tool) => e.keyCode === tool.keyCode);
         if(tool) this.selectTool(tool);
     }
-
+    exportDocument = () => {
+        const json = IS.getDoc().toJSON()
+        var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(json));
+        window.open(dataStr)
+    }
 
 
     render() {
@@ -212,6 +216,8 @@ export default class App extends Component {
 
     renderTopToolbar() {
         return <HBox className='border-bottom' style={{ gridRow:'toolbar', gridColumn:'left/-1'}}>
+            <button onClick={this.exportDocument}>export</button>
+            <button onClick={this.importDocument}>import</button>
             <Spacer/>
             <button onClick={this.undoCommand}>undo</button>
             <button onClick={this.redoCommand}>redo</button>

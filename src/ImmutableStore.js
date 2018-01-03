@@ -150,6 +150,10 @@ const scene = new Map({ //scene
 })
 
 const doc = new Map({
+    meta:new Map({
+        format:'PixelEater:sprite-sheet-collection',
+        version:1
+    }),
     sheets:new List([sheet]),
     palettes:new List([palette]),
     scenes:new List([scene])
