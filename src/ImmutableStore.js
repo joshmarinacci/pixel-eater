@@ -131,18 +131,16 @@ const sheet = new Map({
     palette:palette
 })
 
-const scene = new Map({
+const scene = new Map({ //scene
     name:'scene 1',
     width:4,
     height:4,
     layers:new List([
-        new Map({
+        new Map({ // layer
             visible: true,
             id: genID(),
-            tiles: List([
+            tiles: List([ // tile reference
                 new Map({
-                    x:0,
-                    y:0,
                     sheetId:sheet.get('id'),
                     tileId:tile1.get('id')
                 })
@@ -247,6 +245,8 @@ export default class  ImmutableStore {
         const oldval = this.doc.getIn(path);
         this.setDoc(this.doc.setIn(path,!oldval))
     }
+
+
     getDefaultScene() {
         return this.doc.get('scenes').get(0)
     }
@@ -259,37 +259,35 @@ export default class  ImmutableStore {
     getSceneLayers(scene) {
         return scene.get('layers')
     }
-    getTilesForSceneLayer(scene,layer) {
-        return layer.get('tiles')
-    }
-    getTileForSceneTile(tileRef) {
-        const tileId = tileRef.get('tileId')
-        const sheetId = tileRef.get('sheetId')
-        const doc = this.getDoc()
-        const sheet = doc.get('sheets').find((sheet)=>sheet.get('id')===sheetId)
-        return sheet.get('tiles').find((tile) => tile.get('id') === tileId)
-    }
-    getPaletteForSceneTile(tileRef) {
-        const sheetId = tileRef.get('sheetId')
-        const sheet = doc.get('sheets').find((sheet)=>sheet.get('id')===sheetId)
-        return sheet.get('palette')
+    forEachTileInSceneLayer(scene,layer,cb) {
+        const w = this.getSceneWidth(scene)
+        const h = this.getSceneHeight(scene)
+        for(let x=0; x<w; x++) {
+            for(let y=0; y<h; y++) {
+                const index = x+y*w
+                if(index >= layer.get('tiles').size) continue
+                const tileRef = layer.get('tiles').get(index)
+                if(!tileRef) continue
+                const tileId = tileRef.get('tileId')
+                const sheetId = tileRef.get('sheetId')
+                const doc = this.getDoc()
+                const sheet = doc.get('sheets').find((sheet)=>sheet.get('id')===sheetId)
+                const tile = sheet.get('tiles').find((tile) => tile.get('id') === tileId)
+                const palette = sheet.get('palette')
+                cb(tile,palette,x,y)
+            }
+        }
     }
     setTileInScene(scene,tile,pt) {
-        const tileRef = new Map({
-            x:pt.x,
-            y:pt.y,
-            sheetId:sheet.get('id'),
-            tileId:tile.get('id')
-        })
+        const tileRef = new Map({sheetId:sheet.get('id'),tileId:tile.get('id')})
         const path = ['scenes',0,'layers',0,'tiles']
-        this.setDoc(this.doc.updateIn(path,tiles=> tiles.push(tileRef)))
-        console.log("total tiles = ", this.doc.getIn(path).size)
+        const index = pt.x + pt.y*this.getSceneWidth(scene)
+        this.setDoc(this.doc.updateIn(path, tiles => tiles.set(index,tileRef)))
     }
     removeTileInScene(scene,pt) {
         const path = ['scenes',0,'layers',0,'tiles']
-        this.setDoc(this.doc.updateIn(path, tiles =>{
-            return tiles.filter((tile)=>!(tile.get('x') === pt.x && tile.get('y') === pt.y))
-        }));
+        const index = pt.x + pt.y*this.getSceneWidth(scene)
+        this.setDoc(this.doc.updateIn(path, tiles => tiles.set(index,null)));
     }
 }
 

@@ -28,15 +28,10 @@ export default class SceneEditorView extends CanvasComponent {
         const store = this.props.store;
         store.getSceneLayers(scene).forEach(layer => {
             if(!layer.get('visible')) return
-            const tiles = store.getTilesForSceneLayer(scene,layer)
-            tiles.forEach((tileRef)=>{
-                const tile = store.getTileForSceneTile(tileRef)
-                const palette = store.getPaletteForSceneTile(tileRef)
-                c.save();
-                const tx = tileRef.get('x')*this.scale*16
-                const ty = tileRef.get('y')*this.scale*16
-                c.translate(tx,ty)
-                drawSprite(this.props.store,palette,c,tile,this.scale)
+            store.forEachTileInSceneLayer(scene,layer,(tile,palette,tx,ty) => {
+                c.save()
+                c.translate(tx*this.scale*16,ty*this.scale*16)
+                drawSprite(store,palette,c,tile,this.scale)
                 if(this.props.showGrid) {
                     c.strokeStyle = 'black'
                     c.strokeRect(0, 0, this.scale * 16, this.scale * 16)
