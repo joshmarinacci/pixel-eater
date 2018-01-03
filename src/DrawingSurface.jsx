@@ -148,7 +148,7 @@ export default class DrawingSurface extends Component {
         if(e.ctrlKey) return;
         const modelPoint = this.getModelPoint(e)
         this.setState({down:true, prevPoint:modelPoint});
-        this.props.tool.mouseDown(this,modelPoint);
+        this.props.tool.mouseDown(this, modelPoint);
     }
 
     mouseMove(e) {

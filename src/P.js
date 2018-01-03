@@ -16,4 +16,7 @@ export default class P {
         // noinspection JSSuspiciousNameCombination
         return new P(Math.floor(this.x), Math.floor(this.y))
     }
+    translate(x,y) {
+        return new P(this.x+x,this.y+y)
+    }
 }

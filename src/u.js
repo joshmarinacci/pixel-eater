@@ -23,10 +23,11 @@ export function GET_JSON(path) {
 
 export const KEYBOARD = {
     E: 69,
+    F: 70,
     I: 73,
+    L: 76,
     P: 80,
     V: 86,
-    L: 76,
     ARROW_LEFT: 37,
     ARROW_UP: 38,
     ARROW_RIGHT: 39,

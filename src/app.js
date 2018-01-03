@@ -7,7 +7,7 @@ import ColorWellButton from './ColorWellButton.jsx'
 import AlertPanel from './AlertPanel.jsx'
 import {DialogContainer, DialogManager, HBox, PopupContainer, Spacer, VBox, VToggleGroup, HToggleGroup} from 'appy-comps'
 import {KEYBOARD} from './u'
-import {EraserTool, EyedropperTool, LineTool, MoveTool, PencilTool} from './Tools'
+import {EraserTool, EyedropperTool, FillTool, LineTool, MoveTool, PencilTool} from './Tools'
 import 'font-awesome/css/font-awesome.css'
 import './web/components.css'
 import 'appy-style/src/look.css'
@@ -82,6 +82,12 @@ export default class App extends Component {
                 keyCode: KEYBOARD.L
             },
             {
+                tool: new FillTool(this),
+                tooltip:'Fill',
+                icon:'bitbucket',
+                keyCode: KEYBOARD.F
+            },
+            {
                 tool: new MoveTool(this),
                 tooltip:'Move Layer(s)',
                 icon:'arrows',
@@ -149,6 +155,7 @@ export default class App extends Component {
 
         this.selectColor = (color) => this.setState({selectedColor:color});
         this.getColorAtPixel = (pt) => IS.getPixelOnLayer(this.getSelectedLayer(),pt.x,pt.y)
+        this.setColorAtPixel = (pt, color) => IS.setPixelOnTile(this.getSelectedTile(),this.getSelectedLayer(),pt.x,pt.y,color)
     }
     /*
     exportPNG(scale) {

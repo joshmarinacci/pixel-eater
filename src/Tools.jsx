@@ -85,7 +85,6 @@ export class LineTool {
         }
     }
     mouseDown(surf,pt) {
-        console.log("setting the start point")
         this.start = pt
     }
     mouseDrag(surf,pt) {
@@ -123,6 +122,47 @@ export class LineTool {
             this.setTileXY(x1,y1,value);
         }
         this.start = null
+    }
+    setTileXY(x,y,color) {
+        const stamp = {
+            w:1,
+            h:1,
+            data:[color]
+        }
+        this.app.drawStamp(new P(x,y),stamp, color);
+    }
+}
+
+export class FillTool {
+    constructor(app) {
+        this.app = app
+    }
+    mouseDown(surf,pt) {
+        this.start = new P(pt.x,pt.y)
+    }
+    mouseDrag(){}
+    mouseUp(surf) {
+        let replacement = this.app.state.selectedColor;
+        let target = this.app.getColorAtPixel(this.start)
+        this.floodFill(this.start,target,replacement)
+    }
+    floodFill(pt, target, replacement) {
+        if(this.outsideTile(pt)) return
+        if(target === replacement) return
+        const color = this.app.getColorAtPixel(pt)
+        if(color !== target) return
+        this.app.setColorAtPixel(pt,replacement)
+        this.floodFill(pt.translate( 1,0),target,replacement)
+        this.floodFill(pt.translate(-1,0),target,replacement)
+        this.floodFill(pt.translate(0,-1),target,replacement)
+        this.floodFill(pt.translate(0, 1),target,replacement)
+    }
+    outsideTile(pt) {
+        if(pt.x < 0) return true
+        if(pt.y < 0) return true
+        if(pt.x >= 16) return true
+        if(pt.y >= 16) return true
+        return false
     }
     setTileXY(x,y,color) {
         const stamp = {
