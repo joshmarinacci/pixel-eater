@@ -25,15 +25,13 @@ export default class SceneEditorView extends CanvasComponent {
         const scene = this.props.scene;
         c.fillStyle = 'white'
         c.fillRect(0,0,this.canvas.width,this.canvas.height)
-        scene.get('layers').forEach((layer)=>{
+        const store = this.props.store;
+        store.getSceneLayers(scene).forEach(layer => {
             if(!layer.get('visible')) return
-            layer.get('tiles').forEach((tileRef)=>{
-                const tileId = tileRef.get('tileId')
-                const sheetId = tileRef.get('sheetId')
-                const doc = this.props.store.getDoc()
-                const sheet = doc.get('sheets').find((sheet)=>sheet.get('id')===sheetId)
-                const palette = sheet.get('palette')
-                const tile = sheet.get('tiles').find((tile)=>tile.get('id')===tileId)
+            const tiles = store.getTilesForSceneLayer(scene,layer)
+            tiles.forEach((tileRef)=>{
+                const tile = store.getTileForSceneTile(tileRef)
+                const palette = store.getPaletteForSceneTile(tileRef)
                 c.save();
                 const tx = tileRef.get('x')*this.scale*16
                 const ty = tileRef.get('y')*this.scale*16

@@ -256,6 +256,24 @@ export default class  ImmutableStore {
     getSceneHeight(scene) {
         return scene.get('height')
     }
+    getSceneLayers(scene) {
+        return scene.get('layers')
+    }
+    getTilesForSceneLayer(scene,layer) {
+        return layer.get('tiles')
+    }
+    getTileForSceneTile(tileRef) {
+        const tileId = tileRef.get('tileId')
+        const sheetId = tileRef.get('sheetId')
+        const doc = this.getDoc()
+        const sheet = doc.get('sheets').find((sheet)=>sheet.get('id')===sheetId)
+        return sheet.get('tiles').find((tile) => tile.get('id') === tileId)
+    }
+    getPaletteForSceneTile(tileRef) {
+        const sheetId = tileRef.get('sheetId')
+        const sheet = doc.get('sheets').find((sheet)=>sheet.get('id')===sheetId)
+        return sheet.get('palette')
+    }
     setTileInScene(scene,tile,pt) {
         const tileRef = new Map({
             x:pt.x,
@@ -265,6 +283,7 @@ export default class  ImmutableStore {
         })
         const path = ['scenes',0,'layers',0,'tiles']
         this.setDoc(this.doc.updateIn(path,tiles=> tiles.push(tileRef)))
+        console.log("total tiles = ", this.doc.getIn(path).size)
     }
     removeTileInScene(scene,pt) {
         const path = ['scenes',0,'layers',0,'tiles']
