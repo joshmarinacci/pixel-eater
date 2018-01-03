@@ -186,10 +186,17 @@ export default class App extends Component {
     }
     exportDocument = () => {
         const json = IS.getDoc().toJSON()
-        var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(json));
+        const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(json))
         window.open(dataStr)
     }
-
+    importDocument = (e) => {
+        var selectedFile = document.getElementById('fileimport').files[0];
+        var fr = new FileReader()
+        fr.onload = function(e) {
+            IS.setDocFromObject(JSON.parse(fr.result))
+        }
+        fr.readAsText(selectedFile)
+    }
 
     render() {
         const gridStyle = {
@@ -217,7 +224,7 @@ export default class App extends Component {
     renderTopToolbar() {
         return <HBox className='border-bottom' style={{ gridRow:'toolbar', gridColumn:'left/-1'}}>
             <button onClick={this.exportDocument}>export</button>
-            <button onClick={this.importDocument}>import</button>
+            <input type="file" id="fileimport" onChange={this.importDocument}/> import
             <Spacer/>
             <button onClick={this.undoCommand}>undo</button>
             <button onClick={this.redoCommand}>redo</button>

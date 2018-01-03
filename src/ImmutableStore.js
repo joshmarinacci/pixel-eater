@@ -6,7 +6,7 @@
   * palettes
 
  */
-import {List, Map} from "immutable";
+import {List, Map, fromJS} from "immutable";
 
 function genID() {
     return "id_"+Math.floor(Math.random()*100000)
@@ -178,6 +178,9 @@ export default class  ImmutableStore {
         // console.log("undo buffer length",this.undoStack.length)
         this.listeners.forEach((cb)=>cb?cb(this.doc):null)
     }
+    setDocFromObject(obj) {
+        this.setDoc(fromJS(obj))
+    }
     undoCommand() {
         if(this.undoStack.length < 1) return  //don't undo if only one item in the stack
         this.undoStack.pop()
@@ -190,7 +193,6 @@ export default class  ImmutableStore {
     }
 
     setPixelOnTile(tile,layer,x,y,value) {
-
         const layer_index = tile.get('layers').indexOf(layer)
         const path = this.findTilePath(tile).concat(['layers',layer_index,'pixels',x+y*16])
         this.setDoc(this.doc.setIn(path, value))
@@ -282,7 +284,7 @@ export default class  ImmutableStore {
             }
         }
     }
-    setTileInScene(scene,tile,pt) {
+    setTileInScene(scene,sheet,tile,pt) {
         const tileRef = new Map({sheetId:sheet.get('id'),tileId:tile.get('id')})
         const path = ['scenes',0,'layers',0,'tiles']
         const index = pt.x + pt.y*this.getSceneWidth(scene)
