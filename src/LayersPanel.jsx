@@ -112,13 +112,8 @@ class LayerItem extends Component {
 }
 
 export default class LayersPanel extends Component {
-    addLayer = () => {
-        this.props.store.addLayerToTile(this.props.model)
-    }
-    toggleVisible = (layer) => {
-        const tile = this.props.model
-        this.props.store.toggleLayerVisibility(tile,layer)
-    }
+    addLayer = () => this.props.store.addLayerToTile(this.props.sheet,this.props.model)
+    toggleVisible = (layer) => this.props.store.toggleLayerVisibility(this.props.sheet,this.props.model,layer)
     render() {
         const layers = this.props.store.getLayers(this.props.model)
         return <VBox grow>

@@ -191,9 +191,9 @@ export default class  ImmutableStore {
         const path = this.findTilePath(sheet,tile).concat(['layers',layer_index,'pixels',x+y*16])
         this.setDoc(this.doc.setIn(path, value))
     }
-    setStampOnTile(tile,layer,x,y,stamp) {
+    setStampOnTile(sheet,tile,layer,x,y,stamp) {
         const layer_index = tile.get('layers').indexOf(layer)
-        const path = this.findTilePath(tile).concat(['layers',layer_index,'pixels'])
+        const path = this.findTilePath(sheet,tile).concat(['layers',layer_index,'pixels'])
         this.setDoc(this.doc.updateIn(path,(pixels)=>{
             for(let i=0; i<stamp.w; i++) {
                 for(let j=0; j<stamp.h; j++) {

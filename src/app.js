@@ -137,7 +137,7 @@ export default class App extends Component {
         }
         this.getSelectedSheet = () => IS.getDoc().get('sheets').get(this.state.selectedSheetIndex)
 
-        this.selectTile = (index) => this.setState({selectedTileIndex:index})
+        this.selectTile = (index) => this.setState({selectedTileIndex:index, selectedLayerIndex: 0})
         this.addTileToSheet = () => IS.addTileToSheet(this.getSelectedSheet());
         this.removeTileFromSheet = () => {
             IS.removeTileFromSheet(this.getSelectedSheet(),this.getSelectedTile())
@@ -168,7 +168,7 @@ export default class App extends Component {
         this.setColorAtPixel = (pt, color) => IS.setPixelOnTile(this.getSelectedTile(),this.getSelectedLayer(),pt.x,pt.y,color)
     }
     drawStamp(pt, stamp, new_color) {
-        IS.setStampOnTile(this.getSelectedTile(),this.getSelectedLayer(),pt.x,pt.y,stamp)
+        IS.setStampOnTile(this.getSelectedSheet(),this.getSelectedTile(),this.getSelectedLayer(),pt.x,pt.y,stamp)
         this.appendRecentColor(new_color);
     }
     appendRecentColor(color) {
@@ -305,6 +305,7 @@ export default class App extends Component {
             <VBox>
                 <LayersPanel
                     model={this.getSelectedTile()} store={IS}
+                    sheet={this.getSelectedSheet()}
                     selectedLayer={this.getSelectedLayer()}
                     onLayerSelected={this.selectLayer}
                 />
