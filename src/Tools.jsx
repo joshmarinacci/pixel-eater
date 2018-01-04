@@ -138,18 +138,20 @@ export class FillTool {
     mouseUp(surf) {
         let replacement = this.app.state.selectedColor;
         let target = this.app.getColorAtPixel(this.start)
-        this.floodFill(this.start,target,replacement)
+        this.app.applyPixelChange((setter)=> {
+            this.floodFill(this.start, target, replacement, setter)
+        })
     }
-    floodFill(pt, target, replacement) {
+    floodFill(pt, target, replacement, setter) {
         if(this.outsideTile(pt)) return
         if(target === replacement) return
-        const color = this.app.getColorAtPixel(pt)
+        const color = setter.getColorAtPixel(pt)
         if(color !== target) return
-        this.app.setColorAtPixel(pt,replacement)
-        this.floodFill(pt.translate( 1,0),target,replacement)
-        this.floodFill(pt.translate(-1,0),target,replacement)
-        this.floodFill(pt.translate(0,-1),target,replacement)
-        this.floodFill(pt.translate(0, 1),target,replacement)
+        setter.setColorAtPixel(pt,replacement)
+        this.floodFill(pt.translate( 1,0),target,replacement,setter)
+        this.floodFill(pt.translate(-1,0),target,replacement,setter)
+        this.floodFill(pt.translate(0,-1),target,replacement,setter)
+        this.floodFill(pt.translate(0, 1),target,replacement,setter)
     }
     outsideTile(pt) {
         if(pt.x < 0) return true

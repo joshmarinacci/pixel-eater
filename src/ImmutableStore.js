@@ -197,6 +197,14 @@ export default class  ImmutableStore {
         let pixels = this.doc.getIn(path)
         pixels = pixels.withMutations((pixels)=> {
             const proxy = {
+                getColorAtPixel: function(pt,value) {
+                    const index = pt.x+pt.y*16
+                    return pixels.get(index)
+                },
+                setColorAtPixel: function(pt,value) {
+                    const index = pt.x+pt.y*16
+                    pixels.set(index,value)
+                },
                 drawStamp: function(pt, stamp, value) {
                     let x = pt.x
                     let y = pt.y
