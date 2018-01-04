@@ -15,37 +15,6 @@ function genID() {
 const empty = [];
 for(let i=0; i<16*16; i++) empty[i] = -1;
 let EMPTY = new List(empty)
-
-function makeLayer() {
-    return new Map({
-        visible:true,
-        opacity:1.0,
-        id:genID(),
-        title:'a layer',
-        pixels:EMPTY,
-        width:16,
-        height:16
-    })
-}
-function makeTile() {
-    return new Map({
-        id:genID(),
-        layers:new List([makeLayer()])
-    })
-}
-
-const layer1 = makeLayer()
-const layer2 = makeLayer()
-
-const tile1 = new Map({
-    id:genID(),
-    layers:new List([layer1])
-})
-const tile2 = new Map({
-    id:genID(),
-    layers: new List([layer2])
-})
-
 const PALETTE =  [
     '#7C7C7C',
     '#0000FC',
@@ -116,20 +85,38 @@ const PALETTE =  [
     "#000000",
     "#000000"
 ]
-
-
 const palette = new Map({
     name:'NES',
     id:genID(),
     colors:new List(PALETTE)
 })
 
-const sheet = new Map({
-    name:'Sheet 1',
-    id:genID(),
-    tiles:new List([tile1, tile2]),
-    palette:palette
-})
+function makeLayer() {
+    return new Map({
+        visible:true,
+        opacity:1.0,
+        id:genID(),
+        title:'a layer',
+        pixels:EMPTY,
+        width:16,
+        height:16
+    })
+}
+function makeTile() {
+    return new Map({
+        id:genID(),
+        layers:new List([makeLayer()])
+    })
+}
+function makeSheet() {
+    return new Map({
+        name:'unnamed sheet',
+        id:genID(),
+        tiles: new List([makeTile()]),
+        palette: palette
+    })
+}
+const s1 = makeSheet()
 
 const scene = new Map({ //scene
     name:'scene 1',
@@ -141,8 +128,8 @@ const scene = new Map({ //scene
             id: genID(),
             tiles: List([ // tile reference
                 new Map({
-                    sheetId:sheet.get('id'),
-                    tileId:tile1.get('id')
+                    sheetId:s1.get('id'),
+                    tileId:s1.get('tiles').get(0).get('id')
                 })
             ])
         })
@@ -154,7 +141,7 @@ const doc = new Map({
         format:'PixelEater:sprite-sheet-collection',
         version:1
     }),
-    sheets:new List([sheet]),
+    sheets:new List([s1]),
     palettes:new List([palette]),
     scenes:new List([scene])
 })
@@ -188,13 +175,20 @@ export default class  ImmutableStore {
         this.listeners.forEach((cb)=>cb?cb(this.doc):null)
     }
 
+    addSheetToDoc() {
+        this.setDoc(this.doc.updateIn(['sheets'], sheets => sheets.push(makeSheet())))
+    }
+    removeSheetFromDoc(sheet) {
+        this.setDoc(this.doc.updateIn(['sheets'], sheets => sheets.filter(sh => sh !== sheet)))
+    }
+
     getLayers(tile) {
         return tile.get('layers')
     }
 
-    setPixelOnTile(tile,layer,x,y,value) {
+    setPixelOnTile(sheet,tile,layer,x,y,value) {
         const layer_index = tile.get('layers').indexOf(layer)
-        const path = this.findTilePath(tile).concat(['layers',layer_index,'pixels',x+y*16])
+        const path = this.findTilePath(sheet,tile).concat(['layers',layer_index,'pixels',x+y*16])
         this.setDoc(this.doc.setIn(path, value))
     }
     setStampOnTile(tile,layer,x,y,stamp) {
@@ -229,25 +223,31 @@ export default class  ImmutableStore {
     lookupPaletteColor(palette, val) {
         return palette.get('colors').get(val)
     }
-    addTileToSheet(sheet) {
-        const layer = makeLayer()
-        this.setDoc(this.doc.updateIn(['sheets',0,'tiles'], (tiles)=>tiles.push(makeTile())))
+
+    findSheetPath(sheet) {
+        return ['sheets',this.doc.get('sheets').indexOf(sheet)]
     }
-    removeTileFromSheet(sheet, tile) {
-        this.setDoc(this.doc.updateIn(['sheets',0,'tiles'], (tiles)=>tiles.filter(test=>test!==tile)))
-    }
-    findTilePath(tile) {
-        let path = ['sheets',0,'tiles']
+    findTilePath(sheet,tile) {
+        let path = this.findSheetPath(sheet).concat(['tiles'])
         return path.concat([this.doc.getIn(path).indexOf(tile)])
     }
-    addLayerToTile(tile) {
+
+    addTileToSheet(sheet) {
+        const path = this.findSheetPath(sheet).concat(['tiles'])
+        this.setDoc(this.doc.updateIn(path, (tiles)=>tiles.push(makeTile())))
+    }
+    removeTileFromSheet(sheet, tile) {
+        const path = this.findSheetPath(sheet).concat(['tiles'])
+        this.setDoc(this.doc.updateIn(path, (tiles)=>tiles.filter(test=>test!==tile)))
+    }
+    addLayerToTile(sheet,tile) {
         const layer = makeLayer()
-        const path = this.findTilePath(tile).concat(['layers'])
+        const path = this.findTilePath(sheet,tile).concat(['layers'])
         this.setDoc(this.doc.updateIn(path,(layers)=>layers.push(layer)))
     }
-    toggleLayerVisibility(tile,layer) {
+    toggleLayerVisibility(sheet,tile,layer) {
         const layer_index = tile.get('layers').indexOf(layer)
-        const path = this.findTilePath(tile).concat(['layers',layer_index,'visible'])
+        const path = this.findTilePath(sheet,tile).concat(['layers',layer_index,'visible'])
         const oldval = this.doc.getIn(path);
         this.setDoc(this.doc.setIn(path,!oldval))
     }

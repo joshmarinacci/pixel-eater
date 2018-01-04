@@ -26,7 +26,7 @@ const SheetListItemRenderer = (props) => {
         border:'1px solid black'
     }
     if(props.selected) style.backgroundColor ='#ccddff'
-    return <div style={style}>{props.item.get('name')}</div>
+    return <div style={style} onClick={()=>props.onClick(props.index)}>{props.item.get('name')}</div>
 }
 
 const TileViewItemRenderer = (props) => {
@@ -129,18 +129,27 @@ export default class App extends Component {
         this.undoCommand = () => IS.undoCommand()
         this.redoCommand = () => IS.redoCommand()
 
-        this.getSelectedSheet = () => IS.getDoc().get('sheets').get(0)
-        this.getCurrentPalette = () => this.getSelectedSheet().get('palette')
-        this.selectTile = (index) => this.setState({selectedTileIndex:index})
-        this.getSelectedTile = () => this.getSelectedSheet().get('tiles').get(this.state.selectedTileIndex)
-        this.selectLayer = (layer,index) => this.setState({selectedLayerIndex:index})
-        this.getSelectedLayer = () => this.getSelectedTile().get('layers').get(this.state.selectedLayerIndex)
+        this.selectSheet = (index) => this.setState({selectedSheetIndex:index, selectedTileIndex:0, selectedLayerIndex:0})
+        this.addSheetToDoc = () => IS.addSheetToDoc()
+        this.removeSheetFromDoc = () => {
+            IS.removeSheetFromDoc(this.getSelectedSheet())
+            this.setState({selectedSheetIndex:0})
+        }
+        this.getSelectedSheet = () => IS.getDoc().get('sheets').get(this.state.selectedSheetIndex)
 
+        this.selectTile = (index) => this.setState({selectedTileIndex:index})
         this.addTileToSheet = () => IS.addTileToSheet(this.getSelectedSheet());
         this.removeTileFromSheet = () => {
             IS.removeTileFromSheet(this.getSelectedSheet(),this.getSelectedTile())
             this.setState({selectedTileIndex:0})
         }
+        this.getSelectedTile = () => this.getSelectedSheet().get('tiles').get(this.state.selectedTileIndex)
+
+        this.getSelectedLayer = () => this.getSelectedTile().get('layers').get(this.state.selectedLayerIndex)
+        this.selectLayer = (layer,index) => this.setState({selectedLayerIndex:index})
+
+        this.getCurrentPalette = () => this.getSelectedSheet().get('palette')
+
         this.selectTool = (item) => this.setState({selectedTool:item});
         this.selectSceneTool = (tool) => this.setState({selectedSceneTool:tool})
         this.toggleGrid = () => this.setState({drawGrid: !this.state.drawGrid});
@@ -158,17 +167,6 @@ export default class App extends Component {
         this.getColorAtPixel = (pt) => IS.getPixelOnLayer(this.getSelectedLayer(),pt.x,pt.y)
         this.setColorAtPixel = (pt, color) => IS.setPixelOnTile(this.getSelectedTile(),this.getSelectedLayer(),pt.x,pt.y,color)
     }
-    /*
-    exportPNG(scale) {
-        PopupState.done();
-        this.saveDoc(function() {
-            document.location.href = Config.url("/preview/")
-                + DocStore.getDoc().id
-                + "?download=true"
-                + "&scale="+scale
-                +"&"+Math.floor(Math.random()*100000);
-        });
-    }*/
     drawStamp(pt, stamp, new_color) {
         IS.setStampOnTile(this.getSelectedTile(),this.getSelectedLayer(),pt.x,pt.y,stamp)
         this.appendRecentColor(new_color);
@@ -241,7 +239,7 @@ export default class App extends Component {
             {this.renderTopToolbar()}
             <div className="border-left" style={{ gridColumn:'1/-1', gridRow:'center/statusbar', display:'flex', flexDirection:'row', overflow:'scroll'}}>
                 {this.renderDocSelector()}
-                {this.renderTileSheet(this.state.doc.get('sheets').get(0))}
+                {this.renderTileSheet()}
                 {this.renderDrawingToolsPanel()}
                 {this.renderDrawingSurface()}
                 {this.renderSceneEditor()}
@@ -273,11 +271,18 @@ export default class App extends Component {
                 style={{flex:1}}
                 orientation={'vertical'}
                 renderer={SheetListItemRenderer}
-                selectedItem={IS.getDoc().get('sheets').get(this.state.selectedSheetIndex)}
+                selectedItem={this.getSelectedSheet()}
+                onClick={this.selectSheet}
             />
+            <HBox style={{flex:0}}>
+                <button onClick={this.addSheetToDoc}>+</button>
+                <button onClick={this.removeSheetFromDoc}>-</button>
+            </HBox>
+
         </CollapsingPanel>
     }
-    renderTileSheet(sheet) {
+    renderTileSheet() {
+        const sheet = this.getSelectedSheet()
         return <CollapsingPanel title="tiles" width='200px' style={{border:'1px solid #888', backgroundColor:'#dddddd'}}>
                 <SimpleList
                     style={{flex:1}}
@@ -285,7 +290,7 @@ export default class App extends Component {
                     renderer={TileViewItemRenderer}
                     palette={sheet.get('palette')}
                     onClick={this.selectTile}
-                    selectedItem={sheet.get('tiles').get(this.state.selectedTileIndex)}
+                    selectedItem={this.getSelectedTile()}
                     orientation='wrap'
                 />
                 <HBox style={{flex:0}}>
