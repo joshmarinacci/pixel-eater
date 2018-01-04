@@ -93,6 +93,7 @@ export class LineTool {
     }
     mouseUp(surf) {
         let value = this.app.state.selectedColor;
+        this.app.applyPixelChange((setter)=>{
 
 
         //bresenham's line algorithm
@@ -107,7 +108,7 @@ export class LineTool {
         let err = dx - dy
 
         //first point
-        this.setTileXY(x1,y1, value);
+        setter.drawStamp(new P(x1,y1),{ w:1, h:1, data:[value] }, value);
         //main loop
         while(!((x1 === x2) && (y1 === y2))) {
             const e2 = err << 1
@@ -119,17 +120,10 @@ export class LineTool {
                 err += dx;
                 y1 += sy;
             }
-            this.setTileXY(x1,y1,value);
+            setter.drawStamp(new P(x1,y1),{ w:1, h:1, data:[value] }, value);
         }
         this.start = null
-    }
-    setTileXY(x,y,color) {
-        const stamp = {
-            w:1,
-            h:1,
-            data:[color]
-        }
-        this.app.drawStamp(new P(x,y),stamp, color);
+        })
     }
 }
 

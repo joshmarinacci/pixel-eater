@@ -165,8 +165,9 @@ export default class App extends Component {
 
         this.selectColor = (color) => this.setState({selectedColor:color});
         this.getColorAtPixel = (pt) => IS.getPixelOnLayer(this.getSelectedLayer(),pt.x,pt.y)
-        this.setColorAtPixel = (pt, color) => IS.setPixelOnTile(this.getSelectedTile(),this.getSelectedLayer(),pt.x,pt.y,color)
+        this.setColorAtPixel = (pt, color) => IS.setPixelOnTile(this.getSelectedSheet(),this.getSelectedTile(),this.getSelectedLayer(),pt.x,pt.y,color)
     }
+    applyPixelChange = (cb) => IS.applyPixelChange(this.getSelectedSheet(),this.getSelectedTile(),this.getSelectedLayer(),cb)
     drawStamp(pt, stamp, new_color) {
         IS.setStampOnTile(this.getSelectedSheet(),this.getSelectedTile(),this.getSelectedLayer(),pt.x,pt.y,stamp)
         this.appendRecentColor(new_color);

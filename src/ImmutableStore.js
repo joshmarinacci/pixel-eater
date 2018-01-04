@@ -191,9 +191,35 @@ export default class  ImmutableStore {
         const path = this.findTilePath(sheet,tile).concat(['layers',layer_index,'pixels',x+y*16])
         this.setDoc(this.doc.setIn(path, value))
     }
-    setStampOnTile(sheet,tile,layer,x,y,stamp) {
+    applyPixelChange(sheet,tile,layer,cb) {
         const layer_index = tile.get('layers').indexOf(layer)
         const path = this.findTilePath(sheet,tile).concat(['layers',layer_index,'pixels'])
+        let pixels = this.doc.getIn(path)
+        pixels = pixels.withMutations((pixels)=> {
+            const proxy = {
+                drawStamp: function(pt, stamp, value) {
+                    let x = pt.x
+                    let y = pt.y
+                    for(let i=0; i<stamp.w; i++) {
+                        for(let j=0; j<stamp.h; j++) {
+                            if(x+i >= layer.get('width')) continue;
+                            if(x+i < 0) continue;
+                            if(y+j >= layer.get('height')) continue;
+                            if(y+j < 0) continue;
+                            let ia = i + j*stamp.w;
+                            let ib = x+i + (y+j)*layer.get('width')
+                            const val = stamp.data[ia]
+                            pixels.set(ib,val)
+                        }
+                    }
+                }
+            }
+            cb(proxy)
+        })
+        this.setDoc(this.doc.updateIn(path,(px)=>pixels))
+    }
+    setStampOnTile(sheet,tile,layer,x,y,stamp) {
+        const path = this.findLayerPath(sheet,tile,layer)
         this.setDoc(this.doc.updateIn(path,(pixels)=>{
             for(let i=0; i<stamp.w; i++) {
                 for(let j=0; j<stamp.h; j++) {
@@ -230,6 +256,10 @@ export default class  ImmutableStore {
     findTilePath(sheet,tile) {
         let path = this.findSheetPath(sheet).concat(['tiles'])
         return path.concat([this.doc.getIn(path).indexOf(tile)])
+    }
+    findLayerPath(sheet,tile,layer) {
+        const layer_index = tile.get('layers').indexOf(layer)
+        return this.findTilePath(sheet,tile).concat(['layers',layer_index,'pixels'])
     }
 
     addTileToSheet(sheet) {
