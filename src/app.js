@@ -17,6 +17,7 @@ import SimpleList from './SimpleList'
 import SceneEditorView from './SceneEditorView'
 import CollapsingPanel from './CollapsingPanel'
 import TileView from "./TileView"
+import {drawSprite} from './GraphicsUtils'
 
 const IS = new ImmutableStore()
 
@@ -190,12 +191,21 @@ export default class App extends Component {
         window.open(dataStr)
     }
     importDocument = (e) => {
-        var selectedFile = document.getElementById('fileimport').files[0];
-        var fr = new FileReader()
-        fr.onload = function(e) {
-            IS.setDocFromObject(JSON.parse(fr.result))
-        }
+        const selectedFile = document.getElementById('fileimport').files[0]
+        const fr = new FileReader()
+        fr.onload = function(e) { IS.setDocFromObject(JSON.parse(fr.result)) }
         fr.readAsText(selectedFile)
+    }
+    exportSprite = (scale) => {
+        const canvas = document.createElement('canvas')
+        canvas.width = 16*scale
+        canvas.height = 16*scale
+        const c = canvas.getContext('2d')
+        const tile = this.getSelectedTile()
+        const palette = this.getCurrentPalette()
+        drawSprite(IS,palette,c,tile,scale)
+        const url = canvas.toDataURL('PNG')
+        window.open(url)
     }
 
     render() {
@@ -223,17 +233,15 @@ export default class App extends Component {
 
     renderTopToolbar() {
         return <HBox className='border-bottom' style={{ gridRow:'toolbar', gridColumn:'left/-1'}}>
-            <button onClick={this.exportDocument}>export</button>
-            <input type="file" id="fileimport" onChange={this.importDocument}/> import
+            <label htmlFor="fileimport">load</label>
+            <input type="file" id="fileimport" onChange={this.importDocument}/>
+            <button onClick={this.exportDocument}>save</button>
+            <button onClick={()=>this.exportSheet(1)}>sheet x1</button>
+            <button onClick={()=>this.exportSheet(4)}>sheet x4</button>
+            <button onClick={()=>this.exportSprite(1)}>sprite x1</button>
+            <button onClick={()=>this.exportSprite(4)}>sprite x4</button>
+            <button onClick={()=>this.exportSprite(8)}>sprite x8</button>
             <Spacer/>
-            <button onClick={this.undoCommand}>undo</button>
-            <button onClick={this.redoCommand}>redo</button>
-            <Spacer/>
-            <button onClick={this.zoomIn}>zoom in</button>
-            <button onClick={this.zoomOut}>zoom out</button>
-            <button onClick={this.toggleGrid}>sprite grid</button>
-            <Spacer/>
-            <button onClick={this.toggleSceneGrid}>scene grid</button>
         </HBox>
     }
 
@@ -291,6 +299,13 @@ export default class App extends Component {
                         renderer={RecentColorRenderer}
                     />
                 </HBox>
+                <HBox>
+                    <button onClick={this.zoomIn} className="fa fa-search-plus"/>
+                    <button onClick={this.zoomOut} className="fa fa-search-minus"/>
+                    <button onClick={this.toggleGrid}>grid</button>
+                    <button onClick={this.undoCommand} className="fa fa-undo"/>
+                    <button onClick={this.redoCommand} className="fa fa-repeat"/>
+                </HBox>
             </VBox>
         </CollapsingPanel>
     }
@@ -334,11 +349,12 @@ export default class App extends Component {
                 <TileView store={IS} sprite={this.getSelectedTile()} scale={1} palette={this.getCurrentPalette()}/>
                 <label>width: 4</label>
                 <label>height: 4 </label>
-            <HToggleGroup
-                list={this.sceneTools}
-                selected={this.state.selectedSceneTool}
-                template={ToggleButtonTemplate}
-                onChange={this.selectSceneTool}/>
+                <HToggleGroup
+                    list={this.sceneTools}
+                    selected={this.state.selectedSceneTool}
+                    template={ToggleButtonTemplate}
+                    onChange={this.selectSceneTool}/>
+                <button onClick={this.toggleSceneGrid}>grid</button>
             </HBox>
         </CollapsingPanel>
     }
