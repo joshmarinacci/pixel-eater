@@ -207,6 +207,27 @@ export default class App extends Component {
         const url = canvas.toDataURL('PNG')
         window.open(url)
     }
+    exportSheet = (scale) => {
+        const canvas = document.createElement('canvas')
+        const w = 4
+        const h = 4
+        canvas.width = 16*scale*w
+        canvas.height = 16*scale*h
+        const c = canvas.getContext('2d')
+        const sheet = this.getSelectedSheet()
+        const palette = this.getCurrentPalette()
+        sheet.get('tiles').forEach((tile,i)=>{
+            c.save()
+            const x = (i%w)*16*scale
+            const y = Math.floor(i/w)*16*scale
+            console.log('translating',x,y)
+            c.translate(x,y)
+            drawSprite(IS,palette,c,tile,scale)
+            c.restore()
+        })
+        const url = canvas.toDataURL('PNG')
+        window.open(url)
+    }
 
     render() {
         const gridStyle = {
@@ -248,11 +269,11 @@ export default class App extends Component {
     renderDocSelector() {
         return <CollapsingPanel title="sheets" width='200px' style={{border:'1px solid #888', backgroundColor:'#dddddd'}}>
             <SimpleList
-                list={this.state.doc.get('sheets')}
+                list={IS.getDoc().get('sheets')}
                 style={{flex:1}}
                 orientation={'vertical'}
                 renderer={SheetListItemRenderer}
-                selectedItem={this.state.doc.get('sheets').get(this.state.selectedSheetIndex)}
+                selectedItem={IS.getDoc().get('sheets').get(this.state.selectedSheetIndex)}
             />
         </CollapsingPanel>
     }
