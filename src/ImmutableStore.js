@@ -151,6 +151,7 @@ export default class  ImmutableStore {
         this.doc = doc
         this.listeners = []
         this.undoStack = [this.doc];
+        this.undoIndex = 0
     }
     on(type, cb) {
         this.listeners.push(cb)
@@ -161,17 +162,24 @@ export default class  ImmutableStore {
 
     setDoc(doc) {
         this.doc = doc
+        this.undoIndex++
+        this.undoStack = this.undoStack.slice(0,this.undoIndex)
         this.undoStack.push(doc)
-        // console.log("undo buffer length",this.undoStack.length)
         this.listeners.forEach((cb)=>cb?cb(this.doc):null)
     }
     setDocFromObject(obj) {
         this.setDoc(fromJS(obj))
     }
     undoCommand() {
-        if(this.undoStack.length < 1) return  //don't undo if only one item in the stack
-        this.undoStack.pop()
-        this.doc = this.undoStack[this.undoStack.length-1]
+        if(this.undoIndex < 1) return  //don't undo if only one item in the stack
+        this.undoIndex--
+        this.doc = this.undoStack[this.undoIndex]
+        this.listeners.forEach((cb)=>cb?cb(this.doc):null)
+    }
+    redoCommand() {
+        if(this.undoIndex >= this.undoStack.length -1) return // don't redo if at the last operation
+        this.undoIndex++
+        this.doc = this.undoStack[this.undoIndex]
         this.listeners.forEach((cb)=>cb?cb(this.doc):null)
     }
 
