@@ -219,12 +219,19 @@ export default class App extends Component {
             c.save()
             const x = (i%w)*16*scale
             const y = Math.floor(i/w)*16*scale
-            console.log('translating',x,y)
+            // console.log('translating',x,y)
             c.translate(x,y)
             drawSprite(IS,palette,c,tile,scale)
             c.restore()
         })
         const url = canvas.toDataURL('PNG')
+        // const link = document.createElement('a');
+        // link.download = 'sheet.png';
+        // document.body.appendChild(link)
+        // link.href = url;//'data:,' + fileContents;
+        // console.log(url)
+        // link.click();
+        // document.body.removeChild(link)
         window.open(url)
     }
 

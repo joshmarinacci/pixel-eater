@@ -60,7 +60,7 @@ export default class DrawingSurface extends Component {
         // let height = this.props.store.getTileHeight(this.props.model) * sc
         // let bg = this.props.model.getBackgroundColor();
         let bg = 0;
-        c.fillStyle = 'white';//this.props.model.lookupCanvasColor(bg);
+        c.fillStyle = 'magenta';//this.props.model.lookupCanvasColor(bg);
         c.fillRect(this.state.xoff, this.state.yoff, width, height);
     }
 
