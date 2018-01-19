@@ -120,8 +120,8 @@ const s1 = makeSheet()
 
 const scene = new Map({ //scene
     name:'scene 1',
-    width:4,
-    height:4,
+    width:8,
+    height:8,
     layers:new List([
         new Map({ // layer
             visible: true,

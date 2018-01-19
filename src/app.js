@@ -382,8 +382,8 @@ export default class App extends Component {
             <HBox>
                 <label>selected tile</label>
                 <TileView store={IS} sprite={this.getSelectedTile()} scale={1} palette={this.getCurrentPalette()}/>
-                <label>width: 4</label>
-                <label>height: 4 </label>
+                <label>width: {IS.getSceneWidth(IS.getDefaultScene())}</label>
+                <label>height: {IS.getSceneHeight(IS.getDefaultScene())} </label>
                 <HToggleGroup
                     list={this.sceneTools}
                     selected={this.state.selectedSceneTool}
