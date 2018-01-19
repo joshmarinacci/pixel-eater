@@ -84,19 +84,27 @@ export default class DrawingSurface extends Component {
     drawGrid(c, width, height) {
         let sc = this.props.scale;
         c.save();
-        c.lineWidth = 0.5
+        c.lineWidth = 1
         c.strokeStyle = 'black'
         c.translate(0.50+this.state.xoff,0.50+this.state.yoff);
         c.beginPath();
         let heigh = this.props.store.getTileHeight(this.props.model)
         let wid = this.props.store.getTileWidth(this.props.model)
-        for (let i = 0; i <= heigh; i++) {
+        for (let i = 1; i <= heigh; i++) {
             c.moveTo(0, i * sc);
             c.lineTo(width, i * sc);
+            if(i%8==0) {
+                c.moveTo(0, i * sc + 1)
+                c.lineTo(width, i * sc + 1);
+            }
         }
-        for (let i = 0; i <= wid; i++) {
+        for (let i = 1; i <= wid; i++) {
             c.moveTo(i * sc, 0);
             c.lineTo(i * sc, height);
+            if(i%8==0) {
+                c.moveTo(i * sc + 1,0)
+                c.lineTo(i * sc + 1,height);
+            }
         }
         c.stroke();
         c.restore();
