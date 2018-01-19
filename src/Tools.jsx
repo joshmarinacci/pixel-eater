@@ -55,7 +55,7 @@ export class PencilTool {
     }
     mouseUp(surf){}
     contextMenu(surf,pt) {
-        this.app.selectColor(DocStore.getDoc().model.getData(pt));
+        this.app.selectColor(this.app.getColorAtPixel(pt));
     }
     getOptionsPanel() {
         return <HBox>
