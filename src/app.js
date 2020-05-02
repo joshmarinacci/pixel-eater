@@ -10,19 +10,19 @@ import {LoginButton} from './loginbutton.js'
 import "font-awesome/css/font-awesome.css";
 import DrawingSurface from './DrawingSurface.jsx'
 import {DocServerAPI} from "docserver2-client"
-import Button from './Button.jsx'
-import AlertPanel from './AlertPanel.jsx'
-import OpenDocPanel from './OpenDocPanel.jsx'
-import ResizePanel from './ResizePanel.jsx'
+import Button from './common/Button.jsx'
+import AlertPanel from './common/AlertPanel.jsx'
+import OpenDocPanel from './dialogs/OpenDocPanel.jsx'
+import ResizePanel from './dialogs/ResizePanel.jsx'
 import ColorPicker from './ColorPicker.jsx'
 import ColorWellButton from './ColorWellButton.jsx'
 import PreviewPanel from './PreviewPanel.jsx'
 import LayersPanel from './LayersPanel.jsx'
 import RecentColors from './RecentColors.jsx'
 import BitmapModel from './BitmapModel.js'
-import PopupState from './PopupState.jsx'
+import PopupState from './common/PopupState.jsx'
 import SharePanel from './SharePanel.jsx'
-import NewDocPanel from './NewDocPanel.jsx'
+import NewDocPanel from './dialogs/NewDocPanel.jsx'
 
 
 export default class App extends Component {

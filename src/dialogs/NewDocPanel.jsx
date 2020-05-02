@@ -1,6 +1,6 @@
 import React, {Component} from "react";
 import {Dialog, VBox, HBox} from "appy-comps";
-import DropdownButton from "./Dropdown.jsx";
+import DropdownButton from "../Dropdown.jsx";
 
 
 export default class extends Component {

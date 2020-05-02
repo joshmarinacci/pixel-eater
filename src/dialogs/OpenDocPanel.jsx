@@ -1,6 +1,6 @@
 import React, {Component} from "react";
 import {Dialog, VBox} from "appy-comps";
-import Config from "./Config.js"
+import Config from "../Config.js"
 
 export default class OpenDocPanel extends Component {
     loadDoc(id) {

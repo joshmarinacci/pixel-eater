@@ -1,6 +1,6 @@
 import React from 'react'
 import PopupState from "./PopupState.jsx"
-import PopupButton from "./PopupButton";
+import PopupButton from "./PopupButton.jsx";
 
 export default class PopupContainer extends React.Component {
     constructor(props) {
