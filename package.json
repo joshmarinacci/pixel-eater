@@ -20,11 +20,24 @@
   },
   "homepage": "https://github.com/joshmarinacci/pixel-eater#readme",
   "dependencies": {
-    "appy-comps": "0.*.*",
+    "appy-comps": "0.1.15",
     "appy-style": "0.0.7",
-    "font-awesome": "^4.7.0",
-    "react": "^15.6.1",
-    "react-dom": "^15.6.1",
-    "react-scripts": "^1.0.10"
+    "font-awesome": "4.7.0",
+    "react": "16.8.6",
+    "react-dom": "16.8.6",
+    "react-scripts": "3.0.1",
+    "docserver2-client": "0.0.5"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }

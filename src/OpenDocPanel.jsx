@@ -1,6 +1,6 @@
 import React, {Component} from "react";
 import {Dialog, VBox} from "appy-comps";
-import Config from "./Config"
+import Config from "./Config.js"
 
 export default class OpenDocPanel extends Component {
     loadDoc(id) {
@@ -10,11 +10,12 @@ export default class OpenDocPanel extends Component {
         this.props.onDeleteDoc(id);
     }
     renderDocs(docs) {
+        console.log("docs is",docs)
         return docs.map((doc)=> {
-            return <li key={doc.id}>
-                <button onClick={this.loadDoc.bind(this,doc.id)}>{doc.title}</button>
-                <button onClick={this.deleteDoc.bind(this,doc.id)}>delete</button>
-                <img src={this.generatePreviewURL(doc.id)} alt="screenshot"/>
+            return <li key={doc._id}>
+                <button onClick={this.loadDoc.bind(this,doc._id)}>{doc.title}</button>
+                <button onClick={this.deleteDoc.bind(this,doc._id)}>delete</button>
+                <img src={this.generatePreviewURL(doc._id)} alt="screenshot"/>
             </li>
         });
     }

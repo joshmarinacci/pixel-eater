@@ -1,31 +1,28 @@
 import React, {Component} from "react";
-import DrawingSurface from "./DrawingSurface.jsx"
-import LayersPanel from "./LayersPanel.jsx";
-import DocStore from "./DocStore.js";
-import UserStore from "./UserStore";
-import Config from "./Config"
-import BitmapModel from "./BitmapModel"
-import Button from "./Button.jsx";
-import ColorPicker from "./ColorPicker.jsx";
-import PopupState from "./PopupState.jsx";
-import RecentColors from "./RecentColors.jsx";
-import ToggleButton from "./ToggleButton.jsx"
-import ColorWellButton from "./ColorWellButton.jsx";
-import PreviewPanel from "./PreviewPanel.jsx"
-import ResizePanel from "./ResizePanel.jsx";
-import AlertPanel from "./AlertPanel.jsx";
-import NewDocPanel from "./NewDocPanel";
-import OpenDocPanel from "./OpenDocPanel";
-import SharePanel from "./SharePanel";
-import LoginPanel from "./LoginPanel";
-import RegistrationPanel from "./RegistrationPanel";
 import {VBox, HBox, Spacer, PopupContainer, VToggleGroup, PopupManager, DialogManager, DialogContainer} from "appy-comps";
-import {KEYBOARD} from "./u";
-import { PencilTool, EraserTool, MoveTool, EyedropperTool } from "./Tools";
-import "font-awesome/css/font-awesome.css";
+import DocStore from './DocStore.js'
+import ToggleButton from './ToggleButton.jsx'
+import {KEYBOARD} from './u.js'
+import {EraserTool, EyedropperTool, MoveTool, PencilTool} from './Tools.jsx'
 import "./web/components.css";
 import "appy-style/src/look.css";
-
+import {LoginButton} from './loginbutton.js'
+import "font-awesome/css/font-awesome.css";
+import DrawingSurface from './DrawingSurface.jsx'
+import {DocServerAPI} from "docserver2-client"
+import Button from './Button.jsx'
+import AlertPanel from './AlertPanel.jsx'
+import OpenDocPanel from './OpenDocPanel.jsx'
+import ResizePanel from './ResizePanel.jsx'
+import ColorPicker from './ColorPicker.jsx'
+import ColorWellButton from './ColorWellButton.jsx'
+import PreviewPanel from './PreviewPanel.jsx'
+import LayersPanel from './LayersPanel.jsx'
+import RecentColors from './RecentColors.jsx'
+import BitmapModel from './BitmapModel.js'
+import PopupState from './PopupState.jsx'
+import SharePanel from './SharePanel.jsx'
+import NewDocPanel from './NewDocPanel.jsx'
 
 
 export default class App extends Component {
@@ -33,10 +30,11 @@ export default class App extends Component {
         super(props);
         this.state = {};
         this.state.doc = DocStore.getDoc();
+        this.docserver = new DocServerAPI("https://docs.josh.earth/")
         DocStore.changed(()=>this.setState({doc:DocStore.getDoc()}));
     }
     render() {
-        return <div><DocPanel doc={this.state.doc}/></div>
+        return <div><DocPanel doc={this.state.doc} docserver={this.docserver}/></div>
     }
 }
 
@@ -44,10 +42,10 @@ const ToggleButtonTemplate = (props) => {
     return <ToggleButton onToggle={props.onSelect}
                          selected={props.selected}
                          tooltip={props.item.tooltip}
-    ><i className={"fa fa-"+props.item.icon}></i></ToggleButton>
+    ><i className={"fa fa-"+props.item.icon}/></ToggleButton>
 };
 
-class DocPanel extends React.Component {
+class DocPanel extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -94,24 +92,10 @@ class DocPanel extends React.Component {
         this.state.doclist = [];
         this.state.recentColors = [];
 
-        UserStore.checkLoggedIn()
-            .then((user) => this.setState({user:user}))
-            .catch((e)=>console.log("not logged in"));
         this.model_listener = this.props.doc.model.changed((mod)=> this.setState({model:mod, dirty:true}));
 
 
 
-        this.loginLogout  = () => {
-            if(!this.state.user) {
-                DialogManager.show(<LoginPanel
-                    onCompleted={this.onLoginCompleted}
-                    onCanceled={this.onLoginCanceled}
-                    switchToRegister={this.switchToRegister}
-                />);
-            } else {
-                UserStore.logout(() => this.setState({user:null}));
-            }
-        };
 
         this.toggleGrid = () => this.setState({drawGrid: !this.state.drawGrid});
         this.togglePreview = () => this.setState({ drawPreview: !this.state.drawPreview});
@@ -133,18 +117,19 @@ class DocPanel extends React.Component {
 
         this.listDocs = () => {
             DialogManager.hide();
-            DocStore.loadDocList().then((docs)=>{
-                this.setState({doclist:docs});
+            console.log("listing the docs")
+            this.props.docserver.list("pixelimage").then(items => {
+                console.log("got items",items)
                 DialogManager.show(<OpenDocPanel
-                    docs={docs}
-                    onSelectDoc={this.openDocPerform}
+                    docs={items.results}
                     onCanceled={this.openDocCanceled}
+                    onSelectDoc={this.openDocPerform}
                     onDeleteDoc={this.deleteDoc}
-                />);
-            }).catch((e)=>{
+                />)
+            }).catch(e => {
                 console.log("got an error");
                 this.showError('some error happened');
-            });
+            })
         };
 
         this.openDoc = () => {
@@ -162,37 +147,17 @@ class DocPanel extends React.Component {
         };
         this.openDocCanceled = () => DialogManager.hide();
         this.openDocPerform = (id) => {
+            console.log("we need to load the doc with id",id)
             this.setState({doclist:[], dirty:false});
-            DocStore.loadDoc(id);
+            this.props.docserver.load(id).then(doc => {
+                doc.model = BitmapModel.fromJSON(doc.model);
+                console.log("the doc is",doc)
+                DialogManager.hide()
+                DocStore.setDoc(doc)
+
+            })
         };
 
-
-        this.onLoginCompleted = (user) => {
-            DialogManager.hide();
-            this.setState({user:user});
-        };
-        this.onLoginCanceled = () => DialogManager.hide();
-        this.onRegistrationCompleted = (user)  => {
-            DialogManager.hide();
-            this.setState({user:user});
-        };
-        this.onRegistrationCanceled = () => DialogManager.hide();
-        this.switchToRegister = () => {
-            DialogManager.hide();
-            DialogManager.show(<RegistrationPanel
-                onCompleted={this.onRegistrationCompleted}
-                onCanceled={this.onRegistrationCanceled}
-                switchToRegister={this.switchToLogin}
-            />);
-        };
-        this.switchToLogin = () => {
-            DialogManager.hide();
-            DialogManager.show(<LoginPanel
-                onCompleted={this.onLoginCompleted}
-                onCanceled={this.onLoginCanceled}
-                switchToRegister={this.switchToRegister}
-            />);
-        };
 
         this.newDoc = () => {
             if(this.state.dirty) {
@@ -228,11 +193,12 @@ class DocPanel extends React.Component {
         this.newDocCanceled = () => DialogManager.hide();
 
         this.saveDoc = (cb) => {
-            DocStore.save(DocStore.getDoc(), (res) => {
+            this.props.docserver.save(DocStore.getDoc(), 'pixelimage').then(res => {
+                console.log("got results",res)
                 DocStore.getDoc().id=res.id;
                 if(typeof cb === 'function') cb();
                 this.setState({dirty:false});
-            });
+            })
         };
 
 
@@ -240,9 +206,9 @@ class DocPanel extends React.Component {
         this.openShareCanceled = () => DialogManager.hide();
 
         this.deleteDoc = (id) => {
-            DocStore.deleteDoc(id, (err,status) => console.log("result of delete is",err,status));
-        };
-
+            console.log('deleting', id)
+            this.props.docserver.delete(id, 'pixelimage')
+        }
         this.selectBGColor = (color) => {
             PopupState.done();
             this.props.doc.model.setBackgroundColor(color);
@@ -262,11 +228,11 @@ class DocPanel extends React.Component {
     exportPNG(scale) {
         PopupState.done();
         this.saveDoc(function() {
-            document.location.href = Config.url("/preview/")
-                + DocStore.getDoc().id
-                + "?download=true"
-                + "&scale="+scale
-                +"&"+Math.floor(Math.random()*100000);
+            // document.location.href = Config.url("/preview/")
+            //     + DocStore.getDoc().id
+            //     + "?download=true"
+            //     + "&scale="+scale
+            //     +"&"+Math.floor(Math.random()*100000);
         });
     }
     setPixel(pt,new_color) {
@@ -299,8 +265,8 @@ class DocPanel extends React.Component {
     }
 
     titleEdited() {
-        DocStore.getDoc().title = this.refs.doc_title.value;
-        this.setState({doc:DocStore.getDoc()});
+        this.props.doc.title = this.refs.doc_title.value
+        this.setState({doc:this.props.doc});
     }
     canvasKeyDown(e) {
         let tool = this.tools.find((tool) => e.keyCode === tool.keyCode);
@@ -309,22 +275,21 @@ class DocPanel extends React.Component {
 
     renderSideToolbar() {
         let model = this.props.doc.model;
-        var loggedOut = UserStore.getUser()===null;
         let cp =  <ColorPicker model={model} onSelectColor={this.selectColor}/>;
         return <VBox className="panel left">
-            <ColorWellButton model={model} selectedColor={this.state.selectedColor} content={cp}/>
-            <VToggleGroup list={this.tools} selected={this.state.selected_tool} template={ToggleButtonTemplate} onChange={this.selectTool}/>
-            <Spacer/>
-            <Button onClick={this.execUndo} disabled={!model.isUndoAvailable()} tooltip="Undo"><i className="fa fa-undo"/></Button>
-            <Button onClick={this.execRedo} disabled={!model.isRedoAvailable()} tooltip="Redo"><i className="fa fa-repeat"/></Button>
-            <Button onClick={this.resizeDoc} tooltip="Resize Doc">resize</Button>
-            <ToggleButton onToggle={this.toggleGrid} selected={this.state.drawGrid} tooltip="Show/Hide Grid"><i className="fa fa-th"/></ToggleButton>
-            <ToggleButton onToggle={this.togglePreview} selected={this.state.drawPreview} tooltip="Show/Hide Preview">Preview</ToggleButton>
-            <ToggleButton onToggle={this.toggleLayers} selected={this.state.showLayers} tooltip="Show/Hide Layers">Layers</ToggleButton>
-            <Spacer/>
-            <Button onClick={this.newDoc}    disabled={loggedOut} tooltip="New Image"><i className="fa fa-file-o"/></Button>
-            <Button onClick={this.saveDoc}   disabled={loggedOut} tooltip="Save Image"><i className="fa fa-save"/></Button>
-            <Button onClick={this.openDoc}   disabled={loggedOut} tooltip="Open Image"><i className="fa fa-folder-open"/></Button>
+             <ColorWellButton model={model} selectedColor={this.state.selectedColor} content={cp}/>
+             <VToggleGroup list={this.tools} selected={this.state.selected_tool} template={ToggleButtonTemplate} onChange={this.selectTool}/>
+             <Spacer/>
+             <Button onClick={this.execUndo} disabled={!model.isUndoAvailable()} tooltip="Undo"><i className="fa fa-undo"/></Button>
+             <Button onClick={this.execRedo} disabled={!model.isRedoAvailable()} tooltip="Redo"><i className="fa fa-repeat"/></Button>
+             <Button onClick={this.resizeDoc} tooltip="Resize Doc">resize</Button>
+             <ToggleButton onToggle={this.toggleGrid} selected={this.state.drawGrid} tooltip="Show/Hide Grid"><i className="fa fa-th"/></ToggleButton>
+             <ToggleButton onToggle={this.togglePreview} selected={this.state.drawPreview} tooltip="Show/Hide Preview">Preview</ToggleButton>
+             <ToggleButton onToggle={this.toggleLayers} selected={this.state.showLayers} tooltip="Show/Hide Layers">Layers</ToggleButton>
+             <Spacer/>
+             <Button onClick={this.newDoc}    disabled={!this.props.docserver.isLoggedIn()} tooltip="New Image"><i className="fa fa-file-o"/></Button>
+             <Button onClick={this.saveDoc}   disabled={!this.props.docserver.isLoggedIn()} tooltip="Save Image"><i className="fa fa-save"/></Button>
+             <Button onClick={this.openDoc}   disabled={!this.props.docserver.isLoggedIn()} tooltip="Open Image"><i className="fa fa-folder-open"/></Button>
         </VBox>
     }
     renderTopToolbar() {
@@ -350,8 +315,7 @@ class DocPanel extends React.Component {
     }
     renderBottomToolbar() {
         return <HBox className="panel bottom">
-            <button onClick={this.loginLogout}>{this.state.user?"logout":"login"}</button>
-            <label>{this.state.user?this.state.user.username:'not logged in'}</label>
+            <LoginButton docserver={this.props.docserver}/>
             <Spacer/>
             <label><i>{this.state.dirty?"unsaved changes":""}</i></label>
         </HBox>
@@ -365,7 +329,7 @@ class DocPanel extends React.Component {
         </VBox>
     }
     render() {
-        var model = this.props.doc.model;
+        let model = this.props.doc.model
         return (<HBox fill className="panel">
             {this.renderSideToolbar()}
 			<VBox grow>
