@@ -372,4 +372,38 @@ export default class BitmapModel {
         this.command_index = this.command_index + 1;
     }
 
+
+    drawScaledCanvas(canvas,scale) {
+        let c = canvas.getContext('2d');
+        let w = this.getWidth();
+        c.fillStyle = 'white';
+        c.fillRect(0,0,canvas.width,canvas.height);
+        this.drawScaled(c,0,w*0,w,scale);
+    }
+    drawScaled(c,ox,oy,w,s) {
+        c.save();
+        c.translate(ox,oy);
+        c.fillStyle = this.lookupCanvasColor(this.getBackgroundColor());
+        c.fillRect(0,0,w*s,w*s);
+        c.strokeStyle = 'black';
+        c.strokeRect(0.5,0.5,w*s,w*s);
+        this.getReverseLayers().map((layer) => this.drawLayer(c, layer,s, this));
+        c.restore();
+    }
+    drawLayer(c,layer,sc, model) {
+        if(!layer.visible) return;
+        c.save();
+        c.globalAlpha = layer.opacity;
+        let w = model.getWidth();
+        let h = model.getHeight();
+        for(let y=0; y<h; y++) {
+            for (let x = 0; x < w; x++) {
+                let val = model.getPixelFromLayer(x, y, layer);
+                if(val === -1) continue;
+                c.fillStyle = model.lookupCanvasColor(val);
+                c.fillRect(x * sc, y * sc, sc, sc);
+            }
+        }
+        c.restore();
+    }
 }

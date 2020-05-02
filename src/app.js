@@ -230,24 +230,31 @@ class DocPanel extends Component {
     }
 
     exportPNG(scale) {
-        PopupState.done();
         console.log('exporting at scale',scale)
-        this.saveDoc(function() {
-            // document.location.href = Config.url("/preview/")
-            //     + DocStore.getDoc().id
-            //     + "?download=true"
-            //     + "&scale="+scale
-            //     +"&"+Math.floor(Math.random()*100000);
-        });
+        let doc = DocStore.getDoc()
+        let canvas = document.createElement('canvas')
+        canvas.width = doc.model.getWidth()*scale
+        canvas.height = doc.model.getHeight()*scale
+        doc.model.drawScaledCanvas(canvas,scale)
+        function canvasToPNGBlob(canvas) {
+            return new Promise((res,rej)=>{
+                canvas.toBlob((blob)=>{
+                    res(blob)
+                },'image/png')
+            })
+        }
+        function forceDownloadBlob(title,blob) {
+            console.log("forcing download of",title)
+            const a = document.createElement('a')
+            a.href = URL.createObjectURL(blob)
+            a.download = title
+            document.body.appendChild(a)
+            a.click()
+            document.body.removeChild(a)
+        }
+        canvasToPNGBlob(canvas).then((blob)=> forceDownloadBlob(`${doc.title}@${scale}.png`,blob))
     }
-    setPixel(pt,new_color) {
-        var model = this.props.doc.model;
-        var layer = model.getCurrentLayer();
-        if(!layer) return;
-        if(!model.isLayerVisible(layer)) return;
-        model.setPixel(pt,new_color);
-        this.appendRecentColor(new_color);
-    }
+
     drawStamp(pt, stamp, new_color) {
         var model = this.props.doc.model;
         var layer = model.getCurrentLayer();
