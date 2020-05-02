@@ -24,6 +24,8 @@ import PopupState from './common/PopupState.jsx'
 import SharePanel from './SharePanel.jsx'
 import NewDocPanel from './dialogs/NewDocPanel.jsx'
 import {PALETTES} from './palettes.js'
+import DropdownButton from './Dropdown.jsx'
+import {MenuButton} from './menubutton.js'
 
 
 export default class App extends Component {
@@ -229,6 +231,7 @@ class DocPanel extends Component {
 
     exportPNG(scale) {
         PopupState.done();
+        console.log('exporting at scale',scale)
         this.saveDoc(function() {
             // document.location.href = Config.url("/preview/")
             //     + DocStore.getDoc().id
@@ -296,22 +299,32 @@ class DocPanel extends Component {
     }
     renderTopToolbar() {
         let cp2 = <ColorPicker model={this.props.doc.model} onSelectColor={this.selectBGColor}/>
-        let sharePopup = <div>
-            <li className="disabled">Tweet</li>
-            <li onClick={this.exportPNG.bind(this,1)}>Export as PNG 1x</li>
-            <li onClick={this.exportPNG.bind(this,2)}>Export as PNG 2x</li>
-            <li onClick={this.exportPNG.bind(this,4)}>Export as PNG 4x</li>
-            <li onClick={this.exportPNG.bind(this,8)}>Export as PNG 8x</li>
-            <li className="disabled">Export as JSON</li>
-            <li onClick={this.openShare}>Get Sharing Link</li>
-        </div>;
+        let actions = [
+            {
+                title:'Export as PNG 1x',
+                fun: () => this.exportPNG(1)
+            },
+            {
+                title:'Export as PNG 2x',
+                fun: () => this.exportPNG(2)
+            },
+            {
+                title:'Export as PNG 4x',
+                fun: () => this.exportPNG(4)
+            },
+            {
+                title:'Export as PNG 8x',
+                fun: () => this.exportPNG(8)
+            },
+        ]
+
         return <HBox className="panel top">
             <button onClick={(e)=>PopupManager.show(cp2,e.target)} className="fa fa-gear"/>
             <input type="text" ref="doc_title" value={this.props.doc.title} onChange={this.titleEdited.bind(this)}/>
             <Spacer/>
             <Button onClick={this.zoomIn}><i className="fa fa-plus"/></Button>
             <Button onClick={this.zoomOut}><i className="fa fa-minus"/></Button>
-            <button onClick={(e)=>PopupManager.show(sharePopup, e.target)} className="fa fa-share"/>
+            <MenuButton actions={actions} title={''} className={'fa fa-share'}/>
             <button onClick={this.openShare}>share</button>
         </HBox>
     }
