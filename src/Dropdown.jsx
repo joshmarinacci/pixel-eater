@@ -41,7 +41,8 @@ export default class DropdownButton extends React.Component {
     render() {
         return <div className="dropdown-container">
             <button onClick={this.showDropdown.bind(this)}>
-                Presets&nbsp;<i className="fa fa-caret-down"></i>
+                {this.props.value.toString()}
+                &nbsp;<i className="fa fa-caret-down"></i>
             </button>
             {this.renderList()}
         </div>

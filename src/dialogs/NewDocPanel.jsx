@@ -15,6 +15,7 @@ export default class extends Component {
                     return this.w + " x " + this.h;
                 }
             },
+            selectedPalette: 'nes',
             w:16,
             h:16,
             title:'untitled doc'
@@ -36,6 +37,23 @@ export default class extends Component {
                 }
             }
         ]
+
+        this.palettes = [
+            {
+                id: 'nes',
+                title:'NES 8bit',
+                toString: function() {
+                    return this.title
+                }
+            },
+            {
+                id:'pico8',
+                title: 'Pico 8',
+                toString: function() {
+                    return this.title
+                }
+            }
+        ]
     }
 
     selectPreset(preset) {
@@ -46,11 +64,19 @@ export default class extends Component {
         })
     }
 
+    selectPalette(palette) {
+        console.log("setting the palette to",palette)
+        this.setState({
+            selectedPalette:palette.id,
+        })
+    }
+
     performOkay() {
         this.props.onOkay({
             w:parseInt(this.state.w,10),
             h:parseInt(this.state.h,10),
-            title:this.state.title
+            title:this.state.title,
+            palette:this.state.selectedPalette,
         });
     }
     widthChanged() {
@@ -76,7 +102,7 @@ export default class extends Component {
                 </HBox>
                 <HBox>
                     <label> </label>
-                    <DropdownButton list={this.sizes} onSelect={this.selectPreset.bind(this)}/>
+                    <DropdownButton list={this.sizes} value={this.state.selectedSize} onSelect={this.selectPreset.bind(this)}/>
                 </HBox>
                 <HBox>
                     <label>Width</label>
@@ -85,6 +111,10 @@ export default class extends Component {
                 <HBox>
                     <label>Height</label>
                     <input ref='height' className="digits5" type="number" value={this.state.h} onChange={this.heightChanged.bind(this)}/> <label className="stick-left">px</label>
+                </HBox>
+                <HBox>
+                    <label> </label>
+                    <DropdownButton list={this.palettes} value={this.state.selectedPalette} onSelect={this.selectPalette.bind(this)}/>
                 </HBox>
             </VBox>
             <footer className="children-right">

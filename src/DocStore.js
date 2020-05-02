@@ -1,11 +1,12 @@
 import {GET_JSON, POST_JSON} from "./u";
 import BitmapModel from "./BitmapModel.js";
 import Config from "./Config";
+import {PALETTES} from './palettes.js'
 
 
 export default {
     doc: {
-        model: new BitmapModel(16,16),
+        model: new BitmapModel(16,16, PALETTES.nes),
         title:"new doc",
         id:null
     },
@@ -49,7 +50,7 @@ export default {
     },
     newDoc: function() {
         return {
-            model: new BitmapModel(16,16),
+            model: new BitmapModel(16,16, PALETTES.nes),
             title:"Untitled Artwork",
             id:null
         }

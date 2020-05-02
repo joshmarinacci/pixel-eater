@@ -23,6 +23,7 @@ import BitmapModel from './BitmapModel.js'
 import PopupState from './common/PopupState.jsx'
 import SharePanel from './SharePanel.jsx'
 import NewDocPanel from './dialogs/NewDocPanel.jsx'
+import {PALETTES} from './palettes.js'
 
 
 export default class App extends Component {
@@ -184,8 +185,9 @@ class DocPanel extends Component {
 
         this.newDocPerformed = (settings) => {
             DialogManager.hide();
-            var doc = DocStore.newDoc();
-            doc.model = new BitmapModel(settings.w,settings.h);
+            let doc = DocStore.newDoc()
+            console.log("making a new doc with the settings",settings)
+            doc.model = new BitmapModel(settings.w,settings.h, PALETTES[settings.palette]);
             doc.title = settings.title;
             DocStore.setDoc(doc);
             this.setState({ doc: doc});
