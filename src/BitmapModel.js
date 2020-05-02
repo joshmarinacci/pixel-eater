@@ -385,8 +385,8 @@ export default class BitmapModel {
         c.translate(ox,oy);
         c.fillStyle = this.lookupCanvasColor(this.getBackgroundColor());
         c.fillRect(0,0,w*s,w*s);
-        c.strokeStyle = 'black';
-        c.strokeRect(0.5,0.5,w*s,w*s);
+        // c.strokeStyle = 'black';
+        // c.strokeRect(0.5,0.5,w*s,w*s);
         this.getReverseLayers().map((layer) => this.drawLayer(c, layer,s, this));
         c.restore();
     }

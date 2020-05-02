@@ -79,11 +79,11 @@ export default class DrawingSurface extends Component {
         c.save();
         c.translate(0.5+this.state.xoff,0.5+this.state.yoff);
         c.beginPath();
-        for (let i = 0; i <= this.props.model.getHeight(); i++) {
+        for (let i = 0; i <= this.props.model.getHeight(); i+=8) {
             c.moveTo(0, i * sc);
             c.lineTo(width, i * sc);
         }
-        for (let i = 0; i <= this.props.model.getWidth(); i++) {
+        for (let i = 0; i <= this.props.model.getWidth(); i+=8) {
             c.moveTo(i * sc, 0);
             c.lineTo(i * sc, height);
         }
