@@ -26,7 +26,7 @@
     "react": "16.8.6",
     "react-dom": "16.8.6",
     "react-scripts": "3.0.1",
-    "docserver2-client": "0.0.5"
+    "docserver2-client": "0.0.6"
   },
   "browserslist": {
     "production": [
