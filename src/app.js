@@ -3,7 +3,7 @@ import {VBox, HBox, Spacer, PopupContainer, VToggleGroup, PopupManager, DialogMa
 import DocStore from './DocStore.js'
 import ToggleButton from './ToggleButton.jsx'
 import {KEYBOARD} from './u.js'
-import {EraserTool, EyedropperTool, MoveTool, PencilTool} from './Tools.jsx'
+import {EraserTool, EyedropperTool, LineTool, MoveTool, PencilTool} from './Tools.jsx'
 import "./web/components.css";
 import "appy-style/src/look.css";
 import {LoginButton} from './loginbutton.js'
@@ -75,6 +75,12 @@ class DocPanel extends Component {
                 keyCode: KEYBOARD.E
             },
             {
+                tool: new LineTool(this),
+                tooltip: 'Line',
+                icon: 'line',
+                keyCode: KEYBOARD.L
+            },
+            {
                 tool: new EyedropperTool(this),
                 tooltip:'Eyedropper',
                 icon:'eyedropper',
@@ -134,7 +140,6 @@ class DocPanel extends Component {
                 this.showError('some error happened');
             })
         };
-
         this.openDoc = () => {
             if(this.state.dirty) {
                 DialogManager.show(<AlertPanel
@@ -184,7 +189,6 @@ class DocPanel extends Component {
                 onOkay={this.newDocPerformed}
             />);
         };
-
         this.newDocPerformed = (settings) => {
             DialogManager.hide();
             let doc = DocStore.newDoc()
@@ -204,7 +208,6 @@ class DocPanel extends Component {
                 this.setState({dirty:false});
             })
         };
-
 
         this.openShare = () => DialogManager.show(<SharePanel id={DocStore.getDoc().id}/>);
         this.openShareCanceled = () => DialogManager.hide();

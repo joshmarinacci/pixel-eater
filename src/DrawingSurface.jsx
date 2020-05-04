@@ -1,6 +1,6 @@
 import React, {Component} from "react";
 
-class Point {
+export class Point {
     static makePoint(x,y) {
         return {
             x:x,
@@ -37,6 +37,11 @@ export default class DrawingSurface extends Component {
         this.drawBackground(c);
         this.props.model.getReverseLayers().map((layer) => this.drawLayer(c, layer));
         if(this.props.drawGrid === true) this.drawGrid(c);
+        if(this.props.tool.drawOverlay) {
+            c.save()
+            this.props.tool.drawOverlay(c,this.props.scale)
+            c.restore()
+        }
         if(this.state.hoverEffect && this.state.hoverPoint) {
             c.save();
             c.translate(0.5+this.state.xoff,0.5+this.state.yoff);
@@ -133,6 +138,7 @@ export default class DrawingSurface extends Component {
         if(!modelPoint.equals(this.state.prevPoint)) {
             this.props.tool.mouseDrag(this,modelPoint);
             this.setState({prevPoint:modelPoint});
+            return setTimeout(this.drawCanvas.bind(this),0);
         }
     }
 
@@ -145,6 +151,7 @@ export default class DrawingSurface extends Component {
     mouseUp() {
         this.setState({down:false});
         this.props.tool.mouseUp(this);
+        return setTimeout(this.drawCanvas.bind(this),0);
     }
 
     keyDown(e) {

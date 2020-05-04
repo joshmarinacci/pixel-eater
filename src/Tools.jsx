@@ -3,6 +3,7 @@ import ToggleButton from "./ToggleButton.jsx"
 import {KEYBOARD} from "./u";
 import DocStore from "./DocStore.js";
 import {HBox} from "appy-comps";
+import {Point} from './DrawingSurface.jsx'
 
 export class EyedropperTool {
     constructor(app) {
@@ -158,5 +159,84 @@ export class MoveTool {
             return true;
         }
         return false;
+    }
+}
+
+export class LineTool {
+    constructor(app) {
+        this.app = app;
+        this.prev = Point.makePoint(0,0)
+        this.curr = Point.makePoint(0,0)
+        this.pressed = false
+    }
+    getOptionsPanel() {
+        return <label>none</label>
+    }
+    mouseDown(surf,pt) {
+        this.prev = pt;
+        this.curr = pt;
+        this.pressed = true
+    }
+    mouseDrag(surf,pt) {
+        this.curr = pt
+    }
+    drawOverlay(ctx, scale) {
+        if(!this.pressed) return
+        let col = this.app.state.selectedColor;
+        this.bresenhamLine(this.prev.x,this.prev.y,this.curr.x,this.curr.y,(x,y)=>{
+            ctx.fillStyle = DocStore.getDoc().model.lookupCanvasColor(col)
+            ctx.fillRect(x*scale,y*scale,scale,scale)
+            return false
+        })
+        ctx.strokeStyle = 'red'
+        ctx.beginPath()
+        ctx.moveTo((this.prev.x+0.5)*scale,(this.prev.y+0.5)*scale)
+        ctx.lineTo((this.curr.x+0.5)*scale,(this.curr.y+0.5)*scale)
+        ctx.stroke()
+    }
+    mouseUp() {
+        this.pressed = false
+        let col = this.app.state.selectedColor;
+        this.bresenhamLine(this.prev.x,this.prev.y,this.curr.x,this.curr.y,(x,y)=>{
+            let pt = Point.makePoint(x,y)
+            this.app.drawStamp(pt,this.genStamp(1, col), col );
+            return false
+        })
+        this.curr = Point.makePoint(-1,-1)
+        this.prev = Point.makePoint(-1,-1)
+    }
+    contextMenu(surf,pt) {
+        this.app.selectColor(DocStore.getDoc().model.getData(pt));
+    }
+    genStamp(size,col) {
+        let data = [];
+        for(let i=0; i<size*size; i++) {
+            data[i] = col;
+        }
+        return {w:size, h:size, data:data};
+    }
+
+    bresenhamLine(x0, y0, x1, y1, callback) {
+        callback(x0, y0)
+        var dx = Math.abs(x1 - x0),
+            dy = Math.abs(y1 - y0),
+            sx = x0 < x1 ? 1 : -1,
+            sy = y0 < y1 ? 1 : -1,
+            err = dx - dy;
+
+        while (x0 != x1 || y0 != y1) {
+            var e2 = 2 * err;
+            if (e2 > (dy * -1)) {
+                err -= dy;
+                x0 += sx;
+            }
+            if (e2 < dx) {
+                err += dx;
+                y0 += sy;
+            }
+            if (callback(x0, y0) === true) {
+                return;
+            }
+        }
     }
 }
