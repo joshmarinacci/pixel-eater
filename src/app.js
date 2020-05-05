@@ -159,7 +159,7 @@ class DocPanel extends Component {
             this.setState({doclist:[], dirty:false});
             this.props.docserver.load(id).then(doc => {
                 doc.model = BitmapModel.fromJSON(doc.model);
-                console.log("the doc is",doc)
+                console.log("loaded the doc",doc.id)
                 DialogManager.hide()
                 DocStore.setDoc(doc)
 
@@ -201,9 +201,12 @@ class DocPanel extends Component {
         this.newDocCanceled = () => DialogManager.hide();
 
         this.saveDoc = (cb) => {
+            let doc = DocStore.getDoc()
+            console.log("saving the doc",doc.id)
             this.props.docserver.save(DocStore.getDoc(), 'pixelimage').then(res => {
                 console.log("got results",res)
-                DocStore.getDoc().id=res.id;
+                DocStore.getDoc().id=res.doc._id;
+                console.log("saved the doc with id",DocStore.getDoc().id)
                 if(typeof cb === 'function') cb();
                 this.setState({dirty:false});
             })
