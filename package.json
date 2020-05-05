@@ -20,13 +20,13 @@
   },
   "homepage": "https://apps.josh.earth/pixel-eater/",
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^5.13.0",
     "appy-comps": "0.1.15",
     "appy-style": "0.0.7",
-    "font-awesome": "4.7.0",
+    "docserver2-client": "0.0.7",
     "react": "16.8.6",
     "react-dom": "16.8.6",
-    "react-scripts": "3.0.1",
-    "docserver2-client": "0.0.7"
+    "react-scripts": "3.0.1"
   },
   "browserslist": {
     "production": [

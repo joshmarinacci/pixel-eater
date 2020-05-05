@@ -3,11 +3,11 @@ import {VBox, HBox, Spacer, PopupContainer, VToggleGroup, PopupManager, DialogMa
 import DocStore from './DocStore.js'
 import ToggleButton from './ToggleButton.jsx'
 import {KEYBOARD} from './u.js'
-import {EraserTool, EyedropperTool, LineTool, MoveTool, PencilTool} from './Tools.jsx'
+import {EraserTool, EyedropperTool, FillTool, LineTool, MoveTool, PencilTool} from './Tools.jsx'
 import "./web/components.css";
 import "appy-style/src/look.css";
 import {LoginButton} from './loginbutton.js'
-import "font-awesome/css/font-awesome.css";
+import "@fortawesome/fontawesome-free/css/all.css"
 import DrawingSurface from './DrawingSurface.jsx'
 import {DocServerAPI} from "docserver2-client"
 import Button from './common/Button.jsx'
@@ -65,7 +65,7 @@ class DocPanel extends Component {
             {
                 tool: new PencilTool(this),
                 tooltip:'Pencil',
-                icon:'pencil',
+                icon:'pencil-alt',
                 keyCode: KEYBOARD.P
             },
             {
@@ -77,19 +77,25 @@ class DocPanel extends Component {
             {
                 tool: new LineTool(this),
                 tooltip: 'Line',
-                icon: 'line',
+                icon: 'pen-fancy',
                 keyCode: KEYBOARD.L
             },
             {
                 tool: new EyedropperTool(this),
                 tooltip:'Eyedropper',
-                icon:'eyedropper',
+                icon:'eye-dropper',
                 keyCode: KEYBOARD.I
+            },
+            {
+                tool: new FillTool(this),
+                tooltip: 'Fill',
+                icon:'fill',
+                keyCode: KEYBOARD.F
             },
             {
                 tool: new MoveTool(this),
                 tooltip:'Move Layer(s)',
-                icon:'arrows',
+                icon:'arrows-alt',
                 keyCode: KEYBOARD.V
             },
         ];

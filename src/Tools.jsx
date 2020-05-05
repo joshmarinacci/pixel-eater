@@ -240,3 +240,40 @@ export class LineTool {
         }
     }
 }
+
+export class FillTool {
+    constructor(app) {
+        this.app = app
+    }
+    mouseDown(surf,pt) {
+        let dst_col = this.app.state.selectedColor;
+        let model = DocStore.getDoc().model
+        let layer = model.getCurrentLayer();
+        let src_col = model.getData(pt)
+        this.floodFill(model,pt,src_col,dst_col,layer)
+    }
+
+    floodFill(model, pt, src_col, dst_col,layer) {
+        if(pt.x < 0) return
+        if(pt.y < 0) return
+        if(pt.x >= model.getWidth()) return
+        if(pt.y >= model.getHeight()) return
+        let cur = model.getData(pt)
+        if(cur !== src_col) return
+        model.setData(pt,dst_col,layer)
+        this.floodFill(model,Point.makePoint(pt.x+1,pt.y),src_col,dst_col,layer)
+        this.floodFill(model,Point.makePoint(pt.x,pt.y+1),src_col,dst_col,layer)
+        this.floodFill(model,Point.makePoint(pt.x-1,pt.y),src_col,dst_col,layer)
+        this.floodFill(model,Point.makePoint(pt.x,pt.y-1),src_col,dst_col,layer)
+    }
+
+    getOptionsPanel() {
+        return <label>none</label>
+    }
+    mouseDrag(surf,pt) {
+
+    }
+    mouseUp(surf,pt) {
+
+    }
+}
