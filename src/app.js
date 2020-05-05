@@ -305,13 +305,13 @@ class DocPanel extends Component {
              <VToggleGroup list={this.tools} selected={this.state.selected_tool} template={ToggleButtonTemplate} onChange={this.selectTool}/>
              <Spacer/>
              <Button onClick={this.execUndo} disabled={!model.isUndoAvailable()} tooltip="Undo"><i className="fa fa-undo"/></Button>
-             <Button onClick={this.execRedo} disabled={!model.isRedoAvailable()} tooltip="Redo"><i className="fa fa-repeat"/></Button>
+             <Button onClick={this.execRedo} disabled={!model.isRedoAvailable()} tooltip="Redo"><i className="fa fa-redo"/></Button>
              <Button onClick={this.resizeDoc} tooltip="Resize Doc">resize</Button>
              <ToggleButton onToggle={this.toggleGrid} selected={this.state.drawGrid} tooltip="Show/Hide Grid"><i className="fa fa-th"/></ToggleButton>
              <ToggleButton onToggle={this.togglePreview} selected={this.state.drawPreview} tooltip="Show/Hide Preview">Preview</ToggleButton>
              <ToggleButton onToggle={this.toggleLayers} selected={this.state.showLayers} tooltip="Show/Hide Layers">Layers</ToggleButton>
              <Spacer/>
-             <Button onClick={this.newDoc}    disabled={!this.props.docserver.isLoggedIn()} tooltip="New Image"><i className="fa fa-file-o"/></Button>
+             <Button onClick={this.newDoc}    disabled={!this.props.docserver.isLoggedIn()} tooltip="New Image"><i className="fa fa-file"/></Button>
              <Button onClick={this.saveDoc}   disabled={!this.props.docserver.isLoggedIn()} tooltip="Save Image"><i className="fa fa-save"/></Button>
              <Button onClick={this.openDoc}   disabled={!this.props.docserver.isLoggedIn()} tooltip="Open Image"><i className="fa fa-folder-open"/></Button>
         </VBox>
