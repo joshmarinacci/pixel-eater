@@ -24,11 +24,12 @@
 import {Point} from './DrawingSurface.jsx'
 
 class SelectionBounds {
-    constructor(x,y,w,h) {
+    constructor(x,y,w,h, model) {
         this.x = x
         this.y = y
         this.w = w
         this.h = h
+        this.model = model
     }
     setFrame(p1, p2) {
         this.x = p1.x
@@ -36,12 +37,34 @@ class SelectionBounds {
         this.w = p2.x-p1.x
         this.h = p2.y-p1.y
     }
+    shift(offset) {
+        this.x += offset.x
+        this.y += offset.y
+        this.clip(this.model.pw, this.model.ph)
+    }
     inside(pt) {
         if(pt.x < this.x) return false
         if(pt.y < this.y) return false
         if(pt.x >= this.x + this.w) return false
         if(pt.y >= this.y + this.h) return false
         return true
+    }
+
+    clip(mw,mh) {
+        mw -= this.x
+        mh -= this.y
+        if(this.w > mw) this.w = mw
+        if(this.h > mh) this.h = mh
+        if(this.x < 0) {
+            this.w = this.w + this.x
+            this.x = 0
+        }
+        if(this.y < 0) {
+            this.h = this.h + this.y
+            this.y = 0
+        }
+        if(this.w < 1) this.w = 1
+        if(this.h < 1) this.h = 1
     }
 }
 export default class BitmapModel {
@@ -57,7 +80,7 @@ export default class BitmapModel {
         this.palette = palette
         this.command_buffer = [];
         this.command_index = 0;
-        this.selection = new SelectionBounds(0,0,pw,ph);
+        this.selection = new SelectionBounds(0,0,pw,ph, this);
     }
 
     // encoding
@@ -93,6 +116,10 @@ export default class BitmapModel {
     resetSelection() {
         this.selection.setFrame(Point.makePoint(0,0), Point.makePoint(this.pw,this.ph))
         this.fireUpdate();
+    }
+    shiftSelection(offset) {
+        this.selection.shift(offset)
+        this.fireUpdate()
     }
 
     // data access

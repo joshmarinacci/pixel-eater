@@ -296,5 +296,25 @@ export class SelectionTool {
     mouseUp() {
 
     }
+    keyDown(e) {
+        let model = DocStore.getDoc().model
+        if(e.keyCode === KEYBOARD.ARROW_RIGHT) {
+            model.shiftSelection(Point.makePoint(1,0))
+            return true;
+        }
+        if(e.keyCode === KEYBOARD.ARROW_LEFT) {
+            model.shiftSelection(Point.makePoint(-1,0))
+            return true;
+        }
+        if(e.keyCode === KEYBOARD.ARROW_UP) {
+            model.shiftSelection(Point.makePoint(0,-1))
+            return true;
+        }
+        if(e.keyCode === KEYBOARD.ARROW_DOWN) {
+            model.shiftSelection(Point.makePoint(0,1))
+            return true;
+        }
+        return false;
+    }
 
 }
