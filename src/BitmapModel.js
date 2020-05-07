@@ -21,7 +21,29 @@
  upgrade older versions of the format automatically.
 
  */
+import {Point} from './DrawingSurface.jsx'
 
+class SelectionBounds {
+    constructor(x,y,w,h) {
+        this.x = x
+        this.y = y
+        this.w = w
+        this.h = h
+    }
+    setFrame(p1, p2) {
+        this.x = p1.x
+        this.y = p1.y
+        this.w = p2.x-p1.x
+        this.h = p2.y-p1.y
+    }
+    inside(pt) {
+        if(pt.x < this.x) return false
+        if(pt.y < this.y) return false
+        if(pt.x >= this.x + this.w) return false
+        if(pt.y >= this.y + this.h) return false
+        return true
+    }
+}
 export default class BitmapModel {
 
     constructor(pw, ph, palette) {
@@ -35,6 +57,7 @@ export default class BitmapModel {
         this.palette = palette
         this.command_buffer = [];
         this.command_index = 0;
+        this.selection = new SelectionBounds(0,0,pw,ph);
     }
 
     // encoding
@@ -64,6 +87,12 @@ export default class BitmapModel {
         };
         model.layers = [layer];
         return model;
+    }
+
+    //selection
+    resetSelection() {
+        this.selection.setFrame(Point.makePoint(0,0), Point.makePoint(this.pw,this.ph))
+        this.fireUpdate();
     }
 
     // data access
@@ -127,14 +156,16 @@ export default class BitmapModel {
         }
     }
     stampOnLayer(pt,stamp,layer) {
-        for(var i=0; i<stamp.w; i++) {
-            for(var j=0; j<stamp.h; j++) {
+        for(let i=0; i<stamp.w; i++) {
+            for(let j=0; j<stamp.h; j++) {
+                let pt2 = Point.makePoint(pt.x+i, pt.y+j)
+                if(!this.selection.inside(pt2)) continue
                 if(pt.x+i >= this.pw) continue;
                 if(pt.x+i < 0) continue;
                 if(pt.y+j >= this.ph) continue;
                 if(pt.y+j < 0) continue;
-                var ia = i + j*stamp.w;
-                var ib = (pt.x+i) + (pt.y+j)*this.pw;
+                let ia = i + j * stamp.w
+                let ib = (pt.x + i) + (pt.y + j) * this.pw
                 layer.data[ib] = stamp.data[ia];
             }
         }

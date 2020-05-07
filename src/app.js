@@ -3,7 +3,7 @@ import {VBox, HBox, Spacer, PopupContainer, VToggleGroup, PopupManager, DialogMa
 import DocStore from './DocStore.js'
 import ToggleButton from './ToggleButton.jsx'
 import {KEYBOARD} from './u.js'
-import {EraserTool, EyedropperTool, FillTool, LineTool, MoveTool, PencilTool} from './Tools.jsx'
+import {EraserTool, EyedropperTool, FillTool, LineTool, MoveTool, PencilTool, SelectionTool} from './Tools.jsx'
 import "./web/components.css";
 import "appy-style/src/look.css";
 import {LoginButton} from './loginbutton.js'
@@ -98,6 +98,12 @@ class DocPanel extends Component {
                 icon:'arrows-alt',
                 keyCode: KEYBOARD.V
             },
+            {
+                tool: new SelectionTool(this),
+                tooltip: 'Selection',
+                icon:'border-none',
+                keyCode: KEYBOARD.S
+            }
         ];
 
         this.state.selected_tool = this.tools[0];
@@ -295,6 +301,9 @@ class DocPanel extends Component {
     canvasKeyDown(e) {
         let tool = this.tools.find((tool) => e.keyCode === tool.keyCode);
         if(tool) this.selectTool(tool);
+        if(e.keyCode === KEYBOARD.D) {
+            this.props.doc.model.resetSelection()
+        }
     }
 
     renderSideToolbar() {

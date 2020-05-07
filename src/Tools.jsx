@@ -258,6 +258,7 @@ export class FillTool {
         if(pt.y < 0) return
         if(pt.x >= model.getWidth()) return
         if(pt.y >= model.getHeight()) return
+        if(!model.selection.inside(pt)) return
         let cur = model.getData(pt)
         if(cur !== src_col) return
         model.setData(pt,dst_col,layer)
@@ -276,4 +277,24 @@ export class FillTool {
     mouseUp(surf,pt) {
 
     }
+}
+
+export class SelectionTool {
+    constructor(app) {
+        this.app = app
+    }
+    getOptionsPanel() {
+        return <label>none</label>
+    }
+    mouseDown(surf,pt) {
+        this.start = pt
+    }
+    mouseDrag(surf,pt) {
+        let model = DocStore.getDoc().model
+        model.selection.setFrame(this.start,pt)
+    }
+    mouseUp() {
+
+    }
+
 }

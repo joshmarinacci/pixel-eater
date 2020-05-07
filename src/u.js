@@ -28,6 +28,8 @@ export const KEYBOARD = {
     V: 86,
     L: 76,
     F: 70,
+    S: 83,
+    D:68,
     ARROW_LEFT: 37,
     ARROW_UP: 38,
     ARROW_RIGHT: 39,

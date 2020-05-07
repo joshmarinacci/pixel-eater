@@ -37,6 +37,7 @@ export default class DrawingSurface extends Component {
         this.drawBackground(c);
         this.props.model.getReverseLayers().map((layer) => this.drawLayer(c, layer));
         if(this.props.drawGrid === true) this.drawGrid(c);
+        this.drawSelection(c,this.props.model.selection, this.props.scale)
         if(this.props.tool.drawOverlay) {
             c.save()
             this.props.tool.drawOverlay(c,this.props.scale)
@@ -183,5 +184,16 @@ export default class DrawingSurface extends Component {
                     onKeyDown={this.keyDown.bind(this)}
             />
         </div>
+    }
+
+    drawSelection(ctx, selection, scale) {
+        ctx.save()
+        ctx.strokeStyle = 'yellow'
+        ctx.lineWidth = 2.0
+        ctx.strokeRect(selection.x*scale-1,
+            selection.y*scale-1,
+            selection.w*scale+3,
+            selection.h*scale+3)
+        ctx.restore()
     }
 }
