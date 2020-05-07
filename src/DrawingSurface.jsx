@@ -8,6 +8,12 @@ export class Point {
             equals: function(pt) {
                 if(!pt) return false;
                 return pt.x === this.x && pt.y === this.y;
+            },
+            add: function(pt) {
+                return Point.makePoint(this.x + pt.x, this.y + pt.y)
+            },
+            sub: function(pt) {
+                return Point.makePoint(this.x - pt.x, this.y - pt.y)
             }
         }
     }

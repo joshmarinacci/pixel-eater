@@ -49,6 +49,13 @@ class SelectionBounds {
         if(pt.y >= this.y + this.h) return false
         return true
     }
+    isDefault() {
+        if(this.x !== 0) return false
+        if(this.y !== 0) return false
+        if(this.w !== this.model.pw) return false
+        if(this.h !== this.model.ph) return false
+        return true
+    }
 
     clip(mw,mh) {
         mw -= this.x
@@ -116,6 +123,11 @@ export default class BitmapModel {
     resetSelection() {
         this.selection.setFrame(Point.makePoint(0,0), Point.makePoint(this.pw,this.ph))
         this.fireUpdate();
+    }
+    positionSelection(pt) {
+        this.selection.x = pt.x
+        this.selection.y = pt.y
+        this.fireUpdate()
     }
     shiftSelection(offset) {
         this.selection.shift(offset)

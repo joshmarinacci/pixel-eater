@@ -282,19 +282,33 @@ export class FillTool {
 export class SelectionTool {
     constructor(app) {
         this.app = app
+        this.inside = false
     }
     getOptionsPanel() {
         return <label>none</label>
     }
     mouseDown(surf,pt) {
         this.start = pt
+        let model = DocStore.getDoc().model
+        if(model.selection.inside(pt) && !model.selection.isDefault()) {
+            console.log("starting inside")
+            this.inside = true
+            this.start_off = Point.makePoint(model.selection.x, model.selection.y)
+        }
     }
     mouseDrag(surf,pt) {
         let model = DocStore.getDoc().model
-        model.selection.setFrame(this.start,pt)
+        if(this.inside) {
+            let diff = pt.sub(this.start)
+            diff = diff.add(this.start_off)
+            console.log("diff is",diff)
+            model.positionSelection(diff)
+        } else {
+            model.selection.setFrame(this.start, pt)
+        }
     }
     mouseUp() {
-
+        this.inside = false
     }
     keyDown(e) {
         let model = DocStore.getDoc().model
