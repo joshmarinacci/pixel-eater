@@ -123,6 +123,21 @@ export class MoveTool {
         this.prev = pt;
     }
     shift(diff){
+        let model = this.app.getModel()
+        if(!model.selection.isDefault()) {
+            let layer = model.getCurrentLayer()
+            let pos = Point.makePoint(model.selection.x, model.selection.y)
+            let bounds = {w: model.selection.w, h: model.selection.h}
+            let stamp = model.stampFromLayer(pos,bounds,layer);
+
+            pos.x += diff.x
+            pos.y += diff.y
+            model.selection.shift(diff)
+            model.stampOnLayer(pos,stamp,layer)
+            model.fireUpdate();
+            return
+        }
+
         if(this.app.state.shiftLayerOnly) {
             this.app.getModel().shiftSelectedLayer(diff);
         } else {
@@ -161,6 +176,16 @@ export class MoveTool {
         return false;
     }
 }
+
+/*
+
+select move tool
+if not default, then
+on arrow key, shift the selection instead of the whole thing. and no wrapping
+on drag, move the selection and the contents of the selection.
+copy into a hovering slice, draw the hover, then paste it back down
+
+ */
 
 export class LineTool {
     constructor(app) {
