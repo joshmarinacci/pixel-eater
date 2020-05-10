@@ -14,6 +14,6 @@ export default class RecentColors extends React.Component {
                 key={i}
                 onClick={this.selectedColor.bind(this,color)}></div>
         });
-        return <div className="hbox">{boxes}</div>
+        return <div className="hbox" id={"recent-colors"}>{boxes}</div>
     }
 }

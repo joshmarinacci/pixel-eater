@@ -178,7 +178,7 @@ export default class DrawingSurface extends Component {
     }
 
     render() {
-        return <div className="grow scroll">
+        return <div className="grow scroll" id={"drawing-surface"}>
             <canvas ref="canvas"
                     tabIndex="1"
                     width={this.props.model.getWidth()*this.props.scale+1}

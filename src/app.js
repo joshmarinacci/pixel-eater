@@ -6,6 +6,7 @@ import {KEYBOARD} from './u.js'
 import {EraserTool, EyedropperTool, FillTool, LineTool, MoveTool, PencilTool, SelectionTool} from './Tools.jsx'
 import "./web/components.css";
 import "appy-style/src/look.css";
+import "./app.css";
 import {LoginButton} from './loginbutton.js'
 import "@fortawesome/fontawesome-free/css/all.css"
 import DrawingSurface from './DrawingSurface.jsx'
@@ -24,8 +25,8 @@ import PopupState from './common/PopupState.jsx'
 import SharePanel from './SharePanel.jsx'
 import NewDocPanel from './dialogs/NewDocPanel.jsx'
 import {PALETTES} from './palettes.js'
-import DropdownButton from './Dropdown.jsx'
 import {MenuButton} from './menubutton.js'
+import {MainLayout} from './MainLayout.js'
 
 
 export default class App extends Component {
@@ -37,7 +38,7 @@ export default class App extends Component {
         DocStore.changed(()=>this.setState({doc:DocStore.getDoc()}));
     }
     render() {
-        return <div><DocPanel doc={this.state.doc} docserver={this.docserver}/></div>
+        return <DocPanel doc={this.state.doc} docserver={this.docserver}/>
     }
 }
 
@@ -53,7 +54,7 @@ class DocPanel extends Component {
         super(props);
         this.state = {
             drawGrid:true,
-            drawPreview:false,
+            drawPreview:true,
             showLayers:true,
             selectedColor:1,
             scale: 16,
@@ -309,7 +310,7 @@ class DocPanel extends Component {
     renderSideToolbar() {
         let model = this.props.doc.model;
         let cp =  <ColorPicker model={model} onSelectColor={this.selectColor}/>;
-        return <VBox className="panel left">
+        return <VBox className="panel left" id={"side-toolbar"}>
              <ColorWellButton model={model} selectedColor={this.state.selectedColor} content={cp}/>
              <VToggleGroup list={this.tools} selected={this.state.selected_tool} template={ToggleButtonTemplate} onChange={this.selectTool}/>
              <Spacer/>
@@ -346,7 +347,7 @@ class DocPanel extends Component {
             },
         ]
 
-        return <HBox className="panel top">
+        return <HBox className="panel top" id={"top-toolbar"}>
             <button onClick={(e)=>PopupManager.show(cp2,e.target)} className="fa fa-gear"/>
             <input type="text" ref="doc_title" value={this.props.doc.title} onChange={this.titleEdited.bind(this)}/>
             <Spacer/>
@@ -357,42 +358,43 @@ class DocPanel extends Component {
         </HBox>
     }
     renderBottomToolbar() {
-        return <HBox className="panel bottom">
+        return <HBox className="panel bottom" id="bottom-toolbar">
             <LoginButton docserver={this.props.docserver}/>
             <Spacer/>
             <label><i>{this.state.dirty?"unsaved changes":""}</i></label>
         </HBox>
     }
     renderPreviewPanel() {
-        return this.state.drawPreview?<VBox className="panel right"><PreviewPanel model={this.props.doc.model}/></VBox>:"";
+        return this.state.drawPreview?<VBox className="panel right" id={"preview-panel"}><PreviewPanel model={this.props.doc.model}/></VBox>:"";
     }
     renderLayersPanel() {
-        return <VBox className="panel right">
+        return <VBox className="panel right" id={"layers-panel-wrapper"}>
             {this.state.showLayers?<LayersPanel model={this.props.doc.model}/>:""}
         </VBox>
     }
+    renderOptionsToolbar() {
+        return <HBox className="panel top" id={"options-toolbar"}>
+            <label><b>options</b></label>
+            {this.state.selected_tool.tool.getOptionsPanel()}
+        </HBox>
+    }
     render() {
         let model = this.props.doc.model
-        return (<HBox fill className="panel">
+        return (<MainLayout>
             {this.renderSideToolbar()}
-			<VBox grow>
-                {this.renderTopToolbar()}
-				<HBox className="panel top">
-					<label><b>options</b></label>
-                    {this.state.selected_tool.tool.getOptionsPanel()}
-				</HBox>
-				<DrawingSurface
-					tabIndex="1"
-					tool={this.state.selected_tool.tool} model={model} drawGrid={this.state.drawGrid} scale={this.state.scale}
-					onKeyDown={this.canvasKeyDown.bind(this)}
-				/>
-				<RecentColors colors={this.state.recentColors} model={model} onSelectColor={this.selectColor}/>
-                {this.renderBottomToolbar()}
-			</VBox>
+            {this.renderTopToolbar()}
+            {this.renderOptionsToolbar() }
+            <DrawingSurface
+                tabIndex="1"
+                tool={this.state.selected_tool.tool} model={model} drawGrid={this.state.drawGrid} scale={this.state.scale}
+                onKeyDown={this.canvasKeyDown.bind(this)}
+            />
+            <RecentColors colors={this.state.recentColors} model={model} onSelectColor={this.selectColor}/>
+            {this.renderBottomToolbar()}
             {this.renderPreviewPanel()}
             {this.renderLayersPanel()}
             <DialogContainer/>
             <PopupContainer/>
-        </HBox>)
+        </MainLayout>)
     }
 }
