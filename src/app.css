@@ -16,7 +16,11 @@ html, body, #root {
     grid-row: span 4;
 }
 #top-toolbar {
-    grid-column: span 3;
+    grid-column-start: 1;
+    grid-column: span 1;
+    box-sizing: border-box;
+    border: 0px solid black;
+    border-bottom-width: 1px;
 }
 #options-toolbar {
     grid-column: 2;
@@ -40,13 +44,26 @@ html, body, #root {
 }
 
 #preview-panel {
-    border: 0px solid green;
-    grid-row: 2/4;
-    grid-column: 3;
+    border: 0px solid black;
+    grid-row: 1/4;
+    grid-column: preview;
+    border-left-width: 1px;
 }
 #layers-panel-wrapper {
-    border: 0px solid green;
-    grid-row: 2/4;
-    grid-column: 4;
+    border: 0px solid black;
+    grid-row: 1/4;
+    grid-column-start: layers;
     overflow: hidden;
+    border-left-width: 1px;
+}
+
+
+header {
+    box-sizing: border-box;
+    padding:0.75em;
+    height: 2.5em;
+    background-color: #eee;
+    color: #333;
+    font-weight: bold;
+    text-transform: uppercase;
 }

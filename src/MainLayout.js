@@ -1,10 +1,10 @@
 import React, {Component} from "react";
 
-export const MainLayout = ({children})=>{
+export const MainLayout = ({showLayers, showPreview, children})=>{
     let style = {
         display:'grid',
-        gridTemplateColumns: '40px 1fr 250px 250px',
-        gridTemplateRows: '3em 3em 1fr 3em',
+        gridTemplateColumns: `40px 1fr ${showPreview?'[preview] 250px ':''} ${showLayers?'[layers] 250px ':''}`,
+        gridTemplateRows: '2.5em 3em 1fr 0em',
     }
     return <div id="main-layout" style={style}>{children}</div>
 }

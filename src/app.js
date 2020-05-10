@@ -321,9 +321,6 @@ class DocPanel extends Component {
              <ToggleButton onToggle={this.togglePreview} selected={this.state.drawPreview} tooltip="Show/Hide Preview">Preview</ToggleButton>
              <ToggleButton onToggle={this.toggleLayers} selected={this.state.showLayers} tooltip="Show/Hide Layers">Layers</ToggleButton>
              <Spacer/>
-             <Button onClick={this.newDoc}    disabled={!this.props.docserver.isLoggedIn()} tooltip="New Image"><i className="fa fa-file"/></Button>
-             <Button onClick={this.saveDoc}   disabled={!this.props.docserver.isLoggedIn()} tooltip="Save Image"><i className="fa fa-save"/></Button>
-             <Button onClick={this.openDoc}   disabled={!this.props.docserver.isLoggedIn()} tooltip="Open Image"><i className="fa fa-folder-open"/></Button>
         </VBox>
     }
     renderTopToolbar() {
@@ -349,38 +346,43 @@ class DocPanel extends Component {
 
         return <HBox className="panel top" id={"top-toolbar"}>
             <button onClick={(e)=>PopupManager.show(cp2,e.target)} className="fa fa-gear"/>
+            <Spacer/>
             <input type="text" ref="doc_title" value={this.props.doc.title} onChange={this.titleEdited.bind(this)}/>
+            <Button onClick={this.newDoc}    disabled={!this.props.docserver.isLoggedIn()} tooltip="New Image"><i className="fa fa-file"/></Button>
+            <Button onClick={this.saveDoc}   disabled={!this.props.docserver.isLoggedIn()} tooltip="Save Image"><i className="fa fa-save"/></Button>
+            <Button onClick={this.openDoc}   disabled={!this.props.docserver.isLoggedIn()} tooltip="Open Image"><i className="fa fa-folder-open"/></Button>
             <Spacer/>
-            <Button onClick={this.zoomIn}><i className="fa fa-plus"/></Button>
-            <Button onClick={this.zoomOut}><i className="fa fa-minus"/></Button>
-            <MenuButton actions={actions} title={''} className={'fa fa-share'}/>
-            <button onClick={this.openShare}>share</button>
-        </HBox>
-    }
-    renderBottomToolbar() {
-        return <HBox className="panel bottom" id="bottom-toolbar">
             <LoginButton docserver={this.props.docserver}/>
-            <Spacer/>
             <label><i>{this.state.dirty?"unsaved changes":""}</i></label>
+            <MenuButton actions={actions} title={''} className={'fa fa-share'}/>
+            {/*<button onClick={this.openShare}>share</button>*/}
         </HBox>
     }
+
     renderPreviewPanel() {
-        return this.state.drawPreview?<VBox className="panel right" id={"preview-panel"}><PreviewPanel model={this.props.doc.model}/></VBox>:"";
+        return this.state.drawPreview?<VBox className="panel right" id={"preview-panel"}>
+            <header>Preview</header>
+            <PreviewPanel model={this.props.doc.model}/>
+        </VBox>:"";
     }
     renderLayersPanel() {
-        return <VBox className="panel right" id={"layers-panel-wrapper"}>
-            {this.state.showLayers?<LayersPanel model={this.props.doc.model}/>:""}
-        </VBox>
+        return this.state.showLayers? <VBox className="panel right" id={"layers-panel-wrapper"}>
+            <header>Layers</header>
+            <LayersPanel model={this.props.doc.model}/>
+        </VBox>:""
     }
     renderOptionsToolbar() {
         return <HBox className="panel top" id={"options-toolbar"}>
             <label><b>options</b></label>
             {this.state.selected_tool.tool.getOptionsPanel()}
+            <Spacer/>
+            <Button onClick={this.zoomIn}><i className="fa fa-plus"/></Button>
+            <Button onClick={this.zoomOut}><i className="fa fa-minus"/></Button>
         </HBox>
     }
     render() {
         let model = this.props.doc.model
-        return (<MainLayout>
+        return (<MainLayout showLayers={this.state.showLayers} showPreview={this.state.drawPreview}>
             {this.renderSideToolbar()}
             {this.renderTopToolbar()}
             {this.renderOptionsToolbar() }
@@ -390,7 +392,6 @@ class DocPanel extends Component {
                 onKeyDown={this.canvasKeyDown.bind(this)}
             />
             <RecentColors colors={this.state.recentColors} model={model} onSelectColor={this.selectColor}/>
-            {this.renderBottomToolbar()}
             {this.renderPreviewPanel()}
             {this.renderLayersPanel()}
             <DialogContainer/>
