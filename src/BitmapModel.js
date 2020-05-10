@@ -446,17 +446,11 @@ export default class BitmapModel {
     drawScaledCanvas(canvas,scale) {
         let c = canvas.getContext('2d');
         let w = this.getWidth();
-        c.fillStyle = 'white';
-        c.fillRect(0,0,canvas.width,canvas.height);
-        this.drawScaled(c,0,w*0,w,scale);
+        this.drawScaled(c,0,w*0,w,scale,false);
     }
     drawScaled(c,ox,oy,w,s) {
         c.save();
         c.translate(ox,oy);
-        c.fillStyle = this.lookupCanvasColor(this.getBackgroundColor());
-        c.fillRect(0,0,w*s,w*s);
-        // c.strokeStyle = 'black';
-        // c.strokeRect(0.5,0.5,w*s,w*s);
         this.getReverseLayers().map((layer) => this.drawLayer(c, layer,s, this));
         c.restore();
     }
