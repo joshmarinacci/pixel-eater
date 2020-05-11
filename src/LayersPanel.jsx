@@ -126,7 +126,7 @@ export default class LayersPanel extends React.Component {
     render() {
         let model = this.props.model;
         return <VBox grow>
-            <DraggableList className="grow" id='layers-panel' style={{width:'10em'}}
+            <DraggableList className="grow" id='layers-panel'
                            data={model.getLayers()}
                            templateFunction={this.makeLayerItem.bind(this)}
                            onDropItem={this.itemDropped.bind(this)}

@@ -83,8 +83,7 @@ button:disabled {
     list-style: none;
     margin: 0;
     padding:0;
-    min-width: 20em;
-}
+ }
 
 #layers-panel .layer {
     border: 1px solid gray;

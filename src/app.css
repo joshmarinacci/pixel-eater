@@ -67,3 +67,11 @@ header {
     font-weight: bold;
     text-transform: uppercase;
 }
+
+.layer input {
+    width: 4em;
+}
+
+.grow {
+    flex: 1.0;
+}

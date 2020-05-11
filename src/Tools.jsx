@@ -337,6 +337,26 @@ export class SelectionTool {
     }
     keyDown(e) {
         let model = DocStore.getDoc().model
+
+        if(e.key === 'c' && e.metaKey) {
+            console.log("typed copy")
+            let layer = model.getCurrentLayer()
+            let pos = Point.makePoint(model.selection.x, model.selection.y)
+            let bounds = {w: model.selection.w, h: model.selection.h}
+            let stamp = model.stampFromLayer(pos,bounds,layer);
+            this.copy_buffer = stamp
+            this.copy_pos = pos
+            console.log('copied',this.copy_pos,this.copy_buffer)
+            return
+        }
+        if(e.key === 'v' && e.metaKey) {
+            let layer = model.appendLayer();
+            model.stampOnLayer(this.copy_pos,this.copy_buffer,layer)
+            model.setSelectedLayer(layer);
+            return
+        }
+
+
         if(e.keyCode === KEYBOARD.ARROW_RIGHT) {
             model.shiftSelection(Point.makePoint(1,0))
             return true;
