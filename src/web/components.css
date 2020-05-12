@@ -8,7 +8,7 @@ button, input, input[type=search], .button {
     font-size: 100%;
     font-weight: normal;
     border: 1px solid black;
-    background-color: #fff;
+    background-color: transparent;
     border-radius: 0;
     padding: 0.25em 0.5em;
     margin: 0.25em;
@@ -38,9 +38,19 @@ button.color-well {
 }
 
 button:disabled {
-    color: gray;
-    background-color: lightgrey;
+    background-color: #C2C3C7;
 }
+
+button.selected, .button.selected {
+    background-color: #00E436;
+}
+button.selected:hover, .button.selected:hover, button:hover, .button:hover {
+    background-color: #FFEC27;
+}
+button:active, .button:active, button.selected:active, .button.selected:active {
+    background-color: #FFA300;
+}
+
 
 .panel {
     border: 1px solid gray;

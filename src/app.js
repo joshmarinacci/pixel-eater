@@ -5,8 +5,8 @@ import ToggleButton from './ToggleButton.jsx'
 import {KEYBOARD} from './u.js'
 import {EraserTool, EyedropperTool, FillTool, LineTool, MoveTool, PencilTool, SelectionTool} from './Tools.jsx'
 import icons_spritesheet from "./images/icons@1.png";
-import "./web/components.css";
 import "appy-style/src/look.css";
+import "./web/components.css";
 import "./app.css";
 import {LoginButton} from './loginbutton.js'
 import "@fortawesome/fontawesome-free/css/all.css"
@@ -72,49 +72,49 @@ class DocPanel extends Component {
                 tooltip:'Pencil',
                 spriteX:0,
                 spriteY:1,
-                keyCode: KEYBOARD.P
+                key:'p',
             },
             {
                 tool: new EraserTool(this),
                 tooltip:'Eraser',
                 spriteX:0,
                 spriteY:2,
-                keyCode: KEYBOARD.E
+                key:'e',
             },
             {
                 tool: new LineTool(this),
                 tooltip: 'Line',
                 spriteX:1,
                 spriteY:1,
-                keyCode: KEYBOARD.L
+                key:'l',
             },
             {
                 tool: new EyedropperTool(this),
                 tooltip:'Eyedropper',
                 spriteX:2,
                 spriteY:0,
-                keyCode: KEYBOARD.I
+                key:'i',
             },
             {
                 tool: new FillTool(this),
                 spriteX:3,
                 spriteY:0,
                 tooltip: 'Fill',
-                keyCode: KEYBOARD.F
+                key:'f',
             },
             {
                 tool: new MoveTool(this),
                 tooltip:'Move Layer(s)',
                 spriteX:3,
                 spriteY:1,
-                keyCode: KEYBOARD.V
+                key:'v',
             },
             {
                 tool: new SelectionTool(this),
                 tooltip: 'Selection',
                 spriteX:2,
                 spriteY:1,
-                keyCode: KEYBOARD.S
+                key:'s',
             }
         ];
 
@@ -260,6 +260,24 @@ class DocPanel extends Component {
             this.props.doc.model.setBackgroundColor(color);
         };
         this.selectColor = (color) => this.setState({selectedColor:color});
+
+
+        document.addEventListener('keydown',(e)=>{
+            if(e.target.nodeName === 'INPUT') return
+            if(e.key === 'd') return this.props.doc.model.resetSelection()
+            let tool = this.tools.find((tool) => e.key === tool.key);
+            if(tool) return this.selectTool(tool)
+            let model = this.props.doc.model
+            if(e.metaKey && e.key === 'z' && e.shiftKey === false) {
+                if(model.isUndoAvailable()) model.execUndo()
+                return
+            }
+            if(e.metaKey && e.key === 'z' && e.shiftKey === true) {
+                if(model.isRedoAvailable()) model.execRedo()
+                return
+            }
+            console.log("keydown",e.key,  e.target.nodeName, e.target, e)
+        })
     }
 
     getModel() {
@@ -321,13 +339,6 @@ class DocPanel extends Component {
     titleEdited() {
         this.props.doc.title = this.refs.doc_title.value
         this.setState({doc:this.props.doc});
-    }
-    canvasKeyDown(e) {
-        let tool = this.tools.find((tool) => e.keyCode === tool.keyCode);
-        if(tool) this.selectTool(tool);
-        if(e.keyCode === KEYBOARD.D) {
-            this.props.doc.model.resetSelection()
-        }
     }
 
     renderSideToolbar() {
@@ -467,7 +478,6 @@ class DocPanel extends Component {
             <DrawingSurface
                 tabIndex="1"
                 tool={this.state.selected_tool.tool} model={model} drawGrid={this.state.drawGrid} scale={this.state.scale}
-                onKeyDown={this.canvasKeyDown.bind(this)}
             />
             <RecentColors colors={this.state.recentColors} model={model} onSelectColor={this.selectColor}/>
             {this.renderPreviewPanel()}

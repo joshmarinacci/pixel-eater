@@ -162,11 +162,7 @@ export default class DrawingSurface extends Component {
     }
 
     keyDown(e) {
-        if(this.props.tool.keyDown) {
-            var ret = this.props.tool.keyDown(e);
-            if(ret === true) return;
-        }
-        this.props.onKeyDown(e);
+        if(this.props.tool.keyDown) this.props.tool.keyDown(e)
     }
 
     contextMenu(e) {
