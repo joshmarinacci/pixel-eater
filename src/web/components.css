@@ -187,6 +187,7 @@ button:disabled {
     border-width: 1px 1px 1px 0px;
     min-width: 32px;
     min-height: 32px;
+    box-sizing: border-box;
 }
 
 

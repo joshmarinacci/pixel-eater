@@ -35,8 +35,10 @@ html, body, #root {
 }
 
 #recent-colors {
-    grid-row: 4;
+    grid-row: 4/5;
     grid-column: 2;
+    overflow-y: hidden;
+    box-sizing: border-box;
 }
 
 #bottom-toolbar {
