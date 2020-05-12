@@ -152,13 +152,25 @@ class DocPanel extends Component {
             DialogManager.hide();
             console.log("listing the docs")
             this.props.docserver.list("pixelimage").then(items => {
-                console.log("got items",items)
-                DialogManager.show(<OpenDocPanel
-                    docs={items.results}
-                    onCanceled={this.openDocCanceled}
-                    onSelectDoc={this.openDocPerform}
-                    onDeleteDoc={this.deleteDoc}
-                />)
+                if(items.success === false || !items.results){
+                    console.log("couldnt load the items")
+                    DialogManager.show(<AlertPanel
+                        text="Could not connect to server. Make sure you have internet access and are logged into the server"
+                        okayText="Dismiss"
+                        cancelText="Dismiss"
+                        onCancel={()=>DialogManager.hide()}
+                        onOkay={()=>DialogManager.hide()}
+                    />);
+
+                } else {
+                    console.log("got items", items)
+                    DialogManager.show(<OpenDocPanel
+                        docs={items.results}
+                        onCanceled={this.openDocCanceled}
+                        onSelectDoc={this.openDocPerform}
+                        onDeleteDoc={this.deleteDoc}
+                    />)
+                }
             }).catch(e => {
                 console.log("got an error");
                 this.showError('some error happened');
@@ -337,6 +349,10 @@ class DocPanel extends Component {
                  tooltip="Redo"
                  src={icons_spritesheet} scale={2} spriteX={2} spriteY={2}
              />
+            <ImageButton onClick={(e)=>PopupManager.show(<ColorPicker model={this.props.doc.model} onSelectColor={this.selectBGColor}/>,e.target)}
+                         tooltip="Settings"
+                         src={icons_spritesheet} scale={2} spriteX={4} spriteY={1}
+            />
              <ImageButton
                  onClick={this.resizeDoc}
                  tooltip="Resize Doc"
@@ -364,7 +380,6 @@ class DocPanel extends Component {
         </VBox>
     }
     renderTopToolbar() {
-        let cp2 = <ColorPicker model={this.props.doc.model} onSelectColor={this.selectBGColor}/>
         let actions = [
             {
                 title:'Export as PNG 1x',
@@ -385,7 +400,6 @@ class DocPanel extends Component {
         ]
 
         return <HBox className="panel top" id={"top-toolbar"}>
-            <button onClick={(e)=>PopupManager.show(cp2,e.target)} className="fa fa-gear"/>
             <Spacer/>
             <input type="text" ref="doc_title" value={this.props.doc.title} onChange={this.titleEdited.bind(this)}/>
             <ImageButton
