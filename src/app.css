@@ -14,6 +14,7 @@ html, body, #root {
 
 #side-toolbar {
     grid-row: span 4;
+    align-items: center;
 }
 #top-toolbar {
     grid-column-start: 1;
@@ -21,6 +22,7 @@ html, body, #root {
     box-sizing: border-box;
     border: 0px solid black;
     border-bottom-width: 1px;
+    align-items: center;
 }
 #options-toolbar {
     grid-column: 2;
@@ -74,4 +76,8 @@ header {
 
 .grow {
     flex: 1.0;
+}
+
+.image-button {
+    image-rendering: crisp-edges;
 }

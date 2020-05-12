@@ -4,6 +4,7 @@ import DocStore from './DocStore.js'
 import ToggleButton from './ToggleButton.jsx'
 import {KEYBOARD} from './u.js'
 import {EraserTool, EyedropperTool, FillTool, LineTool, MoveTool, PencilTool, SelectionTool} from './Tools.jsx'
+import icons_spritesheet from "./images/icons@1.png";
 import "./web/components.css";
 import "appy-style/src/look.css";
 import "./app.css";
@@ -27,6 +28,7 @@ import NewDocPanel from './dialogs/NewDocPanel.jsx'
 import {PALETTES} from './palettes.js'
 import {MenuButton} from './menubutton.js'
 import {MainLayout} from './MainLayout.js'
+import {ImageButton, ImageToggleButton} from "./ImageButton.js"
 
 
 export default class App extends Component {
@@ -43,10 +45,12 @@ export default class App extends Component {
 }
 
 const ToggleButtonTemplate = (props) => {
-    return <ToggleButton onToggle={props.onSelect}
-                         selected={props.selected}
-                         tooltip={props.item.tooltip}
-    ><i className={"fa fa-"+props.item.icon}/></ToggleButton>
+    return <ImageToggleButton
+        onToggle={props.onSelect}
+        selected={props.selected}
+        tooltip={props.item.tooltip}
+        src={icons_spritesheet} scale={2} spriteX={props.item.spriteX} spriteY={props.item.spriteY}
+    />
 };
 
 class DocPanel extends Component {
@@ -54,8 +58,8 @@ class DocPanel extends Component {
         super(props);
         this.state = {
             drawGrid:true,
-            drawPreview:true,
-            showLayers:true,
+            drawPreview:false,
+            showLayers:false,
             selectedColor:1,
             scale: 16,
             dirty:false
@@ -66,43 +70,50 @@ class DocPanel extends Component {
             {
                 tool: new PencilTool(this),
                 tooltip:'Pencil',
-                icon:'pencil-alt',
+                spriteX:0,
+                spriteY:1,
                 keyCode: KEYBOARD.P
             },
             {
                 tool: new EraserTool(this),
                 tooltip:'Eraser',
-                icon:'eraser',
+                spriteX:0,
+                spriteY:2,
                 keyCode: KEYBOARD.E
             },
             {
                 tool: new LineTool(this),
                 tooltip: 'Line',
-                icon: 'pen-fancy',
+                spriteX:1,
+                spriteY:1,
                 keyCode: KEYBOARD.L
             },
             {
                 tool: new EyedropperTool(this),
                 tooltip:'Eyedropper',
-                icon:'eye-dropper',
+                spriteX:2,
+                spriteY:0,
                 keyCode: KEYBOARD.I
             },
             {
                 tool: new FillTool(this),
+                spriteX:3,
+                spriteY:0,
                 tooltip: 'Fill',
-                icon:'fill',
                 keyCode: KEYBOARD.F
             },
             {
                 tool: new MoveTool(this),
                 tooltip:'Move Layer(s)',
-                icon:'arrows-alt',
+                spriteX:3,
+                spriteY:1,
                 keyCode: KEYBOARD.V
             },
             {
                 tool: new SelectionTool(this),
                 tooltip: 'Selection',
-                icon:'border-none',
+                spriteX:2,
+                spriteY:1,
                 keyCode: KEYBOARD.S
             }
         ];
@@ -314,12 +325,41 @@ class DocPanel extends Component {
              <ColorWellButton model={model} selectedColor={this.state.selectedColor} content={cp}/>
              <VToggleGroup list={this.tools} selected={this.state.selected_tool} template={ToggleButtonTemplate} onChange={this.selectTool}/>
              <Spacer/>
-             <Button onClick={this.execUndo} disabled={!model.isUndoAvailable()} tooltip="Undo"><i className="fa fa-undo"/></Button>
-             <Button onClick={this.execRedo} disabled={!model.isRedoAvailable()} tooltip="Redo"><i className="fa fa-redo"/></Button>
-             <Button onClick={this.resizeDoc} tooltip="Resize Doc">resize</Button>
-             <ToggleButton onToggle={this.toggleGrid} selected={this.state.drawGrid} tooltip="Show/Hide Grid"><i className="fa fa-th"/></ToggleButton>
-             <ToggleButton onToggle={this.togglePreview} selected={this.state.drawPreview} tooltip="Show/Hide Preview">Preview</ToggleButton>
-             <ToggleButton onToggle={this.toggleLayers} selected={this.state.showLayers} tooltip="Show/Hide Layers">Layers</ToggleButton>
+             <ImageButton
+                 onClick={this.execUndo}
+                 disabled={!model.isUndoAvailable()}
+                 tooltip="Undo"
+                 src={icons_spritesheet} scale={2} spriteX={1} spriteY={2}
+             />
+             <ImageButton
+                 onClick={this.execRedo}
+                 disabled={!model.isRedoAvailable()}
+                 tooltip="Redo"
+                 src={icons_spritesheet} scale={2} spriteX={2} spriteY={2}
+             />
+             <ImageButton
+                 onClick={this.resizeDoc}
+                 tooltip="Resize Doc"
+                 src={icons_spritesheet} scale={2} spriteX={3} spriteY={2}
+             />
+             <ImageToggleButton
+                 onToggle={this.toggleGrid}
+                 selected={this.state.drawGrid}
+                 tooltip="Show/Hide Grid"
+                 src={icons_spritesheet} scale={2} spriteX={4} spriteY={0}
+             />
+             <ImageToggleButton
+                 onToggle={this.togglePreview}
+                 selected={this.state.drawPreview}
+                 tooltip="Show/Hide Preview"
+                 src={icons_spritesheet} scale={2} spriteX={2} spriteY={3}
+             />
+             <ImageToggleButton
+                 onToggle={this.toggleLayers}
+                 selected={this.state.showLayers}
+                 tooltip="Show/Hide Layers"
+                 src={icons_spritesheet} scale={2} spriteX={3} spriteY={3}
+             />
              <Spacer/>
         </VBox>
     }
@@ -348,13 +388,33 @@ class DocPanel extends Component {
             <button onClick={(e)=>PopupManager.show(cp2,e.target)} className="fa fa-gear"/>
             <Spacer/>
             <input type="text" ref="doc_title" value={this.props.doc.title} onChange={this.titleEdited.bind(this)}/>
-            <Button onClick={this.newDoc}    disabled={!this.props.docserver.isLoggedIn()} tooltip="New Image"><i className="fa fa-file"/></Button>
-            <Button onClick={this.saveDoc}   disabled={!this.props.docserver.isLoggedIn()} tooltip="Save Image"><i className="fa fa-save"/></Button>
-            <Button onClick={this.openDoc}   disabled={!this.props.docserver.isLoggedIn()} tooltip="Open Image"><i className="fa fa-folder-open"/></Button>
+            <ImageButton
+                onClick={this.newDoc}
+                disabled={!this.props.docserver.isLoggedIn()}
+                tooltip="New Image"
+                src={icons_spritesheet} scale={2} spriteX={0} spriteY={0}
+            />
+            <ImageButton
+                onClick={this.saveDoc}
+                disabled={!this.props.docserver.isLoggedIn()}
+                tooltip="Save Image"
+                src={icons_spritesheet} scale={2} spriteX={1} spriteY={0}
+            />
+            <ImageButton
+                onClick={this.openDoc}
+                disabled={!this.props.docserver.isLoggedIn()}
+                tooltip="Open Image"
+                src={icons_spritesheet} scale={2} spriteX={5} spriteY={0}
+            />
+            <MenuButton
+                actions={actions}
+                title={''}
+                className={'fa fa-share'}
+                src={icons_spritesheet} scale={2} spriteX={6} spriteY={0}
+            />
             <Spacer/>
             <LoginButton docserver={this.props.docserver}/>
             <label><i>{this.state.dirty?"unsaved changes":""}</i></label>
-            <MenuButton actions={actions} title={''} className={'fa fa-share'}/>
             {/*<button onClick={this.openShare}>share</button>*/}
         </HBox>
     }
@@ -376,8 +436,12 @@ class DocPanel extends Component {
             <label><b>options</b></label>
             {this.state.selected_tool.tool.getOptionsPanel()}
             <Spacer/>
-            <Button onClick={this.zoomIn}><i className="fa fa-plus"/></Button>
-            <Button onClick={this.zoomOut}><i className="fa fa-minus"/></Button>
+            <ImageButton onClick={this.zoomIn}
+                         src={icons_spritesheet} scale={2} spriteX={0} spriteY={3}
+            />
+            <ImageButton onClick={this.zoomOut}
+                         src={icons_spritesheet} scale={2} spriteX={1} spriteY={3}
+            />
         </HBox>
     }
     render() {

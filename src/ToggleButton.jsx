@@ -8,8 +8,8 @@ export default class ToggleButton extends Button {
             super.onClick();
         }
     }
-    generateStyle() {
-        let cls = super.generateStyle();
+    generateClasses() {
+        let cls = super.generateClasses();
         if(this.props.selected === true)  cls += " selected";
         return cls;
     }

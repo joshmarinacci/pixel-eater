@@ -1,9 +1,14 @@
 import React, {useState} from "react";
-export const MenuButton = ({actions, title, className}) => {
+import {ImageButton, ImageToggleButton} from "./ImageButton.js"
+
+export const MenuButton = ({actions, title, className, ...rest}) => {
     let [open,setOpen] = useState(false)
     if(open) {
         return <div className="dropdown-container">
-            <button className={className} onClick={() => setOpen(false)}>{title}</button>
+            <ImageButton
+                onClick={() => setOpen(false)}
+                {...rest}
+            >{title}</ImageButton>
             <ul className="dropdown-list">
                 {actions.map(function(act,i) {
                     return <li key={i} onClick={()=>{
@@ -14,7 +19,9 @@ export const MenuButton = ({actions, title, className}) => {
             </ul>
         </div>
     } else {
-        return <button  className={className} onClick={() => setOpen(true)}>{title}</button>
+        return <ImageButton
+            onClick={() => setOpen(true)}
+            {...rest}>{title}</ImageButton>
     }
 
 }
