@@ -41,6 +41,7 @@ export class PencilTool {
         this.setSize5 = () => this.size = 5;
     }
     mouseDown(surf, pt) {
+        this.copy = this.app.makePasteClone()
         this.mouseDrag(surf,pt);
     }
     mouseDrag(surf,pt) {
@@ -54,7 +55,9 @@ export class PencilTool {
         }
         return {w:size, h:size, data:data};
     }
-    mouseUp(surf){}
+    mouseUp(surf){
+        this.app.completePasteClone(this.copy)
+    }
     contextMenu(surf,pt) {
         this.app.selectColor(DocStore.getDoc().model.getData(pt));
     }
@@ -83,14 +86,16 @@ export class EraserTool {
         this.setSize5 = () => this.size = 5;
     }
     mouseDown(surf,pt) {
+        this.copy = this.app.makePasteClone()
         this.mouseDrag(surf,pt);
     }
     mouseDrag(surf,pt) {
         let col = -1;
-        //this.app.setPixel(pt, -1);
         this.app.drawStamp(pt,this.genStamp(this.size, col), col );
     }
-    mouseUp() {}
+    mouseUp() {
+        this.app.completePasteClone(this.copy)
+    }
     genStamp(size,col) {
         let data = [];
         for(var i=0; i<size*size; i++) {
@@ -198,6 +203,7 @@ export class LineTool {
         return <label>none</label>
     }
     mouseDown(surf,pt) {
+        this.copy = this.app.makePasteClone()
         this.prev = pt;
         this.curr = pt;
         this.pressed = true
@@ -229,6 +235,7 @@ export class LineTool {
         })
         this.curr = Point.makePoint(-1,-1)
         this.prev = Point.makePoint(-1,-1)
+        this.app.completePasteClone(this.copy)
     }
     contextMenu(surf,pt) {
         this.app.selectColor(DocStore.getDoc().model.getData(pt));
@@ -271,6 +278,7 @@ export class FillTool {
         this.app = app
     }
     mouseDown(surf,pt) {
+        this.copy = this.app.makePasteClone()
         let dst_col = this.app.state.selectedColor;
         let model = DocStore.getDoc().model
         let layer = model.getCurrentLayer();
@@ -300,7 +308,7 @@ export class FillTool {
 
     }
     mouseUp(surf,pt) {
-
+        this.app.completePasteClone(this.copy)
     }
 }
 

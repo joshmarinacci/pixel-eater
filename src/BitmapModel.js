@@ -151,32 +151,13 @@ export default class BitmapModel {
         if(!layer) return null;
         return layer.data[point.x+point.y*this.pw];
     }
-    getPixel(x,y) {
-        var layer = this.getCurrentLayer();
-        return layer.data[x+y*this.pw];
-    }
-    setPixel(pt, new_color){
-        var old_color = this.getData(pt);
-        var layer = this.getCurrentLayer();
-        this.setData(pt,new_color,layer);
-        this.appendCommand(
-            () => this.setData(pt, old_color,layer),
-            () => this.setData(pt, new_color,layer)
-        );
-    }
+    // getPixel(x,y) {
+    //     var layer = this.getCurrentLayer();
+    //     return layer.data[x+y*this.pw];
+    // }
     drawStamp(pt, stamp) {
-        var layer = this.getCurrentLayer();
-        var oldStamp = this.stampFromLayer(pt,stamp,layer);
-        let redo = () => {
-            this.stampOnLayer(pt,stamp,layer);
-            this.fireUpdate();
-        };
-        let undo = () => {
-            this.stampOnLayer(pt,oldStamp,layer);
-            this.fireUpdate();
-        };
-        redo();
-        this.appendCommand(undo,redo);
+        let layer = this.getCurrentLayer()
+        this.stampOnLayer(pt,stamp,layer)
     }
     stampFromLayer(pt,stamp,layer) {
         var data = [];
@@ -210,29 +191,13 @@ export default class BitmapModel {
         }
     }
     shiftLayers(pt) {
-        let redo = () => {
-            this.layers.forEach((l) => this.shiftLayer(l,pt));
-            this.fireUpdate();
-        };
-        let undo = () => {
-            this.layers.forEach((l) => this.shiftLayer(l,{x:-pt.x, y:-pt.y}));
-            this.fireUpdate();
-        };
-        redo();
-        this.appendCommand(undo,redo);
+        this.layers.forEach((l) => this.shiftLayer(l,pt));
+        this.fireUpdate();
     }
     shiftSelectedLayer(pt) {
-        var layer = this.getCurrentLayer();
-        let redo = () => {
-            this.shiftLayer(layer,pt);
-            this.fireUpdate();
-        };
-        let undo = () => {
-            this.shiftLayer(layer,{x:-pt.x, y:-pt.y});
-            this.fireUpdate();
-        };
-        redo();
-        this.appendCommand(undo,redo);
+        let layer = this.getCurrentLayer()
+        this.shiftLayer(layer,pt);
+        this.fireUpdate();
     }
     shiftLayer(layer, off) {
         var data2 = [];

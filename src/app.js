@@ -10,7 +10,7 @@ import "./web/components.css";
 import "./app.css";
 import {LoginButton} from './loginbutton.js'
 import "@fortawesome/fontawesome-free/css/all.css"
-import DrawingSurface from './DrawingSurface.jsx'
+import DrawingSurface, {Point} from './DrawingSurface.jsx'
 import {DocServerAPI} from "docserver2-client"
 import Button from './common/Button.jsx'
 import AlertPanel from './common/AlertPanel.jsx'
@@ -276,7 +276,6 @@ class DocPanel extends Component {
                 if(model.isRedoAvailable()) model.execRedo()
                 return
             }
-            console.log("keydown",e.key,  e.target.nodeName, e.target, e)
         })
     }
 
@@ -322,6 +321,26 @@ class DocPanel extends Component {
         if(!model.isLayerVisible(layer)) return;
         model.drawStamp(pt,stamp);
         this.appendRecentColor(new_color);
+    }
+    makePasteClone() {
+        let model = this.props.doc.model
+        let layer = model.getCurrentLayer()
+        let position = Point.makePoint(0,0)
+        let dimensions = {w: model.getWidth(), h: model.getHeight()}
+        let buffer = model.stampFromLayer(position,dimensions,layer)
+        return { layer, position, dimensions, buffer, model }
+    }
+    completePasteClone(before) {
+        let after = this.makePasteClone()
+        let redo = () => {
+            after.model.stampOnLayer(after.position,after.buffer,after.layer);
+            after.model.fireUpdate();
+        };
+        let undo = () => {
+            before.model.stampOnLayer(before.position,before.buffer,before.layer);
+            before.model.fireUpdate();
+        };
+        after.model.appendCommand(undo,redo);
     }
     shiftLayers(pt) {
         this.props.doc.model.shiftLayers(pt);
