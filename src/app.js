@@ -61,6 +61,7 @@ class DocPanel extends Component {
             drawGrid:true,
             drawPreview:false,
             showLayers:false,
+            fullscreen:false,
             selectedColor:1,
             scale: 16,
             dirty:false
@@ -128,12 +129,28 @@ class DocPanel extends Component {
 
         this.model_listener = this.props.doc.model.changed((mod)=> this.setState({model:mod, dirty:true}));
 
+        let fullscreen_handler = () => {
+            if (document.fullscreenElement || document.webkitFullscreenElement) {
+                // console.log("entered")
+            } else {
+                // console.log("exited")
+            }
+        }
 
-
-
+        document.addEventListener('fullscreenchange', fullscreen_handler)
+        document.addEventListener('webkitfullscreenchange',fullscreen_handler)
         this.toggleGrid = () => this.setState({drawGrid: !this.state.drawGrid});
         this.togglePreview = () => this.setState({ drawPreview: !this.state.drawPreview});
         this.toggleLayers = () => this.setState({ showLayers: !this.state.showLayers});
+        this.toggleFullscreen = () => {
+            if(this.state.fullscreen) {
+                document.exitFullscreen()
+                this.setState({fullscreen:!this.state.fullscreen})
+            } else {
+                document.querySelector("#root").requestFullscreen()
+                this.setState({fullscreen:!this.state.fullscreen})
+            }
+        }
         this.zoomIn = () => this.setState({scale: this.state.scale<<1});
         this.zoomOut = () => this.setState({scale: this.state.scale>>1});
         this.resizeDoc = () => DialogManager.show(<ResizePanel model={this.props.doc.model}/>);
@@ -408,6 +425,7 @@ class DocPanel extends Component {
                  tooltip="Redo"
                  src={icons_spritesheet} scale={2} spriteX={2} spriteY={2}
              />
+            <Spacer/>
             <ImageButton onClick={(e)=>PopupManager.show(<ColorPicker model={this.props.doc.model} onSelectColor={this.selectBGColor}/>,e.target)}
                          tooltip="Settings"
                          src={icons_spritesheet} scale={2} spriteX={4} spriteY={1}
@@ -435,7 +453,11 @@ class DocPanel extends Component {
                  tooltip="Show/Hide Layers"
                  src={icons_spritesheet} scale={2} spriteX={3} spriteY={3}
              />
-             <Spacer/>
+            <ImageButton
+                onClick={this.toggleFullscreen}
+                tooltip="Full Screen"
+                src={icons_spritesheet} scale={2} spriteX={4} spriteY={3}
+            />
         </VBox>
     }
     renderTopToolbar() {
