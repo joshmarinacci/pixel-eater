@@ -56,3 +56,11 @@ export function POST_JSON(path, payload, cb) {
         req.send(JSON.stringify(payload));
     })
 }
+
+export const toRad = (deg) => Math.PI/180*deg
+export const remap = (value, min1, max1, min2, max2) => {
+    value = (value-min1)/(max1-min1)  // map from input range to 0->1
+    value = min2 + (max2-min2)*value // map 0->1 to output range
+    return value
+}
+

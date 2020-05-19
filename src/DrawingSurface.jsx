@@ -1,21 +1,32 @@
 import React, {Component} from "react";
 
 export class Point {
+    constructor(x,y) {
+        this.x = x
+        this.y = y
+    }
     static makePoint(x,y) {
-        return {
-            x:x,
-            y:y,
-            equals: function(pt) {
-                if(!pt) return false;
-                return pt.x === this.x && pt.y === this.y;
-            },
-            add: function(pt) {
-                return Point.makePoint(this.x + pt.x, this.y + pt.y)
-            },
-            sub: function(pt) {
-                return Point.makePoint(this.x - pt.x, this.y - pt.y)
-            }
-        }
+        return new Point(x,y)
+    }
+    equals(pt) {
+        if(!pt) return false;
+        return pt.x === this.x && pt.y === this.y;
+    }
+    add(pt) {
+        return Point.makePoint(this.x + pt.x, this.y + pt.y)
+    }
+    sub(pt) {
+        return Point.makePoint(this.x - pt.x, this.y - pt.y)
+    }
+    round() {
+        return Point.makePoint(Math.round(this.x), Math.round(this.y))
+    }
+    length() {
+        return Math.sqrt(this.x*this.x + this.y*this.y)
+    }
+
+    static makePointFromAngleLength(angle, len) {
+        return Point.makePoint(Math.sin(angle)*len,  Math.cos(angle)*len)
     }
 }
 
@@ -143,7 +154,7 @@ export default class DrawingSurface extends Component {
         this.setState({hoverPoint:modelPoint});
         if(!this.state.down) return setTimeout(this.drawCanvas.bind(this),0);
         if(!modelPoint.equals(this.state.prevPoint)) {
-            this.props.tool.mouseDrag(this,modelPoint);
+            this.props.tool.mouseDrag(this,modelPoint,e);
             this.setState({prevPoint:modelPoint});
             return setTimeout(this.drawCanvas.bind(this),0);
         }

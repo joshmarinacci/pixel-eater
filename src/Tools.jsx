@@ -4,6 +4,7 @@ import {KEYBOARD} from "./u";
 import DocStore from "./DocStore.js";
 import {HBox} from "appy-comps";
 import {Point} from './DrawingSurface.jsx'
+import {remap} from './u.js'
 
 export class EyedropperTool {
     constructor(app) {
@@ -182,15 +183,6 @@ export class MoveTool {
     }
 }
 
-/*
-
-select move tool
-if not default, then
-on arrow key, shift the selection instead of the whole thing. and no wrapping
-on drag, move the selection and the contents of the selection.
-copy into a hovering slice, draw the hover, then paste it back down
-
- */
 
 export class LineTool {
     constructor(app) {
@@ -208,8 +200,19 @@ export class LineTool {
         this.curr = pt;
         this.pressed = true
     }
-    mouseDrag(surf,pt) {
+    mouseDrag(surf,pt,e) {
         this.curr = pt
+        if(e.shiftKey) {
+            let sections = 8
+            let diff = this.curr.sub(this.prev)
+            let len = diff.length()
+            let angle = Math.atan2(diff.x,diff.y) // -PI, PI
+            angle = remap(angle, -Math.PI, Math.PI, 0,1) // map to 0->1
+            angle = Math.floor(angle*sections)/sections // round to nearest quadrant
+            angle = remap(angle, 0,1, -Math.PI, Math.PI) // map back to -PI -> PI
+            diff = Point.makePointFromAngleLength(angle,len)
+            this.curr = this.prev.add(diff).round()
+        }
     }
     drawOverlay(ctx, scale) {
         if(!this.pressed) return
