@@ -49,13 +49,13 @@ html, body, #root {
 
 #preview-panel {
     border: 0px solid black;
-    grid-row: 1/4;
+    grid-row: 1/5;
     grid-column: preview;
     border-left-width: 1px;
 }
 #layers-panel-wrapper {
     border: 0px solid black;
-    grid-row: 1/4;
+    grid-row: 1/5;
     grid-column-start: layers;
     overflow: hidden;
     border-left-width: 1px;
