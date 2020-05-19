@@ -266,6 +266,22 @@ class DocPanel extends Component {
 
 
         document.addEventListener('keydown',(e)=>{
+            if(e.metaKey && e.key === 's') {
+                this.saveDoc()
+                e.preventDefault()
+                e.stopPropagation()
+            }
+            if(e.metaKey && e.key === 'n') {
+                this.newDoc()
+                e.preventDefault()
+                e.stopPropagation()
+            }
+            if(e.metaKey && e.key === 'o') {
+                this.openDoc()
+                e.preventDefault()
+                e.stopPropagation()
+            }
+
             if(e.target.nodeName === 'INPUT') return
             if(e.key === 'd') return this.props.doc.model.resetSelection()
             let tool = this.tools.find((tool) => e.key === tool.key);
@@ -279,7 +295,7 @@ class DocPanel extends Component {
                 if(model.isRedoAvailable()) model.execRedo()
                 return
             }
-        })
+        }, {capture:true})
     }
 
     getModel() {
