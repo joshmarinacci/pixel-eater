@@ -1,6 +1,6 @@
 import React from "react";
 import Button from "./common/Button.jsx"
-import ToggleButton from "./ToggleButton.jsx"
+import ToggleButton from "./common/ToggleButton.jsx"
 export class ImageButton extends Button {
     generateClasses() {
         return super.generateClasses() + " image-button"

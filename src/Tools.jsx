@@ -1,5 +1,5 @@
 import React from "react";
-import ToggleButton from "./ToggleButton.jsx"
+import ToggleButton from "./common/ToggleButton.jsx"
 import {KEYBOARD} from "./u";
 import DocStore from "./DocStore.js";
 import {HBox} from "appy-comps";

@@ -1,8 +1,6 @@
 import React, {Component} from "react";
 import {VBox, HBox, Spacer, PopupContainer, VToggleGroup, PopupManager, DialogManager, DialogContainer} from "appy-comps";
 import DocStore from './DocStore.js'
-import ToggleButton from './ToggleButton.jsx'
-import {KEYBOARD} from './u.js'
 import {EraserTool, EyedropperTool, FillTool, LineTool, MoveTool, PencilTool, SelectionTool} from './Tools.jsx'
 import icons_spritesheet from "./images/icons@1.png";
 import "appy-style/src/look.css";
@@ -12,7 +10,6 @@ import {LoginButton} from './loginbutton.js'
 import "@fortawesome/fontawesome-free/css/all.css"
 import DrawingSurface, {Point} from './DrawingSurface.jsx'
 import {DocServerAPI} from "docserver2-client"
-import Button from './common/Button.jsx'
 import AlertPanel from './common/AlertPanel.jsx'
 import OpenDocPanel from './dialogs/OpenDocPanel.jsx'
 import ResizePanel from './dialogs/ResizePanel.jsx'
@@ -29,7 +26,7 @@ import {PALETTES} from './palettes.js'
 import {MenuButton} from './menubutton.js'
 import {MainLayout} from './MainLayout.js'
 import {ImageButton, ImageToggleButton} from "./ImageButton.js"
-import {ToasterContainer, ToasterManager} from './ToasterContainer.js'
+import {ToasterContainer, ToasterManager} from './common/ToasterContainer.js'
 
 
 export default class App extends Component {
@@ -430,11 +427,6 @@ class DocPanel extends Component {
                          tooltip="Settings"
                          src={icons_spritesheet} scale={2} spriteX={4} spriteY={1}
             />
-             <ImageButton
-                 onClick={this.resizeDoc}
-                 tooltip="Resize Doc"
-                 src={icons_spritesheet} scale={2} spriteX={3} spriteY={2}
-             />
              <ImageToggleButton
                  onToggle={this.toggleGrid}
                  selected={this.state.drawGrid}
@@ -501,6 +493,11 @@ class DocPanel extends Component {
                 tooltip="Open Image"
                 src={icons_spritesheet} scale={2} spriteX={5} spriteY={0}
             />
+            <ImageButton
+                onClick={this.resizeDoc}
+                tooltip="Resize Doc"
+                src={icons_spritesheet} scale={2} spriteX={3} spriteY={2}
+            />
             <MenuButton
                 actions={actions}
                 title={''}
@@ -509,7 +506,7 @@ class DocPanel extends Component {
             />
             <Spacer/>
             <LoginButton docserver={this.props.docserver}/>
-            <label><i>{this.state.dirty?"unsaved changes":""}</i></label>
+            <label><i>{this.state.dirty?"*":""}</i></label>
             {/*<button onClick={this.openShare}>share</button>*/}
         </HBox>
     }

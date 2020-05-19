@@ -1,4 +1,4 @@
-import Button from "./common/Button.jsx"
+import Button from "./Button.jsx"
 
 export default class ToggleButton extends Button {
     onClick() {
