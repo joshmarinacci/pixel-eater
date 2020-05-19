@@ -281,6 +281,16 @@ class DocPanel extends Component {
                 e.preventDefault()
                 e.stopPropagation()
             }
+            if(e.metaKey && e.key === '=') {
+                this.zoomIn()
+                e.preventDefault()
+                e.stopPropagation()
+            }
+            if(e.metaKey && e.key === '-') {
+                this.zoomOut()
+                e.preventDefault()
+                e.stopPropagation()
+            }
 
             if(e.target.nodeName === 'INPUT') return
             if(e.key === 'd') return this.props.doc.model.resetSelection()
