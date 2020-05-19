@@ -29,6 +29,7 @@ import {PALETTES} from './palettes.js'
 import {MenuButton} from './menubutton.js'
 import {MainLayout} from './MainLayout.js'
 import {ImageButton, ImageToggleButton} from "./ImageButton.js"
+import {ToasterContainer, ToasterManager} from './ToasterContainer.js'
 
 
 export default class App extends Component {
@@ -238,7 +239,9 @@ class DocPanel extends Component {
 
         this.saveDoc = (cb) => {
             let doc = DocStore.getDoc()
-            console.log("saving the doc",doc.id)
+            console.log("saving the doc",doc)
+            ToasterManager.add('saving ' + doc.title);
+
             this.props.docserver.save(DocStore.getDoc(), 'pixelimage').then(res => {
                 console.log("got results",res)
                 DocStore.getDoc().id=res.doc._id;
@@ -501,6 +504,7 @@ class DocPanel extends Component {
             <RecentColors colors={this.state.recentColors} model={model} onSelectColor={this.selectColor}/>
             {this.renderPreviewPanel()}
             {this.renderLayersPanel()}
+            <ToasterContainer/>
             <DialogContainer/>
             <PopupContainer/>
         </MainLayout>)
