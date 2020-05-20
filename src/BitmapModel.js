@@ -31,6 +31,12 @@ class SelectionBounds {
         this.h = h
         this.model = model
     }
+    position() {
+        return Point.makePoint(this.x,this.y)
+    }
+    bounds() {
+        return { w: this.w, h: this.h}
+    }
     setFrame(p1, p2) {
         this.x = p1.x
         this.y = p1.y
@@ -74,6 +80,27 @@ class SelectionBounds {
         if(this.h < 1) this.h = 1
     }
 }
+
+export class Stamp {
+    constructor(w,h,data) {
+        this.w = w
+        this.h = h
+        this.data = data || []
+    }
+    get_xy(x,y) {
+        if(x > this.w) throw new Error(`x too big ${x} ${this.w}`)
+        if(y > this.h) throw new Error(`y too big ${y} ${this.h}`)
+        let n = y*this.w + x
+        if(n >= this.data.length) throw new Error(`xy outside data bounds ${x},${y} ${this.data.length}`)
+        return this.data[n]
+    }
+    width() {
+        return this.w
+    }
+    height() {
+        return this.h
+    }
+}
 export default class BitmapModel {
 
     constructor(pw, ph, palette) {
@@ -88,6 +115,7 @@ export default class BitmapModel {
         this.command_buffer = [];
         this.command_index = 0;
         this.selection = new SelectionBounds(0,0,pw,ph, this);
+        this.pattern = new Stamp(2,2, [2,3,3,2])
     }
 
     // encoding
@@ -169,11 +197,13 @@ export default class BitmapModel {
                 //layer.data[ib] = stamp.data[ia];
             }
         }
-        return {
-            w:stamp.w,
-            h:stamp.h,
-            data:data
-        }
+        return new Stamp(stamp.w,stamp.h,data)
+    }
+    make_stamp_from_selection() {
+        let pos = this.selection.position()
+        let bounds = this.selection.bounds()
+        let layer = this.getCurrentLayer()
+        return this.stampFromLayer(pos,bounds,layer);
     }
     stampOnLayer(pt,stamp,layer) {
         for(let i=0; i<stamp.w; i++) {
@@ -219,6 +249,14 @@ export default class BitmapModel {
         layer.data = data2;
     }
 
+    // pattern
+    setPattern(pattern) {
+        this.pattern = pattern
+        this.fireUpdate()
+    }
+    getPattern() {
+        return this.pattern
+    }
     //structure
     getWidth() {
         return this.pw;

@@ -1,10 +1,35 @@
-import React from "react";
+import React, {useRef, useEffect} from "react";
 import ToggleButton from "./common/ToggleButton.jsx"
 import {KEYBOARD} from "./u";
 import DocStore from "./DocStore.js";
 import {HBox} from "appy-comps";
 import {Point} from './DrawingSurface.jsx'
 import {remap} from './u.js'
+import {Stamp} from './BitmapModel.js'
+
+const StampView = ({ pattern, model})=>{
+    let can = useRef()
+    useEffect(()=>{
+        if(can.current) {
+            let ctx = can.current.getContext('2d')
+            ctx.fillStyle = 'black'
+            ctx.fillRect(0,0,can.current.width,can.current.height)
+            ctx.imageSmoothingEnabled = false
+            if(pattern) {
+                let sc = can.current.width/pattern.width()
+                for(let x=0; x<pattern.width(); x++) {
+                    for (let y = 0; y < pattern.height(); y++) {
+                        let val = pattern.get_xy(x, y)
+                        if(val === -1) continue
+                        ctx.fillStyle = model.lookupCanvasColor(val);
+                        ctx.fillRect(x * sc, y * sc, sc, sc);
+                    }
+                }
+            }
+        }
+    })
+    return <div><canvas ref={can} width={32} height={32} style={{border:'1px solid black'}}/></div>
+}
 
 export class EyedropperTool {
     constructor(app) {
@@ -50,11 +75,11 @@ export class PencilTool {
         this.app.drawStamp(pt,this.genStamp(this.size, col), col );
     }
     genStamp(size,col) {
-        let data = [];
+        let stamp = new Stamp(size,size)
         for(let i=0; i<size*size; i++) {
-            data[i] = col;
+            stamp.data[i] = col;
         }
-        return {w:size, h:size, data:data};
+        return stamp
     }
     mouseUp(surf){
         this.app.completePasteClone(this.copy)
@@ -279,14 +304,21 @@ export class LineTool {
 export class FillTool {
     constructor(app) {
         this.app = app
+        this.fill_mode = 'color'
     }
     mouseDown(surf,pt) {
         this.copy = this.app.makePasteClone()
-        let dst_col = this.app.state.selectedColor;
         let model = DocStore.getDoc().model
         let layer = model.getCurrentLayer();
         let src_col = model.getData(pt)
-        this.floodFill(model,pt,src_col,dst_col,layer)
+        if(this.fill_mode === 'color') {
+            let dst_col = this.app.state.selectedColor;
+            this.floodFill(model,pt,src_col,dst_col,layer)
+        } else {
+            let temp_col = -2
+            this.floodFill(model, pt, src_col, temp_col, layer)
+            this.replaceWithPattern(model, temp_col, model.getPattern(), layer)
+        }
     }
 
     floodFill(model, pt, src_col, dst_col,layer) {
@@ -304,8 +336,31 @@ export class FillTool {
         this.floodFill(model,Point.makePoint(pt.x,pt.y-1),src_col,dst_col,layer)
     }
 
+    replaceWithPattern(model, src, pattern, layer) {
+        for(let i=0; i<model.getWidth(); i++) {
+            for(let j=0; j<model.getHeight(); j++) {
+                let pt = Point.makePoint(i,j)
+                let cur = model.getData(pt)
+                if(cur === src) {
+                    let c = pattern.get_xy(i%pattern.width(),j%pattern.height())
+                    model.setData(pt, c, layer)
+                }
+            }
+        }
+    }
+
     getOptionsPanel() {
-        return <label>none</label>
+        let model = DocStore.getDoc().model
+        return <HBox>
+            <select value={this.fill_mode} onChange={(e)=>{
+                this.fill_mode = e.target.value
+                DocStore.getDoc().model.fireUpdate()
+            }}>
+                <option value={'color'}>color</option>
+                <option value={'pattern'}>fill</option>
+            </select>
+            <StampView pattern={model.getPattern()} model={model}/>
+        </HBox>
     }
     mouseDrag(surf,pt) {
 
@@ -320,8 +375,16 @@ export class SelectionTool {
         this.app = app
         this.inside = false
     }
+    definePatternFromSelection() {
+        let model = DocStore.getDoc().model
+        model.setPattern(model.make_stamp_from_selection())
+    }
     getOptionsPanel() {
-        return <label>none</label>
+        let model = DocStore.getDoc().model
+        return <HBox>
+            <button onClick={this.definePatternFromSelection.bind(this)}>define pattern</button>
+            <StampView pattern={model.getPattern()} model={model}/>
+        </HBox>
     }
     mouseDown(surf,pt) {
         this.start = pt
@@ -337,7 +400,6 @@ export class SelectionTool {
         if(this.inside) {
             let diff = pt.sub(this.start)
             diff = diff.add(this.start_off)
-            console.log("diff is",diff)
             model.positionSelection(diff)
         } else {
             model.selection.setFrame(this.start, pt)
