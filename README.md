@@ -1,6 +1,6 @@
 # pixel-eater
 
-Eat All The Pixels with this web-based pixel art editor
+Eat All The Pixels with this web-based pixel art editor. Try it out at [https://apps.josh.earth/pixel-eater/](https://apps.josh.earth/pixel-eater/)
 
 There is a server for saving, loading, and rendering images. All drawing is done in the browser.
 The entire UI is in React with custom components.  The UI supports layers and different cursor 
