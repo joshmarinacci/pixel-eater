@@ -309,7 +309,7 @@ class DocPanel extends Component {
             if(e.target.nodeName === 'INPUT') return
             if(e.key === 'd') return this.props.doc.model.resetSelection()
             let tool = this.tools.find((tool) => e.key === tool.key);
-            if(tool) return this.selectTool(tool)
+            if(tool && !e.metaKey) return this.selectTool(tool)
             let model = this.props.doc.model
             if(e.metaKey && e.key === 'z' && e.shiftKey === false) {
                 if(model.isUndoAvailable()) model.execUndo()

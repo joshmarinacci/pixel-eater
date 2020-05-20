@@ -427,6 +427,7 @@ export class SelectionTool {
             return
         }
         if(e.key === 'v' && e.metaKey) {
+            console.log("typed paste")
             let layer = model.appendLayer();
             model.stampOnLayer(this.copy_pos,this.copy_buffer,layer)
             model.setSelectedLayer(layer);
