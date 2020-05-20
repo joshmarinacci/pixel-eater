@@ -187,6 +187,20 @@ export default class BitmapModel {
         let layer = this.getCurrentLayer()
         this.stampOnLayer(pt,stamp,layer)
     }
+    fillStamp(pt, stamp, pattern) {
+        let layer = this.getCurrentLayer()
+        for(let i=0; i<stamp.width(); i++) {
+            for(let j=0; j<stamp.height(); j++) {
+                let cur = stamp.get_xy(i,j)
+                if(cur !== -1) {
+                    let pt2 = Point.makePoint(i+pt.x,j+pt.y)
+                    let c = pattern.get_xy(pt2.x%pattern.width(),pt2.y%pattern.height())
+                    this.setData(pt2, c, layer)
+                }
+            }
+        }
+
+    }
     stampFromLayer(pt,stamp,layer) {
         var data = [];
         for(var i=0; i<stamp.w; i++) {

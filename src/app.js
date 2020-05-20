@@ -365,6 +365,13 @@ class DocPanel extends Component {
         model.drawStamp(pt,stamp);
         this.appendRecentColor(new_color);
     }
+    fillStamp(pt, stamp, pattern) {
+        const model = this.props.doc.model
+        const layer = model.getCurrentLayer()
+        if(!layer) return;
+        if(!model.isLayerVisible(layer)) return;
+        model.fillStamp(pt,stamp,pattern);
+    }
     makePasteClone() {
         let model = this.props.doc.model
         let layer = model.getCurrentLayer()

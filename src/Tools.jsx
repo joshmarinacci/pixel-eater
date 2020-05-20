@@ -65,6 +65,7 @@ export class PencilTool {
         this.setSize1 = () => this.size = 1;
         this.setSize3 = () => this.size = 3;
         this.setSize5 = () => this.size = 5;
+        this.fill_mode = 'color'
     }
     mouseDown(surf, pt) {
         this.copy = this.app.makePasteClone()
@@ -72,7 +73,8 @@ export class PencilTool {
     }
     mouseDrag(surf,pt) {
         let col = this.app.state.selectedColor;
-        this.app.drawStamp(pt,this.genStamp(this.size, col), col );
+        if(this.fill_mode === 'color') this.app.drawStamp(pt,this.genStamp(this.size, col), col );
+        if(this.fill_mode === 'pattern') this.app.fillStamp(pt, this.genStamp(this.size,col), DocStore.getDoc().model.getPattern())
     }
     genStamp(size,col) {
         let stamp = new Stamp(size,size)
@@ -88,10 +90,19 @@ export class PencilTool {
         this.app.selectColor(DocStore.getDoc().model.getData(pt));
     }
     getOptionsPanel() {
+        let model = DocStore.getDoc().model
         return <HBox>
             <ToggleButton selected={this.size === 1} onToggle={this.setSize1}>1px</ToggleButton>
             <ToggleButton selected={this.size === 3} onToggle={this.setSize3}>3px</ToggleButton>
             <ToggleButton selected={this.size === 5} onToggle={this.setSize5}>5px</ToggleButton>
+            <select value={this.fill_mode} onChange={(e)=>{
+                this.fill_mode = e.target.value
+                DocStore.getDoc().model.fireUpdate()
+            }}>
+                <option value={'color'}>color</option>
+                <option value={'pattern'}>pattern</option>
+            </select>
+            <StampView pattern={model.getPattern()} model={model}/>
         </HBox>
     }
 }
