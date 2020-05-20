@@ -321,6 +321,10 @@ export class FillTool {
         }
     }
 
+    contextMenu(surf,pt) {
+        this.app.selectColor(DocStore.getDoc().model.getData(pt));
+    }
+
     floodFill(model, pt, src_col, dst_col,layer) {
         if(pt.x < 0) return
         if(pt.y < 0) return
@@ -357,7 +361,7 @@ export class FillTool {
                 DocStore.getDoc().model.fireUpdate()
             }}>
                 <option value={'color'}>color</option>
-                <option value={'pattern'}>fill</option>
+                <option value={'pattern'}>pattern</option>
             </select>
             <StampView pattern={model.getPattern()} model={model}/>
         </HBox>
