@@ -58,7 +58,8 @@ export class PencilTool {
             let sc = scale;
             c.save();
             c.strokeStyle = 'orange';
-            c.strokeRect(pt.x*sc, pt.y*sc, sc*this.size,sc*this.size);
+            let off = Math.floor(this.size/2)
+            c.strokeRect(pt.x*sc-off*sc, pt.y*sc-off*sc, sc*this.size,sc*this.size);
             c.restore();
         };
 
@@ -73,8 +74,10 @@ export class PencilTool {
     }
     mouseDrag(surf,pt) {
         let col = this.app.state.selectedColor;
-        if(this.fill_mode === 'color') this.app.drawStamp(pt,this.genStamp(this.size, col), col );
-        if(this.fill_mode === 'pattern') this.app.fillStamp(pt, this.genStamp(this.size,col), DocStore.getDoc().model.getPattern())
+        let off = Math.floor(this.size/2)
+        pt = Point.makePoint(pt.x-off,pt.y-off)
+        if(this.fill_mode === 'color')   this.app.drawStamp(pt, this.genStamp(this.size, col), col );
+        if(this.fill_mode === 'pattern') this.app.fillStamp(pt, this.genStamp(this.size, col), DocStore.getDoc().model.getPattern())
     }
     genStamp(size,col) {
         let stamp = new Stamp(size,size)
