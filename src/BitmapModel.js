@@ -179,6 +179,12 @@ export default class BitmapModel {
         if(!layer) return null;
         return layer.data[point.x+point.y*this.pw];
     }
+    get_xy(x,y, layer) {
+        return layer.data[x+y*this.pw];
+    }
+    set_xy(x,y, layer,v) {
+        layer.data[x+y*this.pw] = v
+    }
     // getPixel(x,y) {
     //     var layer = this.getCurrentLayer();
     //     return layer.data[x+y*this.pw];
@@ -486,5 +492,52 @@ export default class BitmapModel {
             }
         }
         c.restore();
+    }
+
+
+    // algorithms
+
+}
+
+
+function is_valid(model, layer, pt, src_col, dst_col) {
+    //if out of bounds, return
+    if(pt.x < 0) return false
+    if(pt.y < 0) return false
+    if(pt.x >= model.getWidth()) return false
+    if(pt.y >= model.getHeight()) return false
+    //if not inside selection, return
+    if(!model.selection.inside(pt)) return false
+    let cur = model.getData(pt)
+    //if not the target color, return
+    if(cur !== src_col) return false
+    return true
+}
+
+export function floodFill(model, layer, pt, src_col, dst_col) {
+    if(!is_valid(model,layer,pt,src_col,dst_col)) return
+
+    let q = []
+    q.push(pt)
+
+    while(q.length > 0) {
+        let q2 = []
+        q.forEach(pt => {
+            //find the left and right most spots
+            let left = pt.x
+            while(model.get_xy(left-1,pt.y,layer) === src_col && left-1 >= 0) left--
+            let right = pt.x
+            while(model.get_xy(right+1,pt.y,layer) === src_col && right+1 < model.getWidth()) right++
+
+            // set the span
+            for(let i=left; i<=right; i++) {
+                model.set_xy(i,pt.y,layer,dst_col)
+                let north = Point.makePoint(i,pt.y-1)
+                if(is_valid(model,layer, north, src_col, dst_col)) q2.push(north)
+                let south = Point.makePoint(i,pt.y+1)
+                if(is_valid(model,layer, south, src_col, dst_col)) q2.push(south)
+            }
+        })
+        q = q2
     }
 }

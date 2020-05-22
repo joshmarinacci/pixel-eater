@@ -5,7 +5,7 @@ import DocStore from "./DocStore.js";
 import {HBox} from "appy-comps";
 import {Point} from './DrawingSurface.jsx'
 import {remap} from './u.js'
-import {Stamp} from './BitmapModel.js'
+import {floodFill, Stamp} from './BitmapModel.js'
 
 const StampView = ({ pattern, model})=>{
     let can = useRef()
@@ -336,10 +336,12 @@ export class FillTool {
         let src_col = model.getData(pt)
         if(this.fill_mode === 'color') {
             let dst_col = this.app.state.selectedColor;
-            this.floodFill(model,pt,src_col,dst_col,layer)
+            // this.floodFill(model,pt,src_col,dst_col,layer)
+            floodFill(model,layer,pt,src_col,dst_col)
         } else {
             let temp_col = -2
-            this.floodFill(model, pt, src_col, temp_col, layer)
+            // this.floodFill(model, pt, src_col, temp_col, layer)
+            floodFill(model,layer,pt,src_col,temp_col)
             this.replaceWithPattern(model, temp_col, model.getPattern(), layer)
         }
     }
@@ -348,20 +350,6 @@ export class FillTool {
         this.app.selectColor(DocStore.getDoc().model.getData(pt));
     }
 
-    floodFill(model, pt, src_col, dst_col,layer) {
-        if(pt.x < 0) return
-        if(pt.y < 0) return
-        if(pt.x >= model.getWidth()) return
-        if(pt.y >= model.getHeight()) return
-        if(!model.selection.inside(pt)) return
-        let cur = model.getData(pt)
-        if(cur !== src_col) return
-        model.setData(pt,dst_col,layer)
-        this.floodFill(model,Point.makePoint(pt.x+1,pt.y),src_col,dst_col,layer)
-        this.floodFill(model,Point.makePoint(pt.x,pt.y+1),src_col,dst_col,layer)
-        this.floodFill(model,Point.makePoint(pt.x-1,pt.y),src_col,dst_col,layer)
-        this.floodFill(model,Point.makePoint(pt.x,pt.y-1),src_col,dst_col,layer)
-    }
 
     replaceWithPattern(model, src, pattern, layer) {
         for(let i=0; i<model.getWidth(); i++) {
