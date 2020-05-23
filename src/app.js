@@ -459,7 +459,7 @@ class DocPanel extends Component {
             />
         </VBox>
     }
-    renderTopToolbar() {
+    renderTopToolbar(model) {
         let actions = [
             {
                 title:'Export as PNG 1x',
@@ -480,8 +480,10 @@ class DocPanel extends Component {
         ]
 
         return <HBox className="panel top" id={"top-toolbar"}>
-            <Spacer/>
             <input type="text" ref="doc_title" value={this.props.doc.title} onChange={this.titleEdited.bind(this)}/>
+            <label><i>{this.state.dirty?"*":""}</i></label>
+            <label>{model.getWidth()} x {model.getHeight()}</label>
+            <Spacer/>
             <ImageButton
                 onClick={this.newDoc}
                 disabled={!this.props.docserver.isLoggedIn()}
@@ -513,7 +515,6 @@ class DocPanel extends Component {
             />
             <Spacer/>
             <LoginButton docserver={this.props.docserver}/>
-            <label><i>{this.state.dirty?"*":""}</i></label>
             {/*<button onClick={this.openShare}>share</button>*/}
         </HBox>
     }
@@ -547,7 +548,7 @@ class DocPanel extends Component {
         let model = this.props.doc.model
         return (<MainLayout showLayers={this.state.showLayers} showPreview={this.state.drawPreview}>
             {this.renderSideToolbar()}
-            {this.renderTopToolbar()}
+            {this.renderTopToolbar(model)}
             {this.renderOptionsToolbar() }
             <DrawingSurface
                 tabIndex="1"
