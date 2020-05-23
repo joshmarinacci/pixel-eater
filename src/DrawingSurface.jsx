@@ -44,6 +44,9 @@ export default class DrawingSurface extends Component {
         };
 
         this.props.model.changed(() => this.drawCanvas());
+        this.mouse_down_handler = (e) => this.mouseDown(e)
+        this.mouse_move_handler = (e) => this.mouseMove(e)
+        this.mouse_up_handler = (e) => this.mouseUp(e)
     }
 
 
@@ -146,6 +149,8 @@ export default class DrawingSurface extends Component {
         var modelPoint = this.getModelPoint(e);
         this.setState({down:true, prevPoint:modelPoint});
         this.props.tool.mouseDown(this,modelPoint);
+        document.addEventListener('mousemove',this.mouse_move_handler)
+        document.addEventListener('mouseup',this.mouse_up_handler)
     }
 
     mouseMove(e) {
@@ -167,6 +172,8 @@ export default class DrawingSurface extends Component {
     }
 
     mouseUp() {
+        document.removeEventListener('mousemove',this.mouse_move_handler)
+        document.removeEventListener('mosueup',this.mouse_up_handler)
         this.setState({down:false});
         this.props.tool.mouseUp(this);
         return setTimeout(this.drawCanvas.bind(this),0);
@@ -190,9 +197,7 @@ export default class DrawingSurface extends Component {
                     tabIndex="1"
                     width={this.props.model.getWidth()*this.props.scale+1}
                     height={this.props.model.getHeight()*this.props.scale+1}
-                    onMouseUp={this.mouseUp.bind(this)}
-                    onMouseDown={this.mouseDown.bind(this)}
-                    onMouseMove={this.mouseMove.bind(this)}
+                    onMouseDown={this.mouse_down_handler}
                     onContextMenu={this.contextMenu.bind(this)}
                     onKeyDown={this.keyDown.bind(this)}
             />
