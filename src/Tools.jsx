@@ -289,6 +289,13 @@ export class LineTool {
                 return false
             })
         }
+        if(this.mode === 'circle') {
+            this.bresenhamCircle(this.prev,this.curr, (x,y)=>{
+                ctx.fillStyle = DocStore.getDoc().model.lookupCanvasColor(col)
+                ctx.fillRect(x * scale, y * scale, scale, scale)
+                return false
+            })
+        }
     }
     mouseUp() {
         this.pressed = false
@@ -302,6 +309,13 @@ export class LineTool {
         }
         if(this.mode === 'rect') {
             this.bresenhamRect(this.prev,this.curr,(x,y)=>{
+                let pt = Point.makePoint(x, y)
+                this.app.drawStamp(pt, this.genStamp(1, col), col);
+                return false
+            })
+        }
+        if(this.mode === 'circle') {
+            this.bresenhamCircle(this.prev,this.curr,(x,y)=>{
                 let pt = Point.makePoint(x, y)
                 this.app.drawStamp(pt, this.genStamp(1, col), col);
                 return false
@@ -368,7 +382,60 @@ export class LineTool {
             cb(end.x,y)
         }
     }
+    bresenhamCircle(start,end,cb) {
+        draw_ellipse(start.x,start.y,end.x-start.x,end.y-start.y,cb)
+    }
 }
+
+function draw_ellipse(x0, y0, a, b,cb) {
+    rasterize(x0, y0, a, b, true, cb);
+    rasterize(x0, y0, b, a, false, cb);
+}
+function rasterize(x0, y0, a, b, hw, cb) {
+    var a2 = a*a;
+    var b2 = b*b;
+
+    var d  = 4*b2 - 4*b*a2 + a2;
+    var delta_A = 4*3*b2;
+    var delta_B = 4*(3*b2 - 2*b*a2 + 2*a2);
+
+    var limit   = (a2*a2)/(a2+b2);
+
+    var x = 0;
+    var y = b;
+    while (true) {
+        if (hw)
+            ellipse_points(x0, y0, x, y, cb);
+        else
+            ellipse_points(x0, y0, y, x, cb);
+
+        if (x * x >= limit)
+            break;
+
+        if (d > 0) {
+            d       += delta_B;
+            delta_A += 4*2*b2;
+            delta_B += 4*(2*b2 + 2*a2);
+
+            x += 1;
+            y -= 1;
+        }
+        else {
+            d       += delta_A;
+            delta_A += 4*2*b2;
+            delta_B += 4*2*b2;
+
+            x += 1;
+        }
+    }
+}
+function ellipse_points(x0, y0, x, y, cb) {
+    cb(x0+x,y0+y)
+    cb(x0-x,y0+y)
+    cb(x0+x,y0-y)
+    cb(x0-x,y0-y)
+}
+
 
 export class FillTool {
     constructor(app) {
