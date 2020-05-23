@@ -238,9 +238,14 @@ export class LineTool {
         this.prev = Point.makePoint(0,0)
         this.curr = Point.makePoint(0,0)
         this.pressed = false
+        this.mode = 'line'
     }
     getOptionsPanel() {
-        return <label>none</label>
+        return <HBox>
+            <ToggleButton onClick={()=>{this.mode = 'line'}}>line</ToggleButton>
+            <ToggleButton onClick={()=>{this.mode = 'rect'}}>rect</ToggleButton>
+            <ToggleButton onClick={()=>{this.mode = 'circle'}}>circle</ToggleButton>
+        </HBox>
     }
     mouseDown(surf,pt) {
         this.copy = this.app.makePasteClone()
@@ -265,25 +270,43 @@ export class LineTool {
     drawOverlay(ctx, scale) {
         if(!this.pressed) return
         let col = this.app.state.selectedColor;
-        this.bresenhamLine(this.prev.x,this.prev.y,this.curr.x,this.curr.y,(x,y)=>{
-            ctx.fillStyle = DocStore.getDoc().model.lookupCanvasColor(col)
-            ctx.fillRect(x*scale,y*scale,scale,scale)
-            return false
-        })
-        ctx.strokeStyle = 'red'
-        ctx.beginPath()
-        ctx.moveTo((this.prev.x+0.5)*scale,(this.prev.y+0.5)*scale)
-        ctx.lineTo((this.curr.x+0.5)*scale,(this.curr.y+0.5)*scale)
-        ctx.stroke()
+        if(this.mode === 'line') {
+            this.bresenhamLine(this.prev.x, this.prev.y, this.curr.x, this.curr.y, (x, y) => {
+                ctx.fillStyle = DocStore.getDoc().model.lookupCanvasColor(col)
+                ctx.fillRect(x * scale, y * scale, scale, scale)
+                return false
+            })
+            ctx.strokeStyle = 'red'
+            ctx.beginPath()
+            ctx.moveTo((this.prev.x + 0.5) * scale, (this.prev.y + 0.5) * scale)
+            ctx.lineTo((this.curr.x + 0.5) * scale, (this.curr.y + 0.5) * scale)
+            ctx.stroke()
+        }
+        if(this.mode === 'rect') {
+            this.bresenhamRect(this.prev,this.curr, (x,y)=>{
+                ctx.fillStyle = DocStore.getDoc().model.lookupCanvasColor(col)
+                ctx.fillRect(x * scale, y * scale, scale, scale)
+                return false
+            })
+        }
     }
     mouseUp() {
         this.pressed = false
         let col = this.app.state.selectedColor;
-        this.bresenhamLine(this.prev.x,this.prev.y,this.curr.x,this.curr.y,(x,y)=>{
-            let pt = Point.makePoint(x,y)
-            this.app.drawStamp(pt,this.genStamp(1, col), col );
-            return false
-        })
+        if(this.mode === 'line') {
+            this.bresenhamLine(this.prev.x, this.prev.y, this.curr.x, this.curr.y, (x, y) => {
+                let pt = Point.makePoint(x, y)
+                this.app.drawStamp(pt, this.genStamp(1, col), col);
+                return false
+            })
+        }
+        if(this.mode === 'rect') {
+            this.bresenhamRect(this.prev,this.curr,(x,y)=>{
+                let pt = Point.makePoint(x, y)
+                this.app.drawStamp(pt, this.genStamp(1, col), col);
+                return false
+            })
+        }
         this.curr = Point.makePoint(-1,-1)
         this.prev = Point.makePoint(-1,-1)
         this.app.completePasteClone(this.copy)
@@ -320,6 +343,29 @@ export class LineTool {
             if (callback(x0, y0) === true) {
                 return;
             }
+        }
+    }
+
+    bresenhamRect(start,end,cb) {
+        let sx = start.x
+        let ex = end.x
+        let sy = start.y
+        let ey = end.y
+        if(sx > ex) {
+            ex = start.x
+            sx = end.x
+        }
+        if(sy > ey) {
+            ey = start.y
+            sy = end.y
+        }
+        for(let x = sx; x<=ex; x++) {
+            cb(x,start.y)
+            cb(x,end.y)
+        }
+        for(let y = sy; y<=ey; y++) {
+            cb(start.x,y)
+            cb(end.x,y)
         }
     }
 }
