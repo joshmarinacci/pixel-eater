@@ -251,16 +251,13 @@ class DocPanel extends Component {
         };
         this.newDocCanceled = () => DialogManager.hide();
 
-        this.saveDoc = (cb) => {
+        this.saveDoc = () => {
             let doc = DocStore.getDoc()
-            console.log("saving the doc",doc)
             ToasterManager.add('saving ' + doc.title);
-
             this.props.docserver.save(DocStore.getDoc(), 'pixelimage').then(res => {
-                console.log("got results",res)
                 DocStore.getDoc().id=res.doc._id;
                 console.log("saved the doc with id",DocStore.getDoc().id)
-                if(typeof cb === 'function') cb();
+                ToasterManager.add('saved ' + doc.title);
                 this.setState({dirty:false});
             })
         };
