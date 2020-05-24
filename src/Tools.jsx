@@ -49,7 +49,30 @@ export class EyedropperTool {
     }
 }
 
-
+export const PencilToolOptions = ({doc})=>{
+    return <HBox className={'hbox-center'}>
+        <label>pen size</label>
+        <select value={doc.tools.pencil.state.size} onChange={(e)=>{
+            doc.tools.pencil.state.size = parseInt(e.target.value)
+            DocStore.fireUpdate()
+        }}>
+            <option value={1}>1</option>
+            <option value={3}>3</option>
+            <option value={5}>5</option>
+            <option value={13}>13</option>
+            <option value={41}>41</option>
+        </select>
+        <label>draw mode</label>
+        <select value={doc.tools.pencil.state.fill_mode} onChange={(e)=>{
+            doc.tools.pencil.state.fill_mode = e.target.value
+            DocStore.fireUpdate()
+        }}>
+            <option value={'color'}>color</option>
+            <option value={'pattern'}>pattern</option>
+        </select>
+        <StampView pattern={doc.model.getPattern()} model={doc.model}/>
+    </HBox>
+}
 export class PencilTool {
     constructor(app) {
         this.app = app;
@@ -87,38 +110,25 @@ export class PencilTool {
         return stamp
     }
     mouseUp(surf){
-        this.app.completePasteClone(this.copy)
+        // this.app.completePasteClone(this.copy)
     }
     contextMenu(surf,pt) {
         this.app.selectColor(DocStore.getDoc().model.getData(pt));
     }
-    getOptionsPanel() {
-        let model = DocStore.getDoc().model
-        return <HBox>
-            <label>pen size</label>
-            <select value={this.size} onChange={(e)=>{
-                this.size = parseInt(e.target.value)
-                DocStore.getDoc().model.fireUpdate()
-            }}>
-                <option value={1}>1</option>
-                <option value={3}>3</option>
-                <option value={5}>5</option>
-                <option value={13}>13</option>
-                <option value={41}>41</option>
-            </select>
-            <label>draw mode</label>
-            <select value={this.fill_mode} onChange={(e)=>{
-                this.fill_mode = e.target.value
-                DocStore.getDoc().model.fireUpdate()
-            }}>
-                <option value={'color'}>color</option>
-                <option value={'pattern'}>pattern</option>
-            </select>
-            <StampView pattern={model.getPattern()} model={model}/>
-        </HBox>
-    }
 }
 
+export const EraserToolOptions = ({doc})=>{
+    let state = doc.tools.eraser.state
+    const setSize = (size)=>{
+        doc.tools.eraser.state.size = size
+        doc.fireUpdate()
+    }
+    return <HBox>
+        <ToggleButton selected={state.size === 1} onToggle={()=>setSize(1)}>1px</ToggleButton>
+        <ToggleButton selected={state.size === 3} onToggle={()=>setSize(3)}>3px</ToggleButton>
+        <ToggleButton selected={state.size === 5} onToggle={()=>setSize(5)}>5px</ToggleButton>
+    </HBox>
+}
 export class EraserTool {
     constructor(app) {
         this.app = app;
@@ -151,13 +161,6 @@ export class EraserTool {
             data[i] = col;
         }
         return {w:size, h:size, data:data};
-    }
-    getOptionsPanel() {
-        return <HBox>
-            <ToggleButton selected={this.size === 1} onToggle={this.setSize1}>1px</ToggleButton>
-            <ToggleButton selected={this.size === 3} onToggle={this.setSize3}>3px</ToggleButton>
-            <ToggleButton selected={this.size === 5} onToggle={this.setSize5}>5px</ToggleButton>
-        </HBox>
     }
 }
 

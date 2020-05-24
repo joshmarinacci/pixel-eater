@@ -86,3 +86,7 @@ header {
 .image-button {
     image-rendering: crisp-edges;
 }
+
+.hbox-center {
+    align-items: center;
+}

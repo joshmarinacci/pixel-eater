@@ -1,7 +1,16 @@
 import React, {Component} from "react";
 import {VBox, HBox, Spacer, PopupContainer, VToggleGroup, PopupManager, DialogManager, DialogContainer} from "appy-comps";
 import DocStore from './DocStore.js'
-import {EraserTool, EyedropperTool, FillTool, LineTool, MoveTool, PencilTool, SelectionTool} from './Tools.jsx'
+import {
+    EraserTool, EraserToolOptions,
+    EyedropperTool,
+    FillTool,
+    LineTool,
+    MoveTool,
+    PencilTool,
+    PencilToolOptions,
+    SelectionTool
+} from './Tools.jsx'
 import icons_spritesheet from "./images/icons@1.png";
 import "appy-style/src/look.css";
 import "./web/components.css";
@@ -72,6 +81,7 @@ class DocPanel extends Component {
                 spriteX:0,
                 spriteY:1,
                 key:'p',
+                options_panel_component: PencilToolOptions,
             },
             {
                 tool: new EraserTool(this),
@@ -79,6 +89,7 @@ class DocPanel extends Component {
                 spriteX:0,
                 spriteY:2,
                 key:'e',
+                options_panel_component: EraserToolOptions,
             },
             {
                 tool: new LineTool(this),
@@ -529,9 +540,10 @@ class DocPanel extends Component {
         </VBox>:""
     }
     renderOptionsToolbar() {
+        let Opts = this.state.selected_tool.options_panel_component
         return <HBox className="panel top" id={"options-toolbar"}>
             <label><b>options</b></label>
-            {this.state.selected_tool.tool.getOptionsPanel()}
+            <Opts doc={this.props.doc}/>
             <Spacer/>
             <ImageButton onClick={this.zoomIn}
                          src={icons_spritesheet} scale={2} spriteX={0} spriteY={3}
