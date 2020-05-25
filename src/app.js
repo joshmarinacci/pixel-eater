@@ -71,7 +71,6 @@ class DocPanel extends Component {
             scale: 16,
             dirty:false
         };
-        this.state.shiftLayerOnly = false;
 
         this.tools = [
             {
