@@ -495,27 +495,26 @@ export class FillTool {
     }
 }
 
+export const SelectionToolOptions = ({doc})=>{
+    let model = doc.model
+    function definePatternFromSelection() {
+        let model = DocStore.getDoc().model
+        model.setPattern(model.make_stamp_from_selection())
+    }
+    return <HBox>
+        <button onClick={definePatternFromSelection}>define pattern</button>
+        <StampView pattern={model.getPattern()} model={model}/>
+    </HBox>
+}
 export class SelectionTool {
     constructor(app) {
         this.app = app
         this.inside = false
     }
-    definePatternFromSelection() {
-        let model = DocStore.getDoc().model
-        model.setPattern(model.make_stamp_from_selection())
-    }
-    getOptionsPanel() {
-        let model = DocStore.getDoc().model
-        return <HBox>
-            <button onClick={this.definePatternFromSelection.bind(this)}>define pattern</button>
-            <StampView pattern={model.getPattern()} model={model}/>
-        </HBox>
-    }
     mouseDown(surf,pt) {
         this.start = pt
         let model = DocStore.getDoc().model
         if(model.selection.inside(pt) && !model.selection.isDefault()) {
-            console.log("starting inside")
             this.inside = true
             this.start_off = Point.makePoint(model.selection.x, model.selection.y)
         }
@@ -574,5 +573,4 @@ export class SelectionTool {
         }
         return false;
     }
-
 }

@@ -7,9 +7,8 @@ import {
     FillTool, FillToolOptions,
     LineTool, LineToolOptions,
     MoveTool, MoveToolOptions,
-    PencilTool,
-    PencilToolOptions,
-    SelectionTool
+    PencilTool, PencilToolOptions,
+    SelectionTool, SelectionToolOptions
 } from './Tools.jsx'
 import icons_spritesheet from "./images/icons@1.png";
 import "appy-style/src/look.css";
@@ -128,6 +127,7 @@ class DocPanel extends Component {
                 spriteX:2,
                 spriteY:1,
                 key:'s',
+                options_panel_component: SelectionToolOptions
             }
         ];
 
