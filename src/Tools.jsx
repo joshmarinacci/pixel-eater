@@ -76,31 +76,28 @@ export const PencilToolOptions = ({doc})=>{
 export class PencilTool {
     constructor(app) {
         this.app = app;
-        this.size = 1;
         this.hoverEffect = (c,scale,pt) => {
             let sc = scale;
             c.save();
             c.strokeStyle = 'orange';
-            let off = Math.floor(this.size/2)
-            c.strokeRect(pt.x*sc-off*sc, pt.y*sc-off*sc, sc*this.size,sc*this.size);
+            let size = this.app.props.doc.tools.pencil.state.size
+            let off = Math.floor(size/2)
+            c.strokeRect(pt.x*sc-off*sc, pt.y*sc-off*sc, sc*size,sc*size);
             c.restore();
         };
-
-        this.setSize1 = () => this.size = 1;
-        this.setSize3 = () => this.size = 3;
-        this.setSize5 = () => this.size = 5;
-        this.fill_mode = 'color'
     }
-    mouseDown(surf, pt) {
+    mouseDown(surf,pt) {
         this.copy = this.app.makePasteClone()
         this.mouseDrag(surf,pt);
     }
     mouseDrag(surf,pt) {
         let col = this.app.state.selectedColor;
-        let off = Math.floor(this.size/2)
+        let size = this.app.props.doc.tools.pencil.state.size
+        let off = Math.floor(size/2)
+        let fill_mode = this.app.props.doc.tools.pencil.state.fill_mode
         pt = Point.makePoint(pt.x-off,pt.y-off)
-        if(this.fill_mode === 'color')   this.app.drawStamp(pt, this.genStamp(this.size, col), col );
-        if(this.fill_mode === 'pattern') this.app.fillStamp(pt, this.genStamp(this.size, col), DocStore.getDoc().model.getPattern())
+        if(fill_mode === 'color')   this.app.drawStamp(pt, this.genStamp(size, col), col );
+        if(fill_mode === 'pattern') this.app.fillStamp(pt, this.genStamp(size, col), DocStore.getDoc().model.getPattern())
     }
     genStamp(size,col) {
         let stamp = new Stamp(size,size)
@@ -110,7 +107,7 @@ export class PencilTool {
         return stamp
     }
     mouseUp(surf){
-        // this.app.completePasteClone(this.copy)
+        this.app.completePasteClone(this.copy)
     }
     contextMenu(surf,pt) {
         this.app.selectColor(DocStore.getDoc().model.getData(pt));
@@ -121,7 +118,7 @@ export const EraserToolOptions = ({doc})=>{
     let state = doc.tools.eraser.state
     const setSize = (size)=>{
         doc.tools.eraser.state.size = size
-        doc.fireUpdate()
+        DocStore.fireUpdate()
     }
     return <HBox>
         <ToggleButton selected={state.size === 1} onToggle={()=>setSize(1)}>1px</ToggleButton>
@@ -132,17 +129,14 @@ export const EraserToolOptions = ({doc})=>{
 export class EraserTool {
     constructor(app) {
         this.app = app;
-        this.size = 1;
         this.hoverEffect = (c,scale,pt) => {
+            let size = this.app.props.doc.tools.eraser.state.size
             let sc = scale;
             c.save();
             c.strokeStyle = 'orange';
-            c.strokeRect(pt.x*sc, pt.y*sc, sc*this.size,sc*this.size);
+            c.strokeRect(pt.x*sc, pt.y*sc, sc*size,sc*size);
             c.restore();
         }
-        this.setSize1 = () => this.size = 1;
-        this.setSize3 = () => this.size = 3;
-        this.setSize5 = () => this.size = 5;
     }
     mouseDown(surf,pt) {
         this.copy = this.app.makePasteClone()
@@ -150,16 +144,15 @@ export class EraserTool {
     }
     mouseDrag(surf,pt) {
         let col = -1;
-        this.app.drawStamp(pt,this.genStamp(this.size, col), col );
+        let size = this.app.props.doc.tools.eraser.state.size
+        this.app.drawStamp(pt,this.genStamp(size, col), col );
     }
     mouseUp() {
         this.app.completePasteClone(this.copy)
     }
     genStamp(size,col) {
         let data = [];
-        for(var i=0; i<size*size; i++) {
-            data[i] = col;
-        }
+        for(let i=0; i<size*size; i++) data[i] = col;
         return {w:size, h:size, data:data};
     }
 }

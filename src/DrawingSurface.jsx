@@ -173,7 +173,7 @@ export default class DrawingSurface extends Component {
 
     mouseUp() {
         document.removeEventListener('mousemove',this.mouse_move_handler)
-        document.removeEventListener('mosueup',this.mouse_up_handler)
+        document.removeEventListener('mouseup',this.mouse_up_handler)
         this.setState({down:false});
         this.props.tool.mouseUp(this);
         return setTimeout(this.drawCanvas.bind(this),0);
