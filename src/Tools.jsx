@@ -170,10 +170,10 @@ export class MoveTool {
     constructor(app) {
         this.app = app;
     }
-    mouseDown(surf,pt) {
+    mouseDown(surf,pt,state) {
         this.prev = pt;
     }
-    mouseDrag(surf,pt) {
+    mouseDrag(surf,pt,state) {
         let diff = {
             x: pt.x - this.prev.x,
             y: pt.y - this.prev.y
@@ -197,7 +197,7 @@ export class MoveTool {
             return
         }
 
-        if(this.app.state.shiftLayerOnly) {
+        if(this.app.props.doc.tools.move.state.shiftLayerOnly) {
             this.app.getModel().shiftSelectedLayer(diff);
         } else {
             this.app.getModel().shiftLayers(diff);
