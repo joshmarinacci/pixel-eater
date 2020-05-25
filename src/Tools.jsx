@@ -31,6 +31,9 @@ const StampView = ({ pattern, model})=>{
     return <div><canvas ref={can} width={32} height={32} style={{border:'1px solid black'}}/></div>
 }
 
+export const EyedropperToolOptions = ({doc}) => {
+    return <label>none</label>
+}
 export class EyedropperTool {
     constructor(app) {
         this.app = app;
@@ -43,9 +46,6 @@ export class EyedropperTool {
     }
     mouseUp() {
         this.app.selectTool(this.app.tools[0])
-    }
-    getOptionsPanel() {
-        return <label>none</label>
     }
 }
 

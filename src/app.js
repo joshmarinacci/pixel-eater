@@ -3,7 +3,7 @@ import {VBox, HBox, Spacer, PopupContainer, VToggleGroup, PopupManager, DialogMa
 import DocStore from './DocStore.js'
 import {
     EraserTool, EraserToolOptions,
-    EyedropperTool,
+    EyedropperTool, EyedropperToolOptions,
     FillTool, FillToolOptions,
     LineTool, LineToolOptions,
     MoveTool, MoveToolOptions,
@@ -104,6 +104,7 @@ class DocPanel extends Component {
                 spriteX:2,
                 spriteY:0,
                 key:'i',
+                options_panel_component: EyedropperToolOptions,
             },
             {
                 tool: new FillTool(this),
