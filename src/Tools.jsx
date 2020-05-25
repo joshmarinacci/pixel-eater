@@ -157,6 +157,18 @@ export class EraserTool {
     }
 }
 
+export const MoveToolOptions = ({doc})=>{
+    const toggleLayerButton = () => {
+        doc.tools.move.state.shiftLayerOnly = !doc.tools.move.state.shiftLayerOnly
+        DocStore.fireUpdate()
+    }
+    return <div className="group">
+        <ToggleButton
+            onToggle={toggleLayerButton}
+            selected={doc.tools.move.state.shiftLayerOnly}
+        >only selected layer</ToggleButton>
+    </div>
+}
 export class MoveTool {
     constructor(app) {
         this.app = app;
@@ -194,18 +206,7 @@ export class MoveTool {
             this.app.getModel().shiftLayers(diff);
         }
     }
-    toggleLayerButton() {
-        this.app.setState({ shiftLayerOnly:!this.app.state.shiftLayerOnly});
-    }
     mouseUp() {}
-    getOptionsPanel() {
-        return <div className="group">
-            <ToggleButton
-                onToggle={this.toggleLayerButton.bind(this)}
-                selected={this.app.state.shiftLayerOnly}
-            >only selected layer</ToggleButton>
-        </div>
-    }
     keyDown(e) {
         if(e.keyCode === KEYBOARD.ARROW_RIGHT) {
             this.shift({x:1,y:0});
@@ -228,20 +229,24 @@ export class MoveTool {
 }
 
 
+export const LineToolOptions = ({doc}) => {
+    let mode = doc.tools.line.state.mode
+    const setMode = (mode) => {
+        doc.tools.line.state.mode = mode
+        DocStore.fireUpdate()
+    }
+    return <HBox>
+        <ToggleButton selected={mode==='line'} onClick={()=>setMode('line')}>line</ToggleButton>
+        <ToggleButton selected={mode==='rect'} onClick={()=>setMode('rect')}>rect</ToggleButton>
+        <ToggleButton selected={mode==='circle'} onClick={()=>setMode('circle')}>circle</ToggleButton>
+    </HBox>
+}
 export class LineTool {
     constructor(app) {
         this.app = app;
         this.prev = Point.makePoint(0,0)
         this.curr = Point.makePoint(0,0)
         this.pressed = false
-        this.mode = 'line'
-    }
-    getOptionsPanel() {
-        return <HBox>
-            <ToggleButton onClick={()=>{this.mode = 'line'}}>line</ToggleButton>
-            <ToggleButton onClick={()=>{this.mode = 'rect'}}>rect</ToggleButton>
-            <ToggleButton onClick={()=>{this.mode = 'circle'}}>circle</ToggleButton>
-        </HBox>
     }
     mouseDown(surf,pt) {
         this.copy = this.app.makePasteClone()
@@ -266,7 +271,8 @@ export class LineTool {
     drawOverlay(ctx, scale) {
         if(!this.pressed) return
         let col = this.app.state.selectedColor;
-        if(this.mode === 'line') {
+        let mode = this.app.props.doc.tools.line.state.mode
+        if(mode === 'line') {
             this.bresenhamLine(this.prev.x, this.prev.y, this.curr.x, this.curr.y, (x, y) => {
                 ctx.fillStyle = DocStore.getDoc().model.lookupCanvasColor(col)
                 ctx.fillRect(x * scale, y * scale, scale, scale)
@@ -278,14 +284,14 @@ export class LineTool {
             ctx.lineTo((this.curr.x + 0.5) * scale, (this.curr.y + 0.5) * scale)
             ctx.stroke()
         }
-        if(this.mode === 'rect') {
+        if(mode === 'rect') {
             this.bresenhamRect(this.prev,this.curr, (x,y)=>{
                 ctx.fillStyle = DocStore.getDoc().model.lookupCanvasColor(col)
                 ctx.fillRect(x * scale, y * scale, scale, scale)
                 return false
             })
         }
-        if(this.mode === 'circle') {
+        if(mode === 'circle') {
             this.bresenhamCircle(this.prev,this.curr, (x,y)=>{
                 ctx.fillStyle = DocStore.getDoc().model.lookupCanvasColor(col)
                 ctx.fillRect(x * scale, y * scale, scale, scale)
@@ -296,21 +302,22 @@ export class LineTool {
     mouseUp() {
         this.pressed = false
         let col = this.app.state.selectedColor;
-        if(this.mode === 'line') {
+        let mode = this.app.props.doc.tools.line.state.mode
+        if(mode === 'line') {
             this.bresenhamLine(this.prev.x, this.prev.y, this.curr.x, this.curr.y, (x, y) => {
                 let pt = Point.makePoint(x, y)
                 this.app.drawStamp(pt, this.genStamp(1, col), col);
                 return false
             })
         }
-        if(this.mode === 'rect') {
+        if(mode === 'rect') {
             this.bresenhamRect(this.prev,this.curr,(x,y)=>{
                 let pt = Point.makePoint(x, y)
                 this.app.drawStamp(pt, this.genStamp(1, col), col);
                 return false
             })
         }
-        if(this.mode === 'circle') {
+        if(mode === 'circle') {
             this.bresenhamCircle(this.prev,this.curr,(x,y)=>{
                 let pt = Point.makePoint(x, y)
                 this.app.drawStamp(pt, this.genStamp(1, col), col);
@@ -432,34 +439,42 @@ function ellipse_points(x0, y0, x, y, cb) {
     cb(x0-x,y0-y)
 }
 
+export const FillToolOptions = ({doc})=>{
+    let mode = doc.tools.fill.state.mode
+    let model = doc.model
+    return <HBox>
+        <select value={mode} onChange={(e)=>{
+            doc.tools.fill.state.mode = e.target.value
+            DocStore.fireUpdate()
+        }}>
+            <option value={'color'}>color</option>
+            <option value={'pattern'}>pattern</option>
+        </select>
+        <StampView pattern={model.getPattern()} model={model}/>
+    </HBox>
 
+}
 export class FillTool {
     constructor(app) {
         this.app = app
-        this.fill_mode = 'color'
     }
     mouseDown(surf,pt) {
         this.copy = this.app.makePasteClone()
         let model = DocStore.getDoc().model
         let layer = model.getCurrentLayer();
         let src_col = model.getData(pt)
-        if(this.fill_mode === 'color') {
+        if(this.app.props.doc.tools.fill.state.mode === 'color') {
             let dst_col = this.app.state.selectedColor;
-            // this.floodFill(model,pt,src_col,dst_col,layer)
             floodFill(model,layer,pt,src_col,dst_col)
         } else {
             let temp_col = -2
-            // this.floodFill(model, pt, src_col, temp_col, layer)
             floodFill(model,layer,pt,src_col,temp_col)
             this.replaceWithPattern(model, temp_col, model.getPattern(), layer)
         }
     }
-
     contextMenu(surf,pt) {
         this.app.selectColor(DocStore.getDoc().model.getData(pt));
     }
-
-
     replaceWithPattern(model, src, pattern, layer) {
         for(let i=0; i<model.getWidth(); i++) {
             for(let j=0; j<model.getHeight(); j++) {
@@ -471,20 +486,6 @@ export class FillTool {
                 }
             }
         }
-    }
-
-    getOptionsPanel() {
-        let model = DocStore.getDoc().model
-        return <HBox>
-            <select value={this.fill_mode} onChange={(e)=>{
-                this.fill_mode = e.target.value
-                DocStore.getDoc().model.fireUpdate()
-            }}>
-                <option value={'color'}>color</option>
-                <option value={'pattern'}>pattern</option>
-            </select>
-            <StampView pattern={model.getPattern()} model={model}/>
-        </HBox>
     }
     mouseDrag(surf,pt) {
 

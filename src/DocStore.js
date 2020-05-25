@@ -63,7 +63,23 @@ class DocStore {
                     state: {
                         size:1,
                     }
+                },
+                move: {
+                    state: {
+                        shiftLayerOnly:true,
+                    }
+                },
+                line: {
+                    state: {
+                        mode:'line'
+                    }
+                },
+                fill: {
+                    state: {
+                        mode:'color'
+                    }
                 }
+
             }
         }
     }

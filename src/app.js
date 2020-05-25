@@ -4,9 +4,9 @@ import DocStore from './DocStore.js'
 import {
     EraserTool, EraserToolOptions,
     EyedropperTool,
-    FillTool,
-    LineTool,
-    MoveTool,
+    FillTool, FillToolOptions,
+    LineTool, LineToolOptions,
+    MoveTool, MoveToolOptions,
     PencilTool,
     PencilToolOptions,
     SelectionTool
@@ -97,6 +97,7 @@ class DocPanel extends Component {
                 spriteX:1,
                 spriteY:1,
                 key:'l',
+                options_panel_component: LineToolOptions,
             },
             {
                 tool: new EyedropperTool(this),
@@ -111,6 +112,7 @@ class DocPanel extends Component {
                 spriteY:0,
                 tooltip: 'Fill',
                 key:'f',
+                options_panel_component: FillToolOptions
             },
             {
                 tool: new MoveTool(this),
@@ -118,6 +120,7 @@ class DocPanel extends Component {
                 spriteX:3,
                 spriteY:1,
                 key:'v',
+                options_panel_component: MoveToolOptions,
             },
             {
                 tool: new SelectionTool(this),
