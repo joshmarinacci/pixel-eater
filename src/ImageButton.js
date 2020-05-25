@@ -13,6 +13,8 @@ export class ImageButton extends Button {
             backgroundSize: `${200*window.devicePixelRatio*this.props.scale}%`,
             width:16*this.props.scale,
             height:16*this.props.scale,
+            minWidth:16*this.props.scale,
+            minHeight:16*this.props.scale,
             borderWidth: '0px',
             borderRadius: 0,
             borderColor: 'black',

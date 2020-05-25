@@ -47,6 +47,37 @@ export default class DrawingSurface extends Component {
         this.mouse_down_handler = (e) => this.mouseDown(e)
         this.mouse_move_handler = (e) => this.mouseMove(e)
         this.mouse_up_handler = (e) => this.mouseUp(e)
+
+        this.touch_start_handler = (e)=>{
+            e.preventDefault()
+            e.stopPropagation()
+            let modelPoint = this.getModelPoint_touch(e)
+            this.setState({down:true, prevPoint:modelPoint});
+            let name = this.props.selected_tool.name
+            this.props.tool.mouseDown(this,modelPoint,this.props.doc.tools[name].state,e);
+        }
+        this.touch_move_handler = (e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            let modelPoint = this.getModelPoint_touch(e);
+            this.setState({hoverPoint:modelPoint});
+            if(!this.state.down) return setTimeout(this.drawCanvas.bind(this),0);
+            if(!modelPoint.equals(this.state.prevPoint)) {
+                let name = this.props.selected_tool.name
+                this.props.tool.mouseDrag(this,modelPoint,this.props.doc.tools[name].state,e);
+                this.setState({prevPoint:modelPoint});
+                return setTimeout(this.drawCanvas.bind(this),0);
+            }
+        }
+        this.touch_end_handler = (e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            this.setState({down:false});
+            let name = this.props.selected_tool.name
+            let modelPoint = this.getModelPoint_touch(e);
+            this.props.tool.mouseUp(this,modelPoint,this.props.doc.tools[name].state,e);
+            return setTimeout(this.drawCanvas.bind(this),0);
+        }
     }
 
 
@@ -144,6 +175,11 @@ export default class DrawingSurface extends Component {
         let rect = this.refs.canvas.getBoundingClientRect();
         return this.mouseToModel(Point.makePoint(e.clientX-rect.left, e.clientY-rect.top));
     }
+    getModelPoint_touch(e) {
+        let rect = this.refs.canvas.getBoundingClientRect()
+        let touch = e.changedTouches[0]
+        return this.mouseToModel(Point.makePoint(touch.clientX-rect.left, touch.clientY-rect.top));
+    }
 
     mouseDown(e) {
         if(e.button !== 0) return;
@@ -207,6 +243,9 @@ export default class DrawingSurface extends Component {
                     onMouseDown={this.mouse_down_handler}
                     onContextMenu={this.contextMenu.bind(this)}
                     onKeyDown={this.keyDown.bind(this)}
+                    onTouchStart={this.touch_start_handler}
+                    onTouchMove={this.touch_move_handler}
+                    onTouchEnd={this.touch_end_handler}
             />
         </div>
     }

@@ -541,7 +541,7 @@ class DocPanel extends Component {
         return <HBox className="panel top" id={"top-toolbar"}>
             <input type="text" ref="doc_title" value={this.props.doc.title} onChange={this.titleEdited.bind(this)}/>
             <label><i>{this.state.dirty?"*":""}</i></label>
-            <label>{model.getWidth()} x {model.getHeight()}</label>
+            <label>{model.getWidth()}&nbsp;x&nbsp;{model.getHeight()}</label>
             <Spacer/>
             <ImageButton
                 onClick={this.newDoc}
