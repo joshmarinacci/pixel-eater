@@ -408,6 +408,22 @@ export default class BitmapModel {
         layers.splice(index,0,layer);
         this.setLayers(layers);
     }
+    mergeLayerWithNext(index) {
+        let l1 = this.layers[index]
+        let l2 = this.layers[index + 1]
+        for(let i=0; i<this.getWidth(); i++) {
+            for(let j=0; j<this.getHeight(); j++) {
+                let v = this.get_xy(i,j,l1)
+                if(v === -1) continue
+                this.set_xy(i,j,l2,v)
+            }
+        }
+        let newLayers = this.layers.slice()
+        //delete the upper one
+        newLayers.splice(index,1)
+        // trigger update
+        this.setLayers(newLayers)
+    }
     setLayers(newLayers) {
         var oldLayers = this.layers;
         let redo = () => {

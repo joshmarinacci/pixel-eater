@@ -1,6 +1,8 @@
 import React from "react";
 import DraggableList from "./DraggableList.jsx";
 import {VBox, HBox, Spacer} from "appy-comps";
+import icons_spritesheet from './images/icons@1.png'
+import {ImageButton} from './ImageButton.js'
 
 class LayerItem extends React.Component {
     constructor(props) {
@@ -116,6 +118,12 @@ export default class LayersPanel extends React.Component {
         if(n+1 < this.props.model.layers.length) this.props.model.moveLayerTo(cur,n+1);
         this.props.model.setSelectedLayer(cur);
     }
+    mergeLayer() {
+        let cur = this.props.model.getCurrentLayer();
+        let n = this.props.model.getLayerIndex(cur);
+        if(n+1 >= this.props.model.layers.length) return
+        this.props.model.mergeLayerWithNext(n)
+    }
     itemDropped(remove,insert,item) {
         this.props.model.moveLayerTo(item,insert);
         this.props.model.setSelectedLayer(item);
@@ -136,6 +144,9 @@ export default class LayersPanel extends React.Component {
                 <button onClick={this.moveLayerUp.bind(this)}><i className="fa fa-arrow-up"/></button>
                 <button onClick={this.moveLayerDown.bind(this)}><i className="fa fa-arrow-down"/></button>
                 <Spacer/>
+                <ImageButton onClick={this.mergeLayer.bind(this)} tooltip={"merge layer"}
+                             src={icons_spritesheet} scale={2} spriteX={5} spriteY={3}
+                />
                 <button onClick={this.deleteLayer.bind(this)}><i className="fa fa-trash"/></button>
             </HBox>
         </VBox>
