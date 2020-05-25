@@ -511,6 +511,7 @@ function is_valid(model, layer, pt, src_col, dst_col) {
     let cur = model.getData(pt)
     //if not the target color, return
     if(cur !== src_col) return false
+    if(cur === dst_col) return false
     return true
 }
 

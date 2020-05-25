@@ -3,7 +3,7 @@ import {PALETTES} from './palettes.js'
 import {Point} from './DrawingSurface.jsx'
 
 
-it('does stuff', () => {
+it('fills', () => {
     let model = new BitmapModel(150,110,PALETTES.nes)
     let pt = Point.makePoint(0,0)
     let color0 = -1
@@ -24,6 +24,14 @@ it('does stuff', () => {
     expect(model.getData(Point.makePoint(3,0))).toEqual(color2)
     expect(model.getData(Point.makePoint(10,0))).toEqual(color2)
     expect(model.getData(Point.makePoint(0,10))).toEqual(color2)
+});
+
+it('fill-same-color-crash',()=>{
+    let model = new BitmapModel(5,5,PALETTES.nes)
+    model.setData(Point.makePoint(3,3),3,model.getCurrentLayer())
+    model.setData(Point.makePoint(3,4),3,model.getCurrentLayer())
+    floodFill(model,model.getCurrentLayer(),Point.makePoint(3,3),3, 3)
+    expect(model.getData(Point.makePoint(3,3))).toEqual(3)
 });
 
 
