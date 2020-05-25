@@ -11,7 +11,6 @@ export const LoginButton = ({docserver})=> {
         }
         ds.on(LOGIN,cb)
         return () => {
-            console.log('rebuilding')
             ds.off(LOGIN,cb)
         }
     },li)

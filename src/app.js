@@ -233,6 +233,47 @@ class DocPanel extends Component {
             this.props.docserver.load(id).then(doc => {
                 doc.model = BitmapModel.fromJSON(doc.model);
                 console.log("loaded the doc",doc.id)
+                if(!doc.tools) {
+                    doc.tools = {
+                        pencil:{
+                            state:{
+                                size:1,
+                                fill_mode:'color',
+                            }
+                        },
+                        eraser: {
+                            state: {
+                                size:1,
+                            }
+                        },
+                        move: {
+                            state: {
+                                shiftLayerOnly:true,
+                            }
+                        },
+                        line: {
+                            state: {
+                                mode:'line'
+                            }
+                        },
+                        fill: {
+                            state: {
+                                mode:'color'
+                            }
+                        },
+                        eyedropper:{
+                            state: {
+
+                            }
+                        },
+                        selection: {
+                            state:{
+
+                            }
+                        }
+                    }
+                }
+
                 DialogManager.hide()
                 DocStore.setDoc(doc)
 
