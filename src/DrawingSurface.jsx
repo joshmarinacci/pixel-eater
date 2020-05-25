@@ -49,6 +49,7 @@ export default class DrawingSurface extends Component {
         this.mouse_up_handler = (e) => this.mouseUp(e)
 
         this.touch_start_handler = (e)=>{
+            if(this.props.scrollTouch) return
             e.preventDefault()
             e.stopPropagation()
             let modelPoint = this.getModelPoint_touch(e)
@@ -57,6 +58,7 @@ export default class DrawingSurface extends Component {
             this.props.tool.mouseDown(this,modelPoint,this.props.doc.tools[name].state,e);
         }
         this.touch_move_handler = (e) => {
+            if(this.props.scrollTouch) return
             e.preventDefault()
             e.stopPropagation()
             let modelPoint = this.getModelPoint_touch(e);
@@ -70,6 +72,7 @@ export default class DrawingSurface extends Component {
             }
         }
         this.touch_end_handler = (e) => {
+            if(this.props.scrollTouch) return
             e.preventDefault()
             e.stopPropagation()
             this.setState({down:false});
@@ -164,6 +167,7 @@ export default class DrawingSurface extends Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
+        if(this.props.scrollTouch !== nextProps.scrollTouch) return true
         if(this.props.scale !== nextProps.scale) return true;
         if(this.props.model !== nextProps.model) return true;
         if(this.state.width !== nextProps.model.getWidth()) return true;
@@ -237,6 +241,7 @@ export default class DrawingSurface extends Component {
     render() {
         return <div className="grow scroll" id={"drawing-surface"}>
             <canvas ref="canvas"
+                    style={{ touchAction:this.props.scrollTouch?"auto":"none" }}
                     tabIndex="1"
                     width={this.props.model.getWidth()*this.props.scale+1}
                     height={this.props.model.getHeight()*this.props.scale+1}

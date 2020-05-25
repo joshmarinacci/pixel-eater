@@ -38,8 +38,8 @@ html, body, #root {
     background-image: url(images/alpha-bg@1.png);
 }
 #drawing-surface canvas {
-    touch-action: none;
-    user-select: none;
+    /*touch-action: none;*/
+    /*user-select: none;*/
 }
 
 #recent-colors {

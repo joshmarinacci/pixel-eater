@@ -35,6 +35,7 @@ import {MenuButton} from './menubutton.js'
 import {MainLayout} from './MainLayout.js'
 import {ImageButton, ImageToggleButton} from "./ImageButton.js"
 import {ToasterContainer, ToasterManager} from './common/ToasterContainer.js'
+import ToggleButton from './common/ToggleButton.jsx'
 
 
 export default class App extends Component {
@@ -67,6 +68,7 @@ class DocPanel extends Component {
             drawPreview:false,
             showLayers:false,
             fullscreen:false,
+            scrollTouch:false,
             selectedColor:1,
             scale: 16,
             dirty:false
@@ -593,15 +595,17 @@ class DocPanel extends Component {
     renderOptionsToolbar() {
         let Opts = this.state.selected_tool.options_panel_component
         return <HBox className="panel top" id={"options-toolbar"}>
-            <label><b>options</b></label>
-            <Opts doc={this.props.doc}/>
-            <Spacer/>
             <ImageButton onClick={this.zoomIn}
                          src={icons_spritesheet} scale={2} spriteX={0} spriteY={3}
             />
             <ImageButton onClick={this.zoomOut}
                          src={icons_spritesheet} scale={2} spriteX={1} spriteY={3}
             />
+            <ToggleButton selected={this.state.scrollTouch} onToggle={()=>{
+                this.setState({scrollTouch:!this.state.scrollTouch})
+            }}>scroll</ToggleButton>
+            <Spacer/>
+            <Opts doc={this.props.doc}/>
         </HBox>
     }
     render() {
@@ -618,6 +622,7 @@ class DocPanel extends Component {
                 drawGrid={this.state.drawGrid}
                 scale={this.state.scale}
                 doc={this.props.doc}
+                scrollTouch={this.state.scrollTouch}
             />
             <RecentColors colors={this.state.recentColors} model={model} onSelectColor={this.selectColor}/>
             {this.renderPreviewPanel()}
