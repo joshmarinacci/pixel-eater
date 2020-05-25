@@ -76,6 +76,7 @@ class DocPanel extends Component {
         this.tools = [
             {
                 tool: new PencilTool(this),
+                name:'pencil',
                 tooltip:'Pencil',
                 spriteX:0,
                 spriteY:1,
@@ -84,6 +85,7 @@ class DocPanel extends Component {
             },
             {
                 tool: new EraserTool(this),
+                name:'eraser',
                 tooltip:'Eraser',
                 spriteX:0,
                 spriteY:2,
@@ -92,6 +94,7 @@ class DocPanel extends Component {
             },
             {
                 tool: new LineTool(this),
+                name:'line',
                 tooltip: 'Line',
                 spriteX:1,
                 spriteY:1,
@@ -100,6 +103,7 @@ class DocPanel extends Component {
             },
             {
                 tool: new EyedropperTool(this),
+                name:'eyedropper',
                 tooltip:'Eyedropper',
                 spriteX:2,
                 spriteY:0,
@@ -108,6 +112,7 @@ class DocPanel extends Component {
             },
             {
                 tool: new FillTool(this),
+                name:'fill',
                 spriteX:3,
                 spriteY:0,
                 tooltip: 'Fill',
@@ -116,6 +121,7 @@ class DocPanel extends Component {
             },
             {
                 tool: new MoveTool(this),
+                name:'move',
                 tooltip:'Move Layer(s)',
                 spriteX:3,
                 spriteY:1,
@@ -124,6 +130,7 @@ class DocPanel extends Component {
             },
             {
                 tool: new SelectionTool(this),
+                name:'selection',
                 tooltip: 'Selection',
                 spriteX:2,
                 spriteY:1,
@@ -565,7 +572,12 @@ class DocPanel extends Component {
             {this.renderOptionsToolbar() }
             <DrawingSurface
                 tabIndex="1"
-                tool={this.state.selected_tool.tool} model={model} drawGrid={this.state.drawGrid} scale={this.state.scale}
+                tool={this.state.selected_tool.tool}
+                selected_tool={this.state.selected_tool}
+                model={model}
+                drawGrid={this.state.drawGrid}
+                scale={this.state.scale}
+                doc={this.props.doc}
             />
             <RecentColors colors={this.state.recentColors} model={model} onSelectColor={this.selectColor}/>
             {this.renderPreviewPanel()}

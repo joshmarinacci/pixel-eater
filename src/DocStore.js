@@ -78,6 +78,16 @@ class DocStore {
                     state: {
                         mode:'color'
                     }
+                },
+                eyedropper:{
+                    state: {
+
+                    }
+                },
+                selection: {
+                    state:{
+
+                    }
                 }
 
             }

@@ -76,28 +76,26 @@ export const PencilToolOptions = ({doc})=>{
 export class PencilTool {
     constructor(app) {
         this.app = app;
-        this.hoverEffect = (c,scale,pt) => {
+        this.hoverEffect = (c,scale,pt,state) => {
             let sc = scale;
             c.save();
             c.strokeStyle = 'orange';
-            let size = this.app.props.doc.tools.pencil.state.size
+            let size = state.size
             let off = Math.floor(size/2)
             c.strokeRect(pt.x*sc-off*sc, pt.y*sc-off*sc, sc*size,sc*size);
             c.restore();
         };
     }
-    mouseDown(surf,pt) {
+    mouseDown(surf,pt, state) {
         this.copy = this.app.makePasteClone()
-        this.mouseDrag(surf,pt);
+        this.mouseDrag(surf,pt,state);
     }
-    mouseDrag(surf,pt) {
+    mouseDrag(surf,pt,state,e) {
         let col = this.app.state.selectedColor;
-        let size = this.app.props.doc.tools.pencil.state.size
-        let off = Math.floor(size/2)
-        let fill_mode = this.app.props.doc.tools.pencil.state.fill_mode
+        let off = Math.floor(state.size/2)
         pt = Point.makePoint(pt.x-off,pt.y-off)
-        if(fill_mode === 'color')   this.app.drawStamp(pt, this.genStamp(size, col), col );
-        if(fill_mode === 'pattern') this.app.fillStamp(pt, this.genStamp(size, col), DocStore.getDoc().model.getPattern())
+        if(state.fill_mode === 'color')   this.app.drawStamp(pt, this.genStamp(state.size, col), col );
+        if(state.fill_mode === 'pattern') this.app.fillStamp(pt, this.genStamp(state.size, col), DocStore.getDoc().model.getPattern())
     }
     genStamp(size,col) {
         let stamp = new Stamp(size,size)
@@ -129,8 +127,8 @@ export const EraserToolOptions = ({doc})=>{
 export class EraserTool {
     constructor(app) {
         this.app = app;
-        this.hoverEffect = (c,scale,pt) => {
-            let size = this.app.props.doc.tools.eraser.state.size
+        this.hoverEffect = (c,scale,pt,state) => {
+            let size = state.size
             let sc = scale;
             c.save();
             c.strokeStyle = 'orange';
@@ -138,14 +136,13 @@ export class EraserTool {
             c.restore();
         }
     }
-    mouseDown(surf,pt) {
+    mouseDown(surf,pt,state) {
         this.copy = this.app.makePasteClone()
-        this.mouseDrag(surf,pt);
+        this.mouseDrag(surf,pt,state);
     }
-    mouseDrag(surf,pt) {
+    mouseDrag(surf,pt,state) {
         let col = -1;
-        let size = this.app.props.doc.tools.eraser.state.size
-        this.app.drawStamp(pt,this.genStamp(size, col), col );
+        this.app.drawStamp(pt,this.genStamp(state.size, col), col );
     }
     mouseUp() {
         this.app.completePasteClone(this.copy)
@@ -254,7 +251,7 @@ export class LineTool {
         this.curr = pt;
         this.pressed = true
     }
-    mouseDrag(surf,pt,e) {
+    mouseDrag(surf,pt,state,e) {
         this.curr = pt
         if(e.shiftKey) {
             let sections = 8
@@ -268,10 +265,10 @@ export class LineTool {
             this.curr = this.prev.add(diff).round()
         }
     }
-    drawOverlay(ctx, scale) {
+    drawOverlay(ctx, scale, state) {
         if(!this.pressed) return
         let col = this.app.state.selectedColor;
-        let mode = this.app.props.doc.tools.line.state.mode
+        let mode = state.mode
         if(mode === 'line') {
             this.bresenhamLine(this.prev.x, this.prev.y, this.curr.x, this.curr.y, (x, y) => {
                 ctx.fillStyle = DocStore.getDoc().model.lookupCanvasColor(col)
@@ -299,10 +296,10 @@ export class LineTool {
             })
         }
     }
-    mouseUp() {
+    mouseUp(surf,pt,state) {
         this.pressed = false
         let col = this.app.state.selectedColor;
-        let mode = this.app.props.doc.tools.line.state.mode
+        let mode = state.mode
         if(mode === 'line') {
             this.bresenhamLine(this.prev.x, this.prev.y, this.curr.x, this.curr.y, (x, y) => {
                 let pt = Point.makePoint(x, y)
@@ -458,12 +455,12 @@ export class FillTool {
     constructor(app) {
         this.app = app
     }
-    mouseDown(surf,pt) {
+    mouseDown(surf,pt,state) {
         this.copy = this.app.makePasteClone()
         let model = DocStore.getDoc().model
         let layer = model.getCurrentLayer();
         let src_col = model.getData(pt)
-        if(this.app.props.doc.tools.fill.state.mode === 'color') {
+        if(state.mode === 'color') {
             let dst_col = this.app.state.selectedColor;
             floodFill(model,layer,pt,src_col,dst_col)
         } else {
