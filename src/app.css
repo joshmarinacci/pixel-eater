@@ -15,7 +15,7 @@ html, body, #root {
 #side-toolbar {
     grid-row: span 4;
     align-items: center;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 #top-toolbar {
     grid-column-start: 1;
@@ -24,7 +24,7 @@ html, body, #root {
     border: 0px solid black;
     border-bottom-width: 1px;
     align-items: center;
-    overflow-x: scroll;
+    overflow-x: auto;
 }
 #options-toolbar {
     grid-column: 2;

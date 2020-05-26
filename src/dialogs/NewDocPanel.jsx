@@ -1,5 +1,5 @@
 import React, {Component} from "react";
-import {Dialog, VBox, HBox} from "appy-comps";
+import {Dialog, VBox, HBox, StandardDialog, Spacer} from "appy-comps"
 import DropdownButton from "../Dropdown.jsx";
 
 
@@ -90,9 +90,9 @@ export default class extends Component {
     }
 
     render() {
-        return <Dialog visible={true}>
+        return <StandardDialog visible={true}>
             <header>New Doc</header>
-            <VBox className="form">
+            <main className="form">
                 <HBox>
                     <label>Name</label>
                     <input ref='title'
@@ -116,11 +116,12 @@ export default class extends Component {
                     <label> </label>
                     <DropdownButton list={this.palettes} value={this.state.selectedPalette} onSelect={this.selectPalette.bind(this)}/>
                 </HBox>
-            </VBox>
+            </main>
             <footer className="children-right">
-                <button onClick={this.performOkay.bind(this)}>okay</button>
+                <Spacer/>
                 <button onClick={this.props.onCancel}>cancel</button>
+                <button onClick={this.performOkay.bind(this)}>okay</button>
             </footer>
-        </Dialog>
+        </StandardDialog>
     }
 }

@@ -1,5 +1,5 @@
 import React, {Component} from "react";
-import {Dialog, VBox, HBox, DialogManager} from "appy-comps";
+import {Dialog, VBox, HBox, DialogManager, StandardDialog, Spacer} from "appy-comps"
 
 
 export default class extends Component {
@@ -29,9 +29,9 @@ export default class extends Component {
     }
 
     render() {
-        return <Dialog visible={true}>
+        return <StandardDialog visible={true}>
             <header>Resize Canvas Dimensions</header>
-            <VBox className="form">
+            <main className="form">
                 <HBox>
                     <label>Width</label>
                     <input ref='width' type="text" size="6" value={this.state.width} onChange={this.changedWidth}/>
@@ -40,12 +40,13 @@ export default class extends Component {
                     <label>Height</label>
                     <input ref="height" type="text" size="6" value={this.state.height} onChange={this.changedHeight}/>
                 </HBox>
-            </VBox>
+            </main>
 
             <footer className="children-right">
+                <Spacer/>
                 <button onClick={this.okay}>okay</button>
                 <button onClick={this.cancel}>cancel</button>
             </footer>
-        </Dialog>
+        </StandardDialog>
     }
 }

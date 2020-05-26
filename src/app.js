@@ -1,5 +1,15 @@
 import React, {Component} from "react";
-import {VBox, HBox, Spacer, PopupContainer, VToggleGroup, PopupManager, DialogManager, DialogContainer} from "appy-comps";
+import {
+    VBox,
+    HBox,
+    Spacer,
+    PopupContainer,
+    VToggleGroup,
+    PopupManager,
+    DialogManager,
+    DialogContainer,
+    PopupManagerContext
+} from "appy-comps"
 import DocStore from './DocStore.js'
 import {
     EraserTool, EraserToolOptions,
@@ -21,8 +31,8 @@ import {DocServerAPI} from "docserver2-client"
 import AlertPanel from './common/AlertPanel.jsx'
 import OpenDocPanel from './dialogs/OpenDocPanel.jsx'
 import ResizePanel from './dialogs/ResizePanel.jsx'
-import ColorPicker from './ColorPicker.jsx'
-import ColorWellButton from './ColorWellButton.jsx'
+import {ColorPicker} from './ColorPicker.jsx'
+import {ColorWellButton, PopupImageButton} from './ColorWellButton.jsx'
 import PreviewPanel from './PreviewPanel.jsx'
 import LayersPanel from './LayersPanel.jsx'
 import RecentColors from './RecentColors.jsx'
@@ -47,7 +57,11 @@ export default class App extends Component {
         DocStore.changed(()=>this.setState({doc:DocStore.getDoc()}));
     }
     render() {
-        return <DocPanel doc={this.state.doc} docserver={this.docserver}/>
+        return (
+        <PopupManagerContext.Provider value={new PopupManager()}>
+            <DocPanel doc={this.state.doc} docserver={this.docserver}/>
+        </PopupManagerContext.Provider>
+        )
     }
 }
 
@@ -491,7 +505,8 @@ class DocPanel extends Component {
                  src={icons_spritesheet} scale={2} spriteX={2} spriteY={2}
              />
             <Spacer/>
-            <ImageButton onClick={(e)=>PopupManager.show(<ColorPicker model={this.props.doc.model} onSelectColor={this.selectBGColor}/>,e.target)}
+            <PopupImageButton
+                content={<ColorPicker model={this.props.doc.model} onSelectColor={this.selectBGColor}/>}
                          tooltip="Settings"
                          src={icons_spritesheet} scale={2} spriteX={4} spriteY={1}
             />

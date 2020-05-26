@@ -1,16 +1,17 @@
 import React, {Component} from "react";
-import {Dialog, VBox} from "appy-comps";
+import {Dialog, Spacer, StandardDialog, VBox} from "appy-comps"
 
 export default class AlertPanel extends Component {
     render() {
-        return <Dialog visible={true}>
+        return <StandardDialog visible={true}>
             <header>Alert</header>
-            <VBox className="grow">{this.props.text}</VBox>
+            <main className="grow">{this.props.text}</main>
             <footer className="children-right">
+                <Spacer/>
                 {this.renderCancelButton()}
                 {this.renderOkayButton()}
             </footer>
-        </Dialog>
+        </StandardDialog>
     }
 
     renderCancelButton() {

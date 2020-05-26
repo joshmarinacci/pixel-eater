@@ -1,5 +1,5 @@
-import React, {Component} from "react";
-import {PopupManager} from "appy-comps";
+import React, {Component, useContext} from "react";
+import {PopupManager, PopupManagerContext} from "appy-comps"
 
 const popupStyle = {
     margin:0,
@@ -10,16 +10,23 @@ const popupStyle = {
     width:32*16+'px'
 };
 
-export default class extends Component {
-    selectColor(c,i,e) {
-        PopupManager.hide();
-        this.props.onSelectColor(i);
+export const ColorPicker = ({model, onSelectColor})=>{
+    const pm = useContext(PopupManagerContext)
+    const selectColor = (c,i,e) => {
+        pm.hide();
+        onSelectColor(i);
     }
-    render() {
-        var wells = this.props.model.getPalette().map((c,i) => {
-            const colorStyle ={border:'0px solid black', backgroundColor:c, width:32,height:32, display:'inline-block', margin:0, padding:0};
-            return <div key={i} style={colorStyle} onClick={this.selectColor.bind(this, c, i)} />
-        });
-        return <div style={popupStyle}>{wells}</div>
-    }
+    const wells = model.getPalette().map((c,i) => {
+        const colorStyle ={
+            border:'0px solid black',
+            backgroundColor:c,
+            width:32,height:32,
+            display:'inline-block',
+            margin:0, padding:0
+        };
+        return <div key={i} style={colorStyle} onClick={()=>{
+            selectColor(c, i)
+        }} />
+    });
+    return <div style={popupStyle}>{wells}</div>
 }

@@ -21,7 +21,7 @@
   "homepage": "https://apps.josh.earth/pixel-eater/",
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.13.0",
-    "appy-comps": "0.1.15",
+    "appy-comps": "0.2.2",
     "appy-style": "0.0.7",
     "docserver2-client": "0.0.7",
     "react": "16.8.6",

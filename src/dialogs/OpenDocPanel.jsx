@@ -1,5 +1,5 @@
 import React, {Component} from "react";
-import {Dialog, VBox} from "appy-comps";
+import {StandardDialog, Spacer} from "appy-comps"
 import Config from "../Config.js"
 
 export default class OpenDocPanel extends Component {
@@ -20,17 +20,18 @@ export default class OpenDocPanel extends Component {
         });
     }
     render() {
-        return <Dialog visible={true}>
+        return <StandardDialog visible={true}>
             <header>Open</header>
-            <VBox>
+            <main>
                 <ul>
                     {this.renderDocs(this.props.docs)}
                 </ul>
-            </VBox>
+            </main>
             <footer className="children-right">
+                <Spacer/>
                 <button onClick={this.props.onCanceled}>cancel</button>
             </footer>
-        </Dialog>
+        </StandardDialog>
     }
 
     generatePreviewURL(id) {
