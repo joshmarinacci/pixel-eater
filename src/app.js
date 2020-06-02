@@ -55,10 +55,11 @@ export default class App extends Component {
         this.state.doc = DocStore.getDoc();
         this.docserver = new DocServerAPI("https://docs.josh.earth/")
         DocStore.changed(()=>this.setState({doc:DocStore.getDoc()}));
+        this.pm = new PopupManager()
     }
     render() {
         return (
-        <PopupManagerContext.Provider value={new PopupManager()}>
+        <PopupManagerContext.Provider value={this.pm}>
             <DocPanel doc={this.state.doc} docserver={this.docserver}/>
         </PopupManagerContext.Provider>
         )
