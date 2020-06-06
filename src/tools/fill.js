@@ -28,7 +28,7 @@ export class FillTool {
         this.copy = this.app.makePasteClone()
         let model = DocStore.getDoc().model
         let layer = model.getCurrentLayer();
-        let src_col = model.getData(pt)
+        let src_col = model.get_xy(pt.x,pt.y,layer)
         if(state.mode === 'color') {
             let dst_col = this.app.state.selectedColor;
             floodFill(model,layer,pt,src_col,dst_col)
@@ -37,18 +37,20 @@ export class FillTool {
             floodFill(model,layer,pt,src_col,temp_col)
             this.replaceWithPattern(model, temp_col, model.getPattern(), layer)
         }
+        model.fireUpdate()
     }
     contextMenu(surf,pt) {
-        this.app.selectColor(DocStore.getDoc().model.getData(pt));
+        let layer = DocStore.getDoc().model.getCurrentLayer();
+        this.app.selectColor(DocStore.getDoc().model.get_xy(pt.x,pt.y,layer));
     }
     replaceWithPattern(model, src, pattern, layer) {
         for(let i=0; i<model.getWidth(); i++) {
             for(let j=0; j<model.getHeight(); j++) {
                 let pt = Point.makePoint(i,j)
-                let cur = model.getData(pt)
+                let cur = model.get_xy(pt.x,pt.y,layer)
                 if(cur === src) {
                     let c = pattern.get_xy(i%pattern.width(),j%pattern.height())
-                    model.setData(pt, c, layer)
+                    model.set_xy(pt.x,pt.y,layer,c)
                 }
             }
         }

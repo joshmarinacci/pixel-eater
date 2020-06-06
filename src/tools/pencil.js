@@ -64,6 +64,7 @@ export class PencilTool {
         this.app.completePasteClone(this.copy)
     }
     contextMenu(surf,pt) {
-        this.app.selectColor(DocStore.getDoc().model.getData(pt));
+        let layer = DocStore.getDoc().model.getCurrentLayer();
+        this.app.selectColor(DocStore.getDoc().model.get_xy(pt.x,pt.y,layer));
     }
 }

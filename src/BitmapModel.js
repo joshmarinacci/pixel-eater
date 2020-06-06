@@ -119,7 +119,6 @@ export default class BitmapModel {
     }
 
     // encoding
-
     toJSON() {
         return {
             width:this.pw,
@@ -168,27 +167,12 @@ export default class BitmapModel {
             array[i] = val;
         }
     }
-    setData(point, val, layer) {
-        if(!layer) return;
-        var n = point.x + point.y*this.pw;
-        layer.data[n] = val;
-        this.fireUpdate();
-    }
-    getData(point) {
-        var layer = this.getCurrentLayer();
-        if(!layer) return null;
-        return layer.data[point.x+point.y*this.pw];
-    }
     get_xy(x,y, layer) {
         return layer.data[x+y*this.pw];
     }
     set_xy(x,y, layer,v) {
         layer.data[x+y*this.pw] = v
     }
-    // getPixel(x,y) {
-    //     var layer = this.getCurrentLayer();
-    //     return layer.data[x+y*this.pw];
-    // }
     drawStamp(pt, stamp) {
         let layer = this.getCurrentLayer()
         this.stampOnLayer(pt,stamp,layer)
@@ -201,11 +185,11 @@ export default class BitmapModel {
                 if(cur !== -1) {
                     let pt2 = Point.makePoint(i+pt.x,j+pt.y)
                     let c = pattern.get_xy(pt2.x%pattern.width(),pt2.y%pattern.height())
-                    this.setData(pt2, c, layer)
+                    this.set_xy(pt2.x,pt2.y,layer,c)
                 }
             }
         }
-
+        this.fireUpdate()
     }
     stampFromLayer(pt,stamp,layer) {
         var data = [];
@@ -423,6 +407,7 @@ export default class BitmapModel {
         newLayers.splice(index,1)
         // trigger update
         this.setLayers(newLayers)
+        this.fireUpdate()
     }
     setLayers(newLayers) {
         var oldLayers = this.layers;
@@ -524,7 +509,7 @@ function is_valid(model, layer, pt, src_col, dst_col) {
     if(pt.y >= model.getHeight()) return false
     //if not inside selection, return
     if(!model.selection.inside(pt)) return false
-    let cur = model.getData(pt)
+    let cur = model.get_xy(pt.x,pt.y,layer)
     //if not the target color, return
     if(cur !== src_col) return false
     if(cur === dst_col) return false
@@ -557,4 +542,5 @@ export function floodFill(model, layer, pt, src_col, dst_col) {
         })
         q = q2
     }
+    this.fireUpdate()
 }
