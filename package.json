@@ -3,7 +3,6 @@
   "version": "0.0.1",
   "description": "Eat All The Pixels with this web-based pixel art editor",
   "scripts": {
-    "server": "node src/server/server.js",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",

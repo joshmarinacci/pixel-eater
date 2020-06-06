@@ -38,7 +38,6 @@ import LayersPanel from './LayersPanel.jsx'
 import RecentColors from './RecentColors.jsx'
 import BitmapModel from './BitmapModel.js'
 import PopupState from './common/PopupState.jsx'
-import SharePanel from './SharePanel.jsx'
 import NewDocPanel from './dialogs/NewDocPanel.jsx'
 import {PALETTES} from './palettes.js'
 import {MenuButton} from './menubutton.js'
@@ -341,9 +340,6 @@ class DocPanel extends Component {
             })
         };
 
-        this.openShare = () => DialogManager.show(<SharePanel id={DocStore.getDoc().id}/>);
-        this.openShareCanceled = () => DialogManager.hide();
-
         this.deleteDoc = (id) => {
             console.log('deleting', id)
             this.props.docserver.delete(id, 'pixelimage')
@@ -592,7 +588,6 @@ class DocPanel extends Component {
             />
             <Spacer/>
             <LoginButton docserver={this.props.docserver}/>
-            {/*<button onClick={this.openShare}>share</button>*/}
         </HBox>
     }
 
