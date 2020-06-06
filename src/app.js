@@ -11,15 +11,6 @@ import {
     PopupManagerContext
 } from "appy-comps"
 import DocStore from './DocStore.js'
-import {
-    EraserTool, EraserToolOptions,
-    EyedropperTool, EyedropperToolOptions,
-    FillTool, FillToolOptions,
-    LineTool, LineToolOptions,
-    MoveTool, MoveToolOptions,
-    PencilTool, PencilToolOptions,
-    SelectionTool, SelectionToolOptions
-} from './Tools.jsx'
 import icons_spritesheet from "./images/icons@1.png";
 import "appy-style/src/look.css";
 import "./web/components.css";
@@ -45,6 +36,13 @@ import {MainLayout} from './MainLayout.js'
 import {ImageButton, ImageToggleButton} from "./ImageButton.js"
 import {ToasterContainer, ToasterManager} from './common/ToasterContainer.js'
 import ToggleButton from './common/ToggleButton.jsx'
+import {EyedropperTool, EyedropperToolOptions} from './tools/eyedropper.js'
+import {PencilTool, PencilToolOptions} from './tools/pencil.js'
+import {EraserTool, EraserToolOptions} from './tools/eraser.js'
+import {SelectionTool, SelectionToolOptions} from './tools/select.js'
+import {MoveTool, MoveToolOptions} from './tools/move.js'
+import {FillTool, FillToolOptions} from './tools/fill.js'
+import {LineTool, LineToolOptions} from './tools/line.js'
 
 
 export default class App extends Component {
