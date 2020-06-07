@@ -173,10 +173,6 @@ export default class BitmapModel {
     set_xy(x,y, layer,v) {
         layer.data[x+y*this.pw] = v
     }
-    drawStamp(pt, stamp) {
-        let layer = this.getCurrentLayer()
-        this.stampOnLayer(pt,stamp,layer)
-    }
     fillStamp(pt, stamp, pattern) {
         let layer = this.getCurrentLayer()
         for(let i=0; i<stamp.width(); i++) {
@@ -542,5 +538,4 @@ export function floodFill(model, layer, pt, src_col, dst_col) {
         })
         q = q2
     }
-    this.fireUpdate()
 }

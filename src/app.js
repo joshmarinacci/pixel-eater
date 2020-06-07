@@ -428,11 +428,11 @@ class DocPanel extends Component {
     }
 
     drawStamp(pt, stamp, new_color) {
-        var model = this.props.doc.model;
-        var layer = model.getCurrentLayer();
+        const model = this.props.doc.model
+        const layer = model.getCurrentLayer()
         if(!layer) return;
         if(!model.isLayerVisible(layer)) return;
-        model.drawStamp(pt,stamp);
+        model.stampOnLayer(pt,stamp,layer);
         this.appendRecentColor(new_color);
     }
     fillStamp(pt, stamp, pattern) {
