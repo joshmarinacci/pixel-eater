@@ -2,27 +2,22 @@
 
 Eat All The Pixels with this web-based pixel art editor. Try it out at [https://apps.josh.earth/pixel-eater/](https://apps.josh.earth/pixel-eater/)
 
-There is a server for saving, loading, and rendering images. All drawing is done in the browser.
-The entire UI is in React with custom components.  The UI supports layers and different cursor 
-tools (eyedropper, pencil, eraser, move, etc.)
+![Pixel Eater in action](images/screenshot.png)
 
-After you draw something you can save it by creating an account with an arbitrary username and 
-password. You can download what you've drawn using the 'share' button in the upper right of the 
-main drawing area. (it looks like a right turned arrow).
+There is a generic document server for saving and loading, though it currently is broken.
+All drawing is done in the browser. The entire UI is in React with custom components.
+The UI supports layers and different cursor
+tools (eyedropper, pencil, eraser, move, fill, etc.)
 
+Contributions are super welcome. This is your editor as much as mine.
 
-# Instructions
+# Build Instructions
 
-start the server with `npm run server`
-
-build with `npm run build`
-
-open the editor with the file `dist/index.html` in your browser
+It's a standard [create-react-app](https://reactjs.org/docs/create-a-new-react-app.html) application. Build with `npm run build`. Open the editor with the file `dist/index.html` in your browser.
 
 # future work
 
-* make the data model more immutable
-* add keybindings
+
 
  
  

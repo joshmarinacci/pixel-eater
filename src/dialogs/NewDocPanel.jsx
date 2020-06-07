@@ -1,7 +1,27 @@
-import React, {Component} from "react";
-import {Dialog, VBox, HBox, StandardDialog, Spacer} from "appy-comps"
-import DropdownButton from "../Dropdown.jsx";
+import React, {Component, useRef, useContext} from "react"
+import {Dialog, VBox, HBox, StandardDialog, Spacer, PopupManagerContext} from "appy-comps"
 
+const SimplePopupList = ({list, value, onSelect})=>{
+    let pm = useContext(PopupManagerContext)
+    const button = useRef()
+    const selected = (data) => {
+        pm.hide()
+        onSelect(data)
+    }
+    const clicked = () => pm.show(<SimpleList list={list} onSelect={selected}/>,button.current);
+    return <button onClick={clicked} ref={button}>
+        {value.toString()}
+        &nbsp;<i className="fa fa-caret-down"/>
+    </button>
+}
+
+const SimpleList = ({list, onSelect}) => {
+    return <ul className="dropdown-list">
+        {list.map((item,i)=> {
+            return <li key={i} onClick={()=>onSelect(item)}>{item.toString()}</li>
+        })}
+    </ul>
+}
 
 export default class extends Component {
 
@@ -102,7 +122,7 @@ export default class extends Component {
                 </HBox>
                 <HBox>
                     <label> </label>
-                    <DropdownButton list={this.sizes} value={this.state.selectedSize} onSelect={this.selectPreset.bind(this)}/>
+                    <SimplePopupList list={this.sizes} value={this.state.selectedSize} onSelect={this.selectPreset.bind(this)}/>
                 </HBox>
                 <HBox>
                     <label>Width</label>
@@ -114,7 +134,7 @@ export default class extends Component {
                 </HBox>
                 <HBox>
                     <label> </label>
-                    <DropdownButton list={this.palettes} value={this.state.selectedPalette} onSelect={this.selectPalette.bind(this)}/>
+                    <SimplePopupList list={this.palettes} value={this.state.selectedPalette} onSelect={this.selectPalette.bind(this)}/>
                 </HBox>
             </main>
             <footer className="children-right">
