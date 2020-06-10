@@ -68,5 +68,40 @@ class DocStore {
             }
         }
     }
+
+    saveThumbnail(doc, docserver) {
+        return new Promise((res,rej)=>{
+            let canvas = document.createElement('canvas')
+            //draw a 2x scaled version
+            let scale = 2
+            canvas.width = doc.model.getWidth()*scale
+            canvas.height = doc.model.getHeight()*scale
+            doc.model.drawScaledCanvas(canvas,scale)
+            function canvasToPNGBlob(canvas) {
+                return new Promise((res,rej)=>{
+                    canvas.toBlob((blob)=>{
+                        res(blob)
+                    },'image/png')
+                })
+            }
+            canvasToPNGBlob(canvas).then((blob)=> {
+                console.log("Got a blob",blob)
+                let url = `${docserver.url}/docs/${docserver.getUsername()}/thumbnail/${doc.id}/version/image/png/${canvas.width}/${canvas.height}/thumbnail.png`
+                let formdata = new FormData()
+                formdata.append('thumbnail',blob)
+                return docserver._fetch(url,{
+                    method:'POST',
+                    body:formdata,
+                }).then(res=>res.json())
+                    .then(json => res(json))
+                    .catch(e => {
+                        console.log("major error",e)
+                    })
+
+                // res(blob)
+            })
+
+        })
+    }
 }
 export default new DocStore()

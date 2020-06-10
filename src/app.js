@@ -330,11 +330,14 @@ class DocPanel extends Component {
         this.saveDoc = () => {
             let doc = DocStore.getDoc()
             ToasterManager.add('saving ' + doc.title);
-            this.props.docserver.save(DocStore.getDoc(), 'pixelimage').then(res => {
+            this.props.docserver.save(doc, 'pixelimage').then(res => {
+                console.log("res is",res)
                 DocStore.getDoc().id=res.doc._id;
                 console.log("saved the doc with id",DocStore.getDoc().id)
-                ToasterManager.add('saved ' + doc.title);
-                this.setState({dirty:false});
+                DocStore.saveThumbnail(DocStore.getDoc(),this.props.docserver).then(()=>{
+                    ToasterManager.add('saved ' + doc.title);
+                    this.setState({dirty:false});
+                })
             })
         };
 
