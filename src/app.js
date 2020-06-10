@@ -216,6 +216,7 @@ class DocPanel extends Component {
                     console.log("got items", items)
                     DialogManager.show(<OpenDocPanel
                         docs={items.results}
+                        docserver={this.props.docserver}
                         onCanceled={this.openDocCanceled}
                         onSelectDoc={this.openDocPerform}
                         onDeleteDoc={this.deleteDoc}
