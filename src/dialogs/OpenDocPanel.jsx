@@ -1,5 +1,13 @@
 import React, {Component} from "react";
 import {StandardDialog, Spacer} from "appy-comps"
+import {MAX_THUMB_DIM} from '../DocStore.js'
+
+function findBestThumbnail(thumbnails) {
+    if(thumbnails.length === 0) return null
+    if(thumbnails.length === 1) return thumbnails[0]
+    let list = thumbnails.slice().sort((a,b)=>b.width - a.width)
+    return list.find(t => t.width <= MAX_THUMB_DIM)
+}
 
 export default class OpenDocPanel extends Component {
     loadDoc(id) {
@@ -35,8 +43,8 @@ export default class OpenDocPanel extends Component {
 
     renderThumbnail(doc) {
         if(!doc.thumbnails || doc.thumbnails.length < 1) return <div></div>
-        let thumb = doc.thumbnails[0]
-        if(thumb.src) return <img src={this.props.docserver.url+thumb.src} style={{border:'1px solid black' }}/>
+        let thumb = findBestThumbnail(doc.thumbnails)
+        if(thumb && thumb.src) return <img src={this.props.docserver.url+thumb.src} style={{border:'1px solid black' }}/>
         return <div>thumbnail error</div>
     }
 }

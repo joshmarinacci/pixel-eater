@@ -1,6 +1,35 @@
 import BitmapModel from "./BitmapModel.js";
 import {PALETTES} from './palettes.js'
 
+export const MAX_THUMB_DIM = 128
+function calcScale(model) {
+    let scale = 1
+    if(model.getWidth()*scale > MAX_THUMB_DIM || model.getHeight()*scale > MAX_THUMB_DIM) {
+        let larger = Math.max(model.getWidth(), model.getHeight())
+        let scale = 1/larger * MAX_THUMB_DIM
+        let width = model.getWidth()*scale
+        let height = model.getHeight()*scale
+        let out = { width, height, scale}
+        return out
+    }
+
+
+    while(true) {
+        let sc2 = scale+1
+        let larger = Math.max(model.getWidth()*sc2, model.getHeight()*sc2)
+        if(larger > MAX_THUMB_DIM) break;
+        scale = sc2
+    }
+
+    let out = {
+        width:model.getWidth()*scale,
+        height:model.getHeight()*scale,
+        scale:scale
+    }
+
+    return out
+}
+
 class DocStore {
     constructor() {
         this.cbs = []
@@ -73,9 +102,9 @@ class DocStore {
         return new Promise((res,rej)=>{
             let canvas = document.createElement('canvas')
             //draw a 2x scaled version
-            let scale = 2
-            canvas.width = doc.model.getWidth()*scale
-            canvas.height = doc.model.getHeight()*scale
+            let {width,height, scale} = calcScale(doc.model)
+            canvas.width = width
+            canvas.height = height
             doc.model.drawScaledCanvas(canvas,scale)
             function canvasToPNGBlob(canvas) {
                 return new Promise((res,rej)=>{
