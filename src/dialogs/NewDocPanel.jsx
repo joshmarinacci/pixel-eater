@@ -1,26 +1,11 @@
 import React, {Component, useRef, useContext} from "react"
 import {Dialog, VBox, HBox, StandardDialog, Spacer, PopupManagerContext} from "appy-comps"
 
-const SimplePopupList = ({list, value, onSelect})=>{
-    let pm = useContext(PopupManagerContext)
-    const button = useRef()
-    const selected = (data) => {
-        pm.hide()
-        onSelect(data)
-    }
-    const clicked = () => pm.show(<SimpleList list={list} onSelect={selected}/>,button.current);
-    return <button onClick={clicked} ref={button}>
-        {value.toString()}
-        &nbsp;<i className="fa fa-caret-down"/>
-    </button>
-}
-
-const SimpleList = ({list, onSelect}) => {
-    return <ul className="dropdown-list">
-        {list.map((item,i)=> {
-            return <li key={i} onClick={()=>onSelect(item)}>{item.toString()}</li>
-        })}
-    </ul>
+const SimplePopupList = ({list,value,onSelect}) => {
+    let onChange = (e) => onSelect(list.find(v => v.id === e.target.value))
+    return <select onChange={onChange} value={value.id}>
+        {list.map((item, i)=> <option key={i} value={item.id}>{item.toString()}</option>)}
+    </select>
 }
 
 export default class extends Component {
@@ -43,6 +28,7 @@ export default class extends Component {
 
         this.sizes = [
             {
+                id:'16x16',
                 w:16,
                 h:16,
                 toString:function() {
@@ -50,6 +36,7 @@ export default class extends Component {
                 }
             },
             {
+                id:'32x32',
                 w:32,
                 h:32,
                 toString:function() {
