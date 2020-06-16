@@ -44,7 +44,7 @@ export default class OpenDocPanel extends Component {
     renderThumbnail(doc) {
         if(!doc.thumbnails || doc.thumbnails.length < 1) return <div></div>
         let thumb = findBestThumbnail(doc.thumbnails)
-        if(thumb && thumb.src) return <img src={this.props.docserver.url+thumb.src} style={{border:'1px solid black' }}/>
+        if(thumb && thumb.src) return <img src={this.props.docserver.url+thumb.src} style={{border:'1px solid black' }} title={doc.title + " thumbnail"}/>
         return <div>thumbnail error</div>
     }
 }

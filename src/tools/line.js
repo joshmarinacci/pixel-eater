@@ -174,7 +174,7 @@ export class LineTool {
             sy = y0 < y1 ? 1 : -1,
             err = dx - dy;
 
-        while (x0 != x1 || y0 != y1) {
+        while (x0 !== x1 || y0 !== y1) {
             var e2 = 2 * err;
             if (e2 > (dy * -1)) {
                 err -= dy;

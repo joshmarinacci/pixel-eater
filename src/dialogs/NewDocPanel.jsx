@@ -1,5 +1,5 @@
-import React, {Component, useRef, useContext} from "react"
-import {Dialog, VBox, HBox, StandardDialog, Spacer, PopupManagerContext} from "appy-comps"
+import React, {Component} from "react"
+import {HBox, StandardDialog, Spacer} from "appy-comps"
 
 const SimplePopupList = ({list,value,onSelect}) => {
     let onChange = (e) => onSelect(list.find(v => v.id === e.target.value))

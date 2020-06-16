@@ -1,5 +1,5 @@
-import React, {useState, useContext, useRef} from "react";
-import {ImageButton, ImageToggleButton} from "./ImageButton.js"
+import React, {useContext, useRef} from "react";
+import {ImageButton} from "./ImageButton.js"
 import {PopupManagerContext} from 'appy-comps'
 
 export const MenuButton = ({actions, title, className, ...rest}) => {

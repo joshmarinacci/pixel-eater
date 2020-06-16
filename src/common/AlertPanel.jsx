@@ -1,5 +1,5 @@
 import React, {Component} from "react";
-import {Dialog, Spacer, StandardDialog, VBox} from "appy-comps"
+import {Spacer, StandardDialog} from "appy-comps"
 
 export default class AlertPanel extends Component {
     render() {

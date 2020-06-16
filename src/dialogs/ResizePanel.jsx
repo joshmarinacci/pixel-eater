@@ -1,5 +1,5 @@
 import React, {Component} from "react";
-import {Dialog, VBox, HBox, DialogManager, StandardDialog, Spacer} from "appy-comps"
+import {HBox, DialogManager, StandardDialog, Spacer} from "appy-comps"
 
 
 export default class extends Component {

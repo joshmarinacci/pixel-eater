@@ -1,5 +1,5 @@
 import React, {Component, useContext} from "react";
-import {PopupManager, PopupManagerContext} from "appy-comps"
+import {PopupManagerContext} from "appy-comps"
 
 const popupStyle = {
     margin:0,

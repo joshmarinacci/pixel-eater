@@ -37,7 +37,7 @@ export default class Button extends React.Component {
     render() {
         var hover = this.renderHover();
         var cls = this.generateClasses();
-        let {onToggle, tooltip, ...rest} = this.props;
+        let {onToggle, tooltip, spriteX, spriteY, ...rest} = this.props;
         return <button className={cls}
                        style={this.generateStyle()}
                        onMouseOver={this.mouseOver.bind(this)}
