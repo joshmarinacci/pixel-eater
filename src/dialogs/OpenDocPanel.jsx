@@ -17,22 +17,19 @@ export default class OpenDocPanel extends Component {
         this.props.onDeleteDoc(id);
     }
     renderDocs(docs) {
-        console.log("docs is",docs)
-        return docs.map((doc)=> {
+        return <ul className={'doc-list'}>{docs.map((doc)=> {
             return <li key={doc._id}>
                 <button onClick={this.loadDoc.bind(this,doc._id)}>{doc.title}</button>
                 <button onClick={this.deleteDoc.bind(this,doc._id)}>delete</button>
-                {this.renderThumbnail(doc)}
+                <button onClick={this.loadDoc.bind(this,doc._id)}>{this.renderThumbnail(doc)}</button>
             </li>
-        });
+        })}</ul>;
     }
     render() {
         return <StandardDialog visible={true}>
             <header>Open</header>
             <main>
-                <ul>
-                    {this.renderDocs(this.props.docs)}
-                </ul>
+                {this.renderDocs(this.props.docs)}
             </main>
             <footer className="children-right">
                 <Spacer/>
@@ -44,7 +41,9 @@ export default class OpenDocPanel extends Component {
     renderThumbnail(doc) {
         if(!doc.thumbnails || doc.thumbnails.length < 1) return <div></div>
         let thumb = findBestThumbnail(doc.thumbnails)
-        if(thumb && thumb.src) return <img src={this.props.docserver.url+thumb.src} style={{border:'1px solid black' }} title={doc.title + " thumbnail"}/>
+        if(thumb && thumb.src) return <img
+            src={this.props.docserver.url+thumb.src}
+            title={doc.title + " thumbnail"}/>
         return <div>thumbnail error</div>
     }
 }
