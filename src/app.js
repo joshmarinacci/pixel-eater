@@ -43,6 +43,7 @@ import {SelectionTool, SelectionToolOptions} from './tools/select.js'
 import {MoveTool, MoveToolOptions} from './tools/move.js'
 import {FillTool, FillToolOptions} from './tools/fill.js'
 import {LineTool, LineToolOptions} from './tools/line.js'
+import bmp from "@wokwi/bmp-ts"
 
 
 export default class App extends Component {
@@ -430,6 +431,89 @@ class DocPanel extends Component {
         }
         canvasToPNGBlob(canvas).then((blob)=> forceDownloadBlob(`${doc.title}@${scale}.png`,blob))
     }
+    exportBMP(scale) {
+        console.log('exporting BMP at scale',scale)
+
+
+        //render document to canvas
+        let doc = DocStore.getDoc()
+        let canvas = document.createElement('canvas')
+        canvas.width = doc.model.getWidth()*scale
+        canvas.height = doc.model.getHeight()*scale
+        doc.model.drawScaledCanvas(canvas,scale)
+
+        //get ImageData from the canvas
+        let id_orig = canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height)
+
+
+        //copy ImageData to a new structure and swizzle the byte order to ABGR
+        let id = {
+            width:canvas.width,
+            height:canvas.height,
+            // data: new Array(5*5*4),
+        }
+        id.data = new Array(id.width*id.height*4)
+        id.data.fill(0)
+        function copy_pixel(x,y) {
+            let n = (x + id.width * y)*4
+            id.data[n+0] = 255 //A
+            id.data[n+1] = id_orig.data[n+2] //B
+            id.data[n+2] = id_orig.data[n+1] //G
+            id.data[n+3] = id_orig.data[n+0] //R
+        }
+        for(let i=0; i<id_orig.width; i++) {
+            for(let j=0; j<id_orig.height; j++) {
+                copy_pixel(i,j)
+            }
+        }
+        function strToRGBObj(str) {
+            let num = parseInt(str.substring(1),16)
+            let blue = (num & 0x0000FF)
+            let red =  (num & 0xFF0000) >> 16
+            let green =  (num & 0x00FF00) >> 8
+            return {
+                red:red,
+                green:green,
+                blue:blue,
+                quad:255,
+            }
+        }
+
+
+        // Convert the palete to {red,green,blue,quad} structs
+        let palette = doc.model.palette.map(str => strToRGBObj(str))
+        console.log("final palette",palette)
+        while(palette.length < 128) {
+            palette.push({red:0,green:255,blue:0,quad:255})
+        }
+
+        // encode into a BMP
+        const rawData = bmp.encode({
+            data:id.data,
+            bitPP: 8,
+            width:id.width,
+            height:id.height,
+            // palette:palette.slice(0,8)
+            palette:palette
+        });
+        console.log("got a raw buffer",rawData)
+        // console.log("sdefault header",0x42, 0x4D)
+        // turn into a blob
+        let blob = new Blob([rawData.dataView], {type:'image/bmp'})
+        console.log("blob type",blob.type)
+
+        //force download the blob
+        function forceDownloadBlob(title,blob) {
+            console.log("forcing download of",title)
+            const a = document.createElement('a')
+            a.href = URL.createObjectURL(blob)
+            a.download = title
+            document.body.appendChild(a)
+            a.click()
+            document.body.removeChild(a)
+        }
+        forceDownloadBlob(`${doc.title}@${scale}.bmp`,blob)
+    }
 
     drawStamp(pt, stamp, new_color) {
         const model = this.props.doc.model
@@ -552,6 +636,10 @@ class DocPanel extends Component {
                 title:'Export as PNG 8x',
                 fun: () => this.exportPNG(8)
             },
+            {
+                title:'Export as BMP 1x',
+                fun: () => this.exportBMP(1)
+            }
         ]
 
         return <HBox className="panel top" id={"top-toolbar"}>
