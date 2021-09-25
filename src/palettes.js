@@ -87,6 +87,24 @@ export const PALETTES = {
         "#83769C",
         "#FF77A8",
         "#FFCCAA",
+    ],
+    makecode_arcade:[
+        "#000000",     // transparency
+        "#ffffff",
+        "#ff2121",
+        "#ff93c4",
+        "#ff8135",
+        "#fff609",
+        "#249ca3",
+        "#78dc52",
+        "#003fad",
+        "#87f2ff",
+        "#8e2ec4",
+        "#a4839f",
+        "#5c406c",
+        "#e5cdc4",
+        "#91463d",
+        "#000000",
     ]
 }
 

@@ -59,6 +59,13 @@ export default class extends Component {
                 toString: function() {
                     return this.title
                 }
+            },
+            {
+                id:'makecode_arcade',
+                title: 'Makecode Arcade',
+                toString: function() {
+                    return this.title
+                }
             }
         ]
     }
