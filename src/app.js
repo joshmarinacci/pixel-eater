@@ -649,7 +649,7 @@ class DocPanel extends Component {
             <Spacer/>
             <ImageButton
                 onClick={this.newDoc}
-                disabled={!this.props.docserver.isLoggedIn()}
+                // disabled={!this.props.docserver.isLoggedIn()}
                 tooltip="New Image"
                 src={icons_spritesheet} scale={2} spriteX={0} spriteY={0}
             />
