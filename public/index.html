@@ -28,18 +28,13 @@
       To begin the development, run `npm start`.
       To create a production bundle, use `npm run build`.
     -->
-      <script>
-        (function(f, a, t, h, o, m){
-        a[h]=a[h]||function(){
-          (a[h].q=a[h].q||[]).push(arguments)
-        };
-        o=f.createElement('script'),
-        m=f.getElementsByTagName('script')[0];
-        o.async=1; o.src=t; o.id='fathom-script';
-        m.parentNode.insertBefore(o,m)
-      })(document, window, '//stats.josh.earth/tracker.js', 'fathom');
-        fathom('set', 'siteId', 'ETFEQ');
-        fathom('trackPageview');
+    <script type="module">
+      const data = new FormData()
+      data.set('type','pageload')
+      data.set('url',document.location.toString())
+      data.set('referrer',document.referrer)
+      data.set('userAgent',navigator.userAgent)
+      navigator.sendBeacon('https://stats.josh.earth/event',data)
     </script>
   </body>
 </html>
