@@ -14,7 +14,7 @@ module.exports = {
       user: "deployman",
       key: '../deployman_private.key',
       host : 'josh.earth',
-      ref  : 'origin/main',
+      ref  : 'origin/master',
       repo : 'https://github.com/joshmarinacci/pixel-eater.git',
       path : '/projects/pixel-eater/',
       'post-setup' : 'npm install',
